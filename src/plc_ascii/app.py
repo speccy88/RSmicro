@@ -7,14 +7,15 @@ import threading
 import time
 from pathlib import Path
 
-from .circuitpython import install_runtime as install_circuitpython_runtime
 from .engine import LadderEngine
-from .model import Binding, Program, Rung, Step
+from .model import Binding, Program, Rung, Step, RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_PROPELLER2
 from .program_io import load_program, save_program
 from .remote import RemoteSession
 from .render import render_program
 from .serial_link import SerialJsonTransport
 from .subprocess_link import SubprocessJsonTransport
+from plc_runtime.circuitpython import install_runtime as install_circuitpython_runtime
+from plc_runtime.propeller2 import Propeller2Transport, install_runtime as install_propeller2_runtime
 
 
 def parse_bool(raw: str) -> bool:
@@ -47,6 +48,25 @@ class WorkbenchShell(cmd.Cmd):
             print("No remote runtime connected")
             return None
         return self.remote
+
+    def _connect_for_target(self, port: str, baud: int) -> tuple[RemoteSession | None, str | None, dict | None]:
+        target = self.program.runtime_target
+        try:
+            if target == RUNTIME_TARGET_PROPELLER2:
+                session = RemoteSession(Propeller2Transport(port=port, baudrate=baud))
+                hello = session.hello(timeout=1.0)
+                return (session if hello else None, "propeller2" if hello else None, hello)
+            session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
+            hello = session.hello()
+            if not hello and isinstance(session.transport, SerialJsonTransport):
+                session.transport.soft_reboot()
+                hello = session.hello(timeout=2.0)
+            if not hello:
+                session.transport.close()
+            return (session if hello else None, "circuitpython" if hello else None, hello)
+        except Exception as exc:  # pragma: no cover
+            print(f"Serial connection failed: {exc}")
+            return None, None, None
 
     def do_new(self, arg: str) -> None:
         """new PROGRAM_NAME"""
@@ -162,21 +182,14 @@ class WorkbenchShell(cmd.Cmd):
             return
         port = parts[0]
         baud = int(parts[1]) if len(parts) > 1 else 115200
-        try:
-            session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
-            hello = session.hello()
-            if not hello and isinstance(session.transport, SerialJsonTransport):
-                session.transport.soft_reboot()
-                hello = session.hello(timeout=2.0)
-        except Exception as exc:  # pragma: no cover
-            print(f"Serial connection failed: {exc}")
-            return
+        session, runtime_type, hello = self._connect_for_target(port, baud)
         if not hello:
             print("Serial connection failed: no response from target")
-            session.transport.close()
+            if session is not None:
+                session.transport.close()
             return
         self.remote = session
-        self.remote_label = f"serial:{port}"
+        self.remote_label = f"{runtime_type}:{port}"
         try:
             self.remote.set_mode("run")
         except Exception:
@@ -252,6 +265,17 @@ class WorkbenchShell(cmd.Cmd):
             return
         install_circuitpython_runtime(port, program=self.program)
         print(f"Installed CircuitPython runtime on {port}")
+
+    def do_install_propeller2(self, arg: str) -> None:
+        """install_propeller2 PORT [BAUD]"""
+        parts = shlex.split(arg)
+        if not parts:
+            print("Usage: install_propeller2 PORT [BAUD]")
+            return
+        port = parts[0]
+        baud = int(parts[1]) if len(parts) > 1 else 115200
+        install_propeller2_runtime(port, program=self.program, baudrate=baud)
+        print(f"Loaded Propeller 2 runtime into RAM on {port}")
 
     def do_remote_set(self, arg: str) -> None:
         """remote_set TAG 0|1"""

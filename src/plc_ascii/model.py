@@ -12,6 +12,9 @@ VALID_CONTACTS = {"XIC", "XIO", "CMP", "EQ", "GT", "GTE", "LT", "LE", "NE"}
 VALID_ACTIONS = {"OTE", "OTL", "OTU", "TON", "CTU", "CTD", "MOV", "CLR", "ADD", "ABS", "MUL", "DIV", "NEG", "SUB"}
 TIMER_CONTACT_MEMBERS = {"en", "dn", "tt"}
 VARIABLE_TYPES = {"bool", "int", "float", "timer", "counter"}
+RUNTIME_TARGET_CIRCUITPYTHON = "circuitpython"
+RUNTIME_TARGET_PROPELLER2 = "propeller2"
+VALID_RUNTIME_TARGETS = {RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_PROPELLER2}
 COMPARE_SYMBOLS = {
     "CMP": "==",
     "EQ": "==",
@@ -25,6 +28,15 @@ SINGLE_TAG_OPS = {"XIC", "XIO", "OTE", "OTL", "OTU", "TON", "CTU", "CTD", "CLR"}
 UNARY_SOURCE_OPS = {"MOV", "ABS", "NEG"}
 BINARY_SOURCE_OPS = {"ADD", "SUB", "MUL", "DIV"}
 WRITE_TAG_OPS = {"OTE", "OTL", "OTU", "TON", "CTU", "CTD", "MOV", "CLR", "ADD", "ABS", "NEG", "SUB", "MUL", "DIV"}
+
+
+def normalize_runtime_target(value: Any) -> str:
+    text = str(value or RUNTIME_TARGET_CIRCUITPYTHON).strip().lower()
+    if text in {"propeller2", "propeller2-taqoz", "taqoz"}:
+        return RUNTIME_TARGET_PROPELLER2
+    if text in VALID_RUNTIME_TARGETS:
+        return text
+    return RUNTIME_TARGET_CIRCUITPYTHON
 
 
 def split_timer_member(tag: str) -> tuple[str, str] | None:
@@ -366,6 +378,7 @@ class Rung:
 @dataclass(slots=True)
 class Program:
     name: str
+    runtime_target: str = RUNTIME_TARGET_CIRCUITPYTHON
     rungs: list[Rung] = field(default_factory=list)
     variables: list[Variable] = field(default_factory=list)
     bindings: list[Binding] = field(default_factory=list)
@@ -373,6 +386,7 @@ class Program:
     def validate(self) -> None:
         if not self.name:
             raise ValueError("Program name cannot be empty")
+        self.runtime_target = normalize_runtime_target(self.runtime_target)
         for rung in self.rungs:
             rung.validate()
         seen: set[str] = set()
@@ -417,6 +431,7 @@ class Program:
         self.validate()
         return {
             "name": self.name,
+            "runtime_target": self.runtime_target,
             "rungs": [rung.to_dict() for rung in self.rungs],
             "variables": [variable.to_dict() for variable in self.variables],
             "bindings": [binding.to_dict() for binding in self.bindings],
@@ -426,6 +441,7 @@ class Program:
     def from_dict(cls, payload: dict[str, Any]) -> "Program":
         program = cls(
             name=str(payload["name"]),
+            runtime_target=normalize_runtime_target(payload.get("runtime_target")),
             rungs=[Rung.from_dict(rung_payload) for rung_payload in payload.get("rungs", [])],
             variables=[Variable.from_dict(variable_payload) for variable_payload in payload.get("variables", [])],
             bindings=[Binding.from_dict(binding_payload) for binding_payload in payload.get("bindings", [])],

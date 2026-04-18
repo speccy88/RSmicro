@@ -18,6 +18,7 @@ format, the execution model, and the transport protocol easy to inspect.
 A program is stored as JSON and contains:
 
 - `name`
+- `runtime_target`
 - `rungs`
 - `variables`
 - `bindings`
@@ -28,6 +29,10 @@ The JSON format is designed so it can be:
 - saved to disk
 - downloaded to a runtime
 - uploaded back from a runtime
+
+`runtime_target` stores the selected board type so the IDE knows whether
+`Download`, `Upload`, and `Go Online` should talk to CircuitPython or
+Propeller2 TAQOZ when the file is opened again.
 
 ### Rungs
 
@@ -217,6 +222,9 @@ That includes:
 The current implementation uses chunked transfer so larger programs can move
 reliably over the CircuitPython serial console.
 
+For CircuitPython, `Download` can also install the runtime first if the board
+does not answer the PLC protocol yet.
+
 ### Upload
 
 `Upload` requests the stored program from the target runtime.
@@ -247,10 +255,10 @@ The CircuitPython workflow adds a board-specific runtime bundle.
 
 Files:
 
-- `src/plc_ascii/circuitpython.py`
-- `src/plc_ascii/circuitpython_portable_runtime.py`
-- `src/plc_ascii/circuitpython_assets/plc_runtime_board.py`
-- `src/plc_ascii/circuitpython_assets/code.py`
+- `src/plc_runtime/circuitpython/runtime.py`
+- `src/plc_runtime/circuitpython/plc_runtime_portable.py`
+- `src/plc_runtime/circuitpython/plc_runtime_board.py`
+- `src/plc_runtime/circuitpython/code.py`
 
 ### Why There Is a Separate Portable Runtime
 
@@ -278,6 +286,10 @@ It uploads:
 
 The board then boots directly into the PLC runtime.
 
+If the board reports a read-only filesystem over serial, the installer falls
+back to copying the same files to a mounted `CIRCUITPY` volume when one is
+available on the host computer.
+
 ### Board Configuration
 
 The current tested ESP32 mapping is:
@@ -289,6 +301,57 @@ The current tested ESP32 mapping is:
 Example program:
 
 - `examples/circuitpython_button_led.json`
+
+## Propeller 2 TAQOZ Runtime
+
+The Propeller 2 workflow uses TAQOZ in RAM instead of copying Python files onto
+the board filesystem.
+
+Files:
+
+- `src/plc_runtime/propeller2/runtime.py`
+- `src/plc_runtime/propeller2/runtime.fth`
+- `src/plc_runtime/propeller2/transport.py`
+
+The host now generates TAQOZ source that:
+
+- declares the ladder state in hub RAM
+- embeds the full ladder JSON into the TAQOZ runtime for `Upload`
+- binds Propeller 2 pins to ladder tags
+- answers simple host commands through the TAQOZ console
+- executes ladder scans on the Propeller 2 when the IDE requests them online
+
+### Load Runtime to Propeller 2 (RAM)
+
+The `Load Runtime to Propeller 2 (RAM)...` menu action:
+
+- enters TAQOZ over serial
+- cold-starts the board into a clean RAM session
+- compiles the current ladder into TAQOZ words
+- loads the generated `runtime.fth` program into TAQOZ RAM for online control
+
+The current tested setup assumes:
+
+- TAQOZ over the board USB serial link
+- onboard LEDs on pins `56` through `63`
+- those LEDs are active-low
+
+Example program:
+
+- `examples/propeller2_led56.json`
+
+### Current Limitation
+
+This runtime is intentionally RAM-only for now.
+
+On the tested board, re-entering TAQOZ after closing the serial session triggers
+a cold start, which clears the RAM runtime. That means:
+
+- `Download`, `Upload`, and `Go Online` work within one live TAQOZ session
+- the current implementation performs scans on demand from the live IDE session
+- online force support is not implemented yet for the Propeller 2 target
+- persistence across a fresh reconnect will need a later flash or SD solution,
+  or a dedicated serial runtime that does not depend on re-entering TAQOZ
 
 ## Live View Behavior
 

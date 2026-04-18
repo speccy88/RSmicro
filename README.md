@@ -64,6 +64,7 @@ That opens the Tkinter IDE with:
 - local simulation step/run/stop controls
 - board runtime download/upload/live monitoring controls
 - CircuitPython runtime install for supported serial targets
+- Propeller 2 TAQOZ runtime loading for supported serial targets
 
 If you want the original shell version:
 
@@ -76,9 +77,10 @@ plc-ascii-cli examples/demo_program.json
 1. Build a ladder program in the GUI by adding rungs, conditions, actions, and bindings.
 2. Simulate and debug locally with the monitor panel and the Step/Run/Stop controls.
 3. Force tags from the monitor panel like a PLC.
-4. Install the CircuitPython runtime from the `Runtime` menu if the board needs it.
-5. Use `Download`, `Upload`, and `Go Online` to work with the connected board from the same IDE.
-6. Use `Disconnect` to close the serial connection and return to offline editing.
+4. Choose the correct board under `Runtime` -> `Target Board`.
+5. For CircuitPython, `Download` can install the runtime first if the board needs it.
+6. Use `Download`, `Upload`, and `Go Online` to work with the connected board from the same IDE.
+7. Use `Disconnect` to close the serial connection and return to offline editing.
 
 ## CircuitPython board workflow
 
@@ -91,11 +93,41 @@ For the ESP32 DevKitC V4 setup tested in this repo:
 Recommended flow:
 
 1. Open `examples/circuitpython_button_led.json` in the IDE.
-2. Choose `Runtime` -> `Install runtime to CircuitPython...` and select the board serial port.
-3. Click `Go Online`. If the IDE is not connected yet, it will prompt you to connect.
-4. Edit the program offline, then click `Download` to update the board.
+2. Confirm `Runtime` -> `Target Board` is set to `CircuitPython`.
+3. Click `Download`. If the runtime is not present yet, the IDE can install it first and then send the ladder.
+4. Click `Go Online`. If the IDE is not connected yet, it will prompt you to connect.
 5. Click `Upload` to read the stored program back from the board.
 6. Click `Disconnect` to close the serial connection and return to offline mode.
+
+If CircuitPython reports a read-only filesystem over serial, the installer now
+falls back to copying the runtime bundle to the mounted `CIRCUITPY` volume
+when one is available.
+
+## Propeller 2 TAQOZ workflow
+
+For the Propeller 2 setup tested in this repo:
+
+- TAQOZ console over `/dev/tty.usbserial-P2EEQZ7`
+- onboard LEDs on `P56` to `P63`
+- those LEDs are active-low
+- example program: `examples/propeller2_led56.json`
+
+Recommended flow:
+
+1. Open `examples/propeller2_led56.json` in the IDE.
+2. Confirm `Runtime` -> `Target Board` is set to `Propeller2 TAQOZ`.
+3. Choose `Runtime` -> `Load Runtime to Propeller 2 (RAM)...` if you want to preload the TAQOZ runtime.
+4. Click `Go Online`, or use `Download` to push the current ladder and immediately reload the TAQOZ runtime in RAM.
+5. Use `Upload` to read the stored ladder JSON back from the board while the same TAQOZ session remains active.
+6. Click `Disconnect` when you want to return to offline editing.
+
+Current limitation:
+
+- the Propeller 2 runtime is RAM-only for now
+- the current live view drives on-board scans from the IDE session instead of keeping a fully autonomous background task alive in TAQOZ
+- online force support is not implemented yet for the Propeller 2 target
+- reacquiring the TAQOZ console after closing the serial session cold-starts the board on the tested setup, so `Upload` after a fresh reconnect is not yet reliable
+- within one connected session, `Download`, `Upload`, and `Go Online` work against the live TAQOZ runtime
 
 ## Device runtime
 

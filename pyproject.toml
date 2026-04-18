@@ -28,4 +28,4 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-plc_ascii = ["circuitpython_assets/*.py"]
+"plc_runtime.propeller2" = ["runtime.fth"]

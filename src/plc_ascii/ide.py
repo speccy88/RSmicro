@@ -6,9 +6,22 @@ from pathlib import Path
 from tkinter import filedialog, font, messagebox, simpledialog, ttk
 
 import markdown
-from .circuitpython import install_runtime as install_circuitpython_runtime
 from .engine import LadderEngine, ScanResult, trace_program_preview, trace_program_state
-from .model import Binding, Branch, Node, Program, Rung, Step, Variable, split_timer_member, step_primary_tag, walk_steps
+from .model import (
+    Binding,
+    Branch,
+    Node,
+    Program,
+    RUNTIME_TARGET_CIRCUITPYTHON,
+    RUNTIME_TARGET_PROPELLER2,
+    Rung,
+    Step,
+    Variable,
+    normalize_runtime_target,
+    split_timer_member,
+    step_primary_tag,
+    walk_steps,
+)
 from .program_io import load_program, save_program
 from .remote import RemoteSession
 from .render import (
@@ -26,6 +39,8 @@ from .render import (
 )
 from .serial_link import SerialJsonTransport
 from tkinterweb import HtmlFrame
+from plc_runtime.circuitpython import install_runtime as install_circuitpython_runtime
+from plc_runtime.propeller2 import Propeller2Transport, install_runtime as install_propeller2_runtime
 
 try:
     from serial.tools import list_ports  # type: ignore
@@ -141,6 +156,14 @@ TYPE_DISPLAY_NAMES = {
 }
 
 DISPLAY_TO_TYPE_NAMES = {label: data_type for data_type, label in TYPE_DISPLAY_NAMES.items()}
+RUNTIME_TARGET_LABELS = {
+    RUNTIME_TARGET_CIRCUITPYTHON: "CircuitPython",
+    RUNTIME_TARGET_PROPELLER2: "Propeller2 TAQOZ",
+}
+
+
+def runtime_target_label(target: str) -> str:
+    return RUNTIME_TARGET_LABELS.get(normalize_runtime_target(target), "CircuitPython")
 
 
 def display_type_name(data_type: str) -> str:
@@ -990,6 +1013,8 @@ class PLCAsciiIDE:
         self.scan_ms_var = tk.IntVar(value=100)
         self.font_size_var = tk.IntVar(value=18)
         self.connection_var = tk.StringVar(value="Board: Disconnected")
+        self.runtime_target_var = tk.StringVar(value=normalize_runtime_target(self.program.runtime_target))
+        self.runtime_target_label_var = tk.StringVar(value=f"Target: {runtime_target_label(self.program.runtime_target)}")
         self.last_serial_port = default_serial_port()
         self.last_serial_baud = 115200
 
@@ -1054,7 +1079,23 @@ class PLCAsciiIDE:
         menu.add_cascade(label="File", menu=file_menu)
 
         remote_menu = tk.Menu(menu, tearoff=False, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"])
+        target_menu = tk.Menu(remote_menu, tearoff=False, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"])
+        target_menu.add_radiobutton(
+            label="CircuitPython",
+            variable=self.runtime_target_var,
+            value=RUNTIME_TARGET_CIRCUITPYTHON,
+            command=self.on_runtime_target_selected,
+        )
+        target_menu.add_radiobutton(
+            label="Propeller2 TAQOZ",
+            variable=self.runtime_target_var,
+            value=RUNTIME_TARGET_PROPELLER2,
+            command=self.on_runtime_target_selected,
+        )
+        remote_menu.add_cascade(label="Target Board", menu=target_menu)
+        remote_menu.add_separator()
         remote_menu.add_command(label="Install Runtime to CircuitPython...", command=self.install_circuitpython_runtime)
+        remote_menu.add_command(label="Load Runtime to Propeller 2 (RAM)...", command=self.install_propeller2_runtime)
         remote_menu.add_separator()
         remote_menu.add_command(label="Download", command=self.remote_download_program)
         remote_menu.add_command(label="Upload", command=self.remote_upload_program)
@@ -1214,6 +1255,18 @@ class PLCAsciiIDE:
         self.register_tooltip(connection_label, "Shows whether the IDE is currently connected to the board over serial.")
         self.connection_label = connection_label
 
+        runtime_target_label_widget = tk.Label(
+            toolbar,
+            textvariable=self.runtime_target_label_var,
+            bg=PALETTE["panel"],
+            fg=PALETTE["accent_alt"],
+            padx=10,
+            pady=4,
+        )
+        runtime_target_label_widget.pack(side="left", padx=(0, 8))
+        self.register_tooltip(runtime_target_label_widget, "Selected runtime target stored in the project file and used for Download, Upload, and Go Online.")
+        self.runtime_target_label_widget = runtime_target_label_widget
+
         help_button = ttk.Checkbutton(toolbar, text="Help", variable=self.help_var, command=self.update_help_visibility)
         help_button.pack(side="left", padx=(12, 0))
         self.register_tooltip(help_button, "Show keyboard shortcuts below and enable hover tooltips.")
@@ -1295,11 +1348,13 @@ class PLCAsciiIDE:
         delete_var_button.grid(row=0, column=2, sticky="e", padx=(6, 0))
         self.register_tooltip(delete_var_button, "Delete the selected tag. If it is used in the program, its instructions can be removed too.")
 
-        self.monitor_tree = ttk.Treeview(monitor, columns=("value", "type"), show="tree headings")
+        self.monitor_tree = ttk.Treeview(monitor, columns=("binding", "value", "type"), show="tree headings")
         self.monitor_tree.heading("#0", text="Tag")
+        self.monitor_tree.heading("binding", text="Binding")
         self.monitor_tree.heading("value", text="Value")
         self.monitor_tree.heading("type", text="Type")
-        self.monitor_tree.column("#0", width=170, anchor="w")
+        self.monitor_tree.column("#0", width=150, anchor="w")
+        self.monitor_tree.column("binding", width=120, anchor="w")
         self.monitor_tree.column("value", width=100, anchor="w")
         self.monitor_tree.column("type", width=90, anchor="w")
         self.monitor_tree.grid(row=1, column=0, sticky="nsew")
@@ -1443,13 +1498,14 @@ class PLCAsciiIDE:
         tags, timers, counters, forced_tags = self.current_monitor_snapshot()
         inferred = self.inferred_monitor_types()
         variable_map = self.program.variable_map()
+        binding_map = {binding.tag: f"{binding.direction}:{binding.address}" for binding in self.program.bindings}
 
         groups = {
-            "bool": self.monitor_tree.insert("", "end", iid="group:bool", text="BOOL", values=("", "group"), open=True),
-            "int": self.monitor_tree.insert("", "end", iid="group:int", text="DINT", values=("", "group"), open=True),
-            "float": self.monitor_tree.insert("", "end", iid="group:float", text="REAL", values=("", "group"), open=True),
-            "timer": self.monitor_tree.insert("", "end", iid="group:timer", text="TIMER", values=("", "group"), open=True),
-            "counter": self.monitor_tree.insert("", "end", iid="group:counter", text="COUNTER", values=("", "group"), open=True),
+            "bool": self.monitor_tree.insert("", "end", iid="group:bool", text="BOOL", values=("", "", "group"), open=True),
+            "int": self.monitor_tree.insert("", "end", iid="group:int", text="DINT", values=("", "", "group"), open=True),
+            "float": self.monitor_tree.insert("", "end", iid="group:float", text="REAL", values=("", "", "group"), open=True),
+            "timer": self.monitor_tree.insert("", "end", iid="group:timer", text="TIMER", values=("", "", "group"), open=True),
+            "counter": self.monitor_tree.insert("", "end", iid="group:counter", text="COUNTER", values=("", "", "group"), open=True),
         }
 
         scalar_rows: dict[str, tuple[str, object]] = {}
@@ -1474,12 +1530,23 @@ class PLCAsciiIDE:
                 "end",
                 iid=f"scalar:{tag}",
                 text=f"{prefix}{tag}",
-                values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(data_type)),
+                values=(
+                    binding_map.get(tag, ""),
+                    format_runtime_value(value if isinstance(value, (bool, int, float)) else 0),
+                    display_type_name(data_type),
+                ),
             )
 
         for tag in sorted(set(timers) | {name for name, variable in variable_map.items() if variable.data_type == "timer"}):
             timer = timers.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "en": False, "dn": False, "tt": False})
-            parent = self.monitor_tree.insert(groups["timer"], "end", iid=f"timer:{tag}", text=tag, values=("", "TIMER"), open=open_state.get(f"timer:{tag}", False))
+            parent = self.monitor_tree.insert(
+                groups["timer"],
+                "end",
+                iid=f"timer:{tag}",
+                text=tag,
+                values=(binding_map.get(tag, ""), "", "TIMER"),
+                open=open_state.get(f"timer:{tag}", False),
+            )
             for member in ("pre", "acc", "en", "dn", "tt"):
                 value = timer.get(member, 0)
                 member_type = "bool" if member in {"en", "dn", "tt"} else "int"
@@ -1488,12 +1555,23 @@ class PLCAsciiIDE:
                     "end",
                     iid=f"member:timer:{tag}:{member}",
                     text=f".{member}",
-                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(member_type)),
+                    values=(
+                        "",
+                        format_runtime_value(value if isinstance(value, (bool, int, float)) else 0),
+                        display_type_name(member_type),
+                    ),
                 )
 
         for tag in sorted(set(counters) | {name for name, variable in variable_map.items() if variable.data_type == "counter"}):
             counter = counters.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "dn": False})
-            parent = self.monitor_tree.insert(groups["counter"], "end", iid=f"counter:{tag}", text=tag, values=("", "COUNTER"), open=open_state.get(f"counter:{tag}", False))
+            parent = self.monitor_tree.insert(
+                groups["counter"],
+                "end",
+                iid=f"counter:{tag}",
+                text=tag,
+                values=(binding_map.get(tag, ""), "", "COUNTER"),
+                open=open_state.get(f"counter:{tag}", False),
+            )
             for member in ("pre", "acc", "dn"):
                 value = counter.get(member, 0)
                 member_type = "bool" if member == "dn" else "int"
@@ -1502,7 +1580,11 @@ class PLCAsciiIDE:
                     "end",
                     iid=f"member:counter:{tag}:{member}",
                     text=f".{member}",
-                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(member_type)),
+                    values=(
+                        "",
+                        format_runtime_value(value if isinstance(value, (bool, int, float)) else 0),
+                        display_type_name(member_type),
+                    ),
                 )
 
     def add_monitor_variable(self) -> None:
@@ -1692,6 +1774,7 @@ class PLCAsciiIDE:
     def update_connection_indicator(self) -> None:
         if not hasattr(self, "connection_label"):
             return
+        self.runtime_target_label_var.set(f"Target: {runtime_target_label(self.program.runtime_target)}")
         if self.remote is None:
             self.connection_var.set("Board: Disconnected")
             self.connection_label.configure(fg=PALETTE["danger"])
@@ -1722,8 +1805,27 @@ class PLCAsciiIDE:
         )
         if not should_connect:
             return None
-        self.connect_serial()
+        self.connect_serial(action_name=action_name, allow_runtime_bootstrap=(action_name == "Download"))
         return self.remote
+
+    def selected_runtime_target(self) -> str:
+        return normalize_runtime_target(self.runtime_target_var.get())
+
+    def apply_runtime_target(self, target: str, *, disconnect_if_needed: bool) -> None:
+        normalized = normalize_runtime_target(target)
+        self.runtime_target_var.set(normalized)
+        self.program.runtime_target = normalized
+        if disconnect_if_needed and self.remote is not None:
+            self.disconnect_remote(silent=True)
+        self.update_connection_indicator()
+
+    def on_runtime_target_selected(self) -> None:
+        previous = normalize_runtime_target(self.program.runtime_target)
+        self.apply_runtime_target(self.runtime_target_var.get(), disconnect_if_needed=True)
+        current = self.selected_runtime_target()
+        if current != previous:
+            self.status_var.set(f"Selected target board: {runtime_target_label(current)}")
+            self.render_ladder()
 
     def update_help_visibility(self) -> None:
         if self.help_text is None:
@@ -1929,7 +2031,10 @@ class PLCAsciiIDE:
                 self.ladder_text.tag_add("selected", ranges[index], ranges[index + 1])
 
         self.ladder_text.configure(state="disabled")
-        self.root.title(f"PLC ASCII IDE - {self.program.name} - {'online' if self.mode_var.get() == 'online' else 'offline'}")
+        self.root.title(
+            f"PLC ASCII IDE - {self.program.name} - {runtime_target_label(self.program.runtime_target)} - "
+            f"{'online' if self.mode_var.get() == 'online' else 'offline'}"
+        )
         self.ladder_text.focus_set()
         self.render_monitor()
 
@@ -2142,6 +2247,7 @@ class PLCAsciiIDE:
     def new_program(self) -> None:
         self.stop_run()
         self.program = Program(name="untitled", rungs=[Rung(comment="", elements=[])])
+        self.apply_runtime_target(self.program.runtime_target, disconnect_if_needed=True)
         self.program_path = None
         self.engine = LadderEngine(self.program)
         self.sync_program_variables(save_current_values=False)
@@ -2163,6 +2269,7 @@ class PLCAsciiIDE:
         try:
             self.stop_run()
             self.program = load_program(path)
+            self.apply_runtime_target(self.program.runtime_target, disconnect_if_needed=True)
             self.program_path = Path(path)
             self.engine = LadderEngine(self.program)
             self.sync_program_variables(save_current_values=False)
@@ -2181,6 +2288,7 @@ class PLCAsciiIDE:
             self.save_program_as()
             return
         try:
+            self.program.runtime_target = self.selected_runtime_target()
             self.sync_program_variables(save_current_values=True)
             save_program(self.program, self.program_path)
         except Exception as exc:
@@ -2485,35 +2593,89 @@ class PLCAsciiIDE:
         self.last_serial_baud = baud
         return port, baud
 
-    def connect_serial(self) -> None:
+    def _connect_circuitpython_session(self, port: str, baud: int) -> tuple[RemoteSession | None, dict[str, object] | None]:
+        session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
+        hello = session.hello(timeout=1.0)
+        if not hello and isinstance(session.transport, SerialJsonTransport):
+            session.transport.soft_reboot()
+            hello = session.hello(timeout=2.0)
+        if not hello:
+            session.transport.close()
+            return None, None
+        return session, hello
+
+    def _maybe_install_circuitpython_runtime_for_download(self, port: str) -> bool:
+        should_install = messagebox.askyesno(
+            "CircuitPython runtime not found",
+            "No CircuitPython PLC runtime responded on this port.\n\nDownload can install the runtime first, then send your ladder program.\n\nInstall the runtime now?",
+            parent=self.root,
+        )
+        if not should_install:
+            return False
+        try:
+            self.sync_program_variables(save_current_values=True)
+            install_circuitpython_runtime(port, program=self.program)
+        except Exception as exc:
+            messagebox.showerror("Install failed", str(exc), parent=self.root)
+            return False
+        self.status_var.set(f"Installed CircuitPython runtime on {port}")
+        return True
+
+    def connect_serial(self, *, action_name: str = "Connect", allow_runtime_bootstrap: bool = False) -> None:
         target = self.prompt_serial_target()
         if target is None:
             return
         port, baud = target
+        self.connect_serial_to_target(port, baud, action_name=action_name, allow_runtime_bootstrap=allow_runtime_bootstrap)
+
+    def connect_serial_to_target(
+        self,
+        port: str,
+        baud: int,
+        *,
+        action_name: str,
+        allow_runtime_bootstrap: bool,
+    ) -> None:
         self.disconnect_remote(silent=True)
         try:
-            session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
-            hello = session.hello(timeout=1.0)
-            if not hello and isinstance(session.transport, SerialJsonTransport):
-                session.transport.soft_reboot()
-                hello = session.hello(timeout=2.0)
+            runtime_target = self.selected_runtime_target()
+            if runtime_target == RUNTIME_TARGET_PROPELLER2:
+                session = RemoteSession(Propeller2Transport(port=port, baudrate=baud))
+                hello = session.hello(timeout=1.0)
+                runtime_type = RUNTIME_TARGET_PROPELLER2
+            else:
+                session, hello = self._connect_circuitpython_session(port, baud)
+                runtime_type = RUNTIME_TARGET_CIRCUITPYTHON
+                if hello is None and allow_runtime_bootstrap and self._maybe_install_circuitpython_runtime_for_download(port):
+                    session, hello = self._connect_circuitpython_session(port, baud)
         except Exception as exc:
             messagebox.showerror("Serial connection failed", str(exc), parent=self.root)
             return
         if not hello:
-            messagebox.showerror("Serial connection failed", "No response from target.", parent=self.root)
+            if self.selected_runtime_target() == RUNTIME_TARGET_CIRCUITPYTHON:
+                messagebox.showerror(
+                    "Serial connection failed",
+                    f"No CircuitPython runtime responded on {port}.\n\nUse 'Install Runtime to CircuitPython...' first, or use Download to install it automatically.",
+                    parent=self.root,
+                )
+            else:
+                messagebox.showerror("Serial connection failed", "No response from target.", parent=self.root)
             return
         self.remote = session
-        self.remote_label = f"serial:{port}"
+        self.remote_label = f"{runtime_target_label(runtime_type)}:{port}"
         try:
             self.remote.set_mode("run", timeout=0.5)
         except Exception:
             pass
-        self.status_var.set(f"Connected to {port}")
+        if hello.get("runtime") == "missing" and runtime_type == RUNTIME_TARGET_PROPELLER2:
+            self.status_var.set(f"Connected to Propeller 2 on {port} (runtime not loaded yet)")
+        else:
+            self.status_var.set(f"Connected to {port}")
         self.mode_var.set("offline")
         self.update_connection_indicator()
 
     def install_circuitpython_runtime(self) -> None:
+        self.apply_runtime_target(RUNTIME_TARGET_CIRCUITPYTHON, disconnect_if_needed=True)
         target = self.prompt_serial_target()
         if target is None:
             return
@@ -2528,6 +2690,25 @@ class PLCAsciiIDE:
         messagebox.showinfo(
             "Runtime installed",
             f"Installed the CircuitPython runtime on {port}.\nUse Go Online, Download, or Upload to connect and work with the board.",
+            parent=self.root,
+        )
+
+    def install_propeller2_runtime(self) -> None:
+        self.apply_runtime_target(RUNTIME_TARGET_PROPELLER2, disconnect_if_needed=True)
+        target = self.prompt_serial_target()
+        if target is None:
+            return
+        port, baud = target
+        try:
+            self.sync_program_variables(save_current_values=True)
+            install_propeller2_runtime(port, program=self.program, baudrate=baud)
+        except Exception as exc:
+            messagebox.showerror("Load failed", str(exc), parent=self.root)
+            return
+        self.status_var.set(f"Loaded Propeller 2 runtime into RAM on {port}")
+        messagebox.showinfo(
+            "Runtime loaded",
+            f"Loaded the Propeller 2 TAQOZ runtime into RAM on {port}.\nUse Download, Upload, or Go Online in the same session to work with the board.",
             parent=self.root,
         )
 

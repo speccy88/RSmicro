@@ -1,5 +1,6 @@
 {
   "name": "demo_start_stop",
+  "runtime_target": "circuitpython",
   "rungs": [
     {
       "name": "seal_in",

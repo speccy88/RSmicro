@@ -1,45 +1,40 @@
 {
-  "name": "circuitpython_button_led",
-  "runtime_target": "circuitpython",
+  "name": "propeller2-led56",
+  "runtime_target": "propeller2",
   "rungs": [
     {
-      "comment": "Turn the onboard LED on while the pushbutton is pressed",
+      "comment": "led command drives onboard LED on P56",
       "elements": [
         {
           "kind": "step",
           "op": "XIC",
-          "tag": "PB"
+          "tag": "led_cmd"
         },
         {
           "kind": "step",
           "op": "OTE",
-          "tag": "LED"
+          "tag": "led_56"
         }
       ]
     }
   ],
   "variables": [
     {
-      "tag": "PB",
+      "tag": "led_cmd",
       "type": "bool",
       "initial": false
     },
     {
-      "tag": "LED",
+      "tag": "led_56",
       "type": "bool",
       "initial": false
     }
   ],
   "bindings": [
     {
-      "tag": "PB",
-      "direction": "input",
-      "address": "IO0"
-    },
-    {
-      "tag": "LED",
+      "tag": "led_56",
       "direction": "output",
-      "address": "IO2"
+      "address": "56"
     }
   ]
 }

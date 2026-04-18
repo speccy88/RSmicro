@@ -45,6 +45,9 @@ Behavior:
 Connects to the board if needed, then sends the full current ladder program to
 the board runtime.
 
+If the selected target is `CircuitPython` and the PLC runtime is not installed
+yet, `Download` can install it first and then send the ladder program.
+
 Use it when:
 
 - you want to update the running ladder on the board
@@ -115,7 +118,9 @@ When enabled:
 
 ### Runtime
 
+- `Target Board`: choose `CircuitPython` or `Propeller2 TAQOZ`
 - `Install runtime to CircuitPython...`
+- `Load Runtime to Propeller 2 (RAM)...`
 - `Download`
 - `Upload`
 - `Go Online`
@@ -194,6 +199,9 @@ Examples:
 - `LED` as output on `IO2`
 
 Bindings matter most when the runtime is connected to real or simulated I/O.
+
+The selected target board is stored in the JSON project file, so opening a
+saved program restores the correct runtime choice automatically.
 
 ## Keyboard Shortcuts
 

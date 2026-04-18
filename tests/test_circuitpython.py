@@ -1,8 +1,8 @@
 import unittest
 
-from plc_ascii.circuitpython import build_runtime_bundle
-from plc_ascii.circuitpython_portable_runtime import MemoryStorage, PortableRuntime
 from plc_ascii.model import Binding, Program, Rung, Step, Variable
+from plc_runtime.circuitpython import build_runtime_bundle
+from plc_runtime.circuitpython.plc_runtime_portable import MemoryStorage, PortableRuntime
 
 
 class FakeBackend:
