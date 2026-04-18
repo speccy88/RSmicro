@@ -1,0 +1,95 @@
+{
+  "name": "demo_start_stop",
+  "rungs": [
+    {
+      "name": "seal_in",
+      "comment": "Press start, release with stop",
+      "conditions": [
+        {
+          "op": "XIC",
+          "tag": "start_pb"
+        },
+        {
+          "op": "XIO",
+          "tag": "stop_pb"
+        }
+      ],
+      "actions": [
+        {
+          "op": "OTL",
+          "tag": "motor_latched"
+        }
+      ]
+    },
+    {
+      "name": "stop_reset",
+      "comment": "Unlatch on stop",
+      "conditions": [
+        {
+          "op": "XIC",
+          "tag": "stop_pb"
+        }
+      ],
+      "actions": [
+        {
+          "op": "OTU",
+          "tag": "motor_latched"
+        }
+      ]
+    },
+    {
+      "name": "motor_output",
+      "comment": "Drive output when latched and healthy",
+      "conditions": [
+        {
+          "op": "XIC",
+          "tag": "motor_latched"
+        },
+        {
+          "op": "XIO",
+          "tag": "fault"
+        }
+      ],
+      "actions": [
+        {
+          "op": "OTE",
+          "tag": "motor_cmd"
+        }
+      ]
+    },
+    {
+      "name": "run_timer",
+      "comment": "Timer after motor starts",
+      "conditions": [
+        {
+          "op": "XIC",
+          "tag": "motor_cmd"
+        }
+      ],
+      "actions": [
+        {
+          "op": "TON",
+          "tag": "motor_run_timer",
+          "arg": 1500
+        }
+      ]
+    }
+  ],
+  "bindings": [
+    {
+      "tag": "start_pb",
+      "direction": "input",
+      "address": "D5"
+    },
+    {
+      "tag": "stop_pb",
+      "direction": "input",
+      "address": "D6"
+    },
+    {
+      "tag": "motor_cmd",
+      "direction": "output",
+      "address": "D17"
+    }
+  ]
+}

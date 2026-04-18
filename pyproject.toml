@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plc-ascii"
+version = "0.1.0"
+description = "ASCII ladder logic editor, simulator, and remote runtime scaffold."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+serial = ["pyserial>=3.5"]
+
+[project.scripts]
+plc-ascii = "plc_ascii.ide:main"
+plc-ascii-cli = "plc_ascii.app:main"
+plc-runtime = "plc_runtime.runtime:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,4 @@
+[console_scripts]
+plc-ascii = plc_ascii.ide:main
+plc-ascii-cli = plc_ascii.app:main
+plc-runtime = plc_runtime.runtime:main
