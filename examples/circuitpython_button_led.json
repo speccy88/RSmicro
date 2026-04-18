@@ -1,0 +1,44 @@
+{
+  "name": "circuitpython_button_led",
+  "rungs": [
+    {
+      "comment": "Turn the onboard LED on while the pushbutton is pressed",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "PB"
+        },
+        {
+          "kind": "step",
+          "op": "OTE",
+          "tag": "LED"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "tag": "PB",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "LED",
+      "type": "bool",
+      "initial": false
+    }
+  ],
+  "bindings": [
+    {
+      "tag": "PB",
+      "direction": "input",
+      "address": "IO0"
+    },
+    {
+      "tag": "LED",
+      "direction": "output",
+      "address": "IO2"
+    }
+  ]
+}

@@ -62,7 +62,8 @@ That opens the Tkinter IDE with:
 - a tag monitor with set/force/unforce controls
 - a bindings editor
 - local simulation step/run/stop controls
-- remote runtime connect/download/snapshot controls
+- board runtime download/upload/live monitoring controls
+- CircuitPython runtime install for supported serial targets
 
 If you want the original shell version:
 
@@ -75,8 +76,26 @@ plc-ascii-cli examples/demo_program.json
 1. Build a ladder program in the GUI by adding rungs, conditions, actions, and bindings.
 2. Simulate and debug locally with the monitor panel and the Step/Run/Stop controls.
 3. Force tags from the monitor panel like a PLC.
-4. Connect to a demo runtime or a serial target from the Remote tab.
-5. Download the program and live-view remote snapshots from the same IDE.
+4. Install the CircuitPython runtime from the `Runtime` menu if the board needs it.
+5. Use `Download`, `Upload`, and `Go Online` to work with the connected board from the same IDE.
+6. Use `Disconnect` to close the serial connection and return to offline editing.
+
+## CircuitPython board workflow
+
+For the ESP32 DevKitC V4 setup tested in this repo:
+
+- Pushbutton input: `IO0` with pull-up and active-low logic
+- LED output: `IO2`
+- Example program: `examples/circuitpython_button_led.json`
+
+Recommended flow:
+
+1. Open `examples/circuitpython_button_led.json` in the IDE.
+2. Choose `Runtime` -> `Install runtime to CircuitPython...` and select the board serial port.
+3. Click `Go Online`. If the IDE is not connected yet, it will prompt you to connect.
+4. Edit the program offline, then click `Download` to update the board.
+5. Click `Upload` to read the stored program back from the board.
+6. Click `Disconnect` to close the serial connection and return to offline mode.
 
 ## Device runtime
 

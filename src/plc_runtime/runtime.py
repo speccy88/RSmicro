@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from dataclasses import dataclass, field
@@ -18,6 +19,8 @@ class DeviceRuntime:
     backend: IOBackend = field(default_factory=MemoryIOBackend)
     program: Program = field(default_factory=lambda: Program(name="device"))
     mode: str = "stop"
+    _download_chunks: list[str] = field(default_factory=list)
+    _upload_chunks: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.engine = LadderEngine(self.program)
@@ -63,6 +66,31 @@ class DeviceRuntime:
         if message_type == "download_program":
             self.load_program(Program.from_dict(payload["program"]))
             return {"type": "ack", "request": "download_program", "program": self.program.name}
+        if message_type == "download_program_begin":
+            self._download_chunks = []
+            return {"type": "ack", "request": "download_program_begin"}
+        if message_type == "download_program_chunk":
+            self._download_chunks.append(str(payload.get("data", "")))
+            return {"type": "ack", "request": "download_program_chunk"}
+        if message_type == "download_program_commit":
+            serialized = "".join(self._download_chunks)
+            self._download_chunks = []
+            self.load_program(Program.from_dict(json.loads(serialized)))
+            return {"type": "ack", "request": "download_program", "program": self.program.name}
+        if message_type == "upload_program":
+            return {"type": "program", "program": self.program.to_dict()}
+        if message_type == "upload_program_begin":
+            serialized = json.dumps(self.program.to_dict(), separators=(",", ":"))
+            self._upload_chunks = [serialized[index : index + 120] for index in range(0, len(serialized), 120)] or [""]
+            return {"type": "upload_program_info", "chunks": len(self._upload_chunks)}
+        if message_type == "upload_program_chunk":
+            index = int(payload.get("index", 0))
+            if index < 0 or index >= len(self._upload_chunks):
+                return {"type": "error", "message": "Invalid upload chunk index"}
+            return {"type": "upload_program_chunk", "index": index, "data": self._upload_chunks[index]}
+        if message_type == "upload_program_end":
+            self._upload_chunks = []
+            return {"type": "ack", "request": "upload_program_end"}
         if message_type == "set_tag":
             tag = str(payload["tag"])
             value = payload["value"]

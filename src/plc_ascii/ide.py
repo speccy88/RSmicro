@@ -5,6 +5,8 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, font, messagebox, simpledialog, ttk
 
+import markdown
+from .circuitpython import install_runtime as install_circuitpython_runtime
 from .engine import LadderEngine, ScanResult, trace_program_preview, trace_program_state
 from .model import Binding, Branch, Node, Program, Rung, Step, Variable, split_timer_member, step_primary_tag, walk_steps
 from .program_io import load_program, save_program
@@ -23,7 +25,12 @@ from .render import (
     SelectionTarget,
 )
 from .serial_link import SerialJsonTransport
-from .subprocess_link import SubprocessJsonTransport
+from tkinterweb import HtmlFrame
+
+try:
+    from serial.tools import list_ports  # type: ignore
+except Exception:  # pragma: no cover
+    list_ports = None
 
 
 PALETTE = {
@@ -39,6 +46,80 @@ PALETTE = {
     "danger": "#ff6b5d",
 }
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DOCS_PATH = REPO_ROOT / "DOCS.md"
+README_PATH = REPO_ROOT / "README.md"
+HELP_PATH = REPO_ROOT / "HELP.md"
+
+MARKDOWN_VIEWER_CSS = """
+body {
+  background: #1f2329;
+  color: #f2f4f8;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: __BODY_FONT_PX__px;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 980px;
+  padding: 28px 32px 48px;
+}
+h1, h2, h3, h4 {
+  color: #ffb938;
+  line-height: 1.2;
+}
+h1 { border-bottom: 1px solid #323842; padding-bottom: 10px; font-size: __H1_FONT_PX__px; }
+h2 { border-bottom: 1px solid #323842; padding-bottom: 8px; margin-top: 32px; font-size: __H2_FONT_PX__px; }
+h3 { font-size: __H3_FONT_PX__px; }
+h4 { font-size: __H4_FONT_PX__px; }
+p, li { color: #f2f4f8; }
+a { color: #45c08a; }
+code {
+  background: #2d333b;
+  border-radius: 4px;
+  color: #ffb938;
+  padding: 2px 5px;
+}
+pre {
+  background: #262b31;
+  border: 1px solid #323842;
+  border-radius: 10px;
+  overflow-x: auto;
+  padding: 14px 16px;
+}
+pre code {
+  background: transparent;
+  color: #f2f4f8;
+  padding: 0;
+}
+blockquote {
+  border-left: 4px solid #ff5b4d;
+  color: #c7d0db;
+  margin: 18px 0;
+  padding-left: 16px;
+}
+table {
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #323842;
+  padding: 10px 12px;
+  text-align: left;
+}
+th {
+  background: #262b31;
+  color: #ffb938;
+}
+td {
+  background: #2d333b;
+}
+hr {
+  border: none;
+  border-top: 1px solid #323842;
+  margin: 28px 0;
+}
+"""
+
 
 ROLE_TO_COLOR = {
     ROLE_TEXT: PALETTE["text"],
@@ -50,6 +131,20 @@ ROLE_TO_COLOR = {
     ROLE_ELEMENT_ON: PALETTE["success"],
     ROLE_ELEMENT_OFF: PALETTE["danger"],
 }
+
+TYPE_DISPLAY_NAMES = {
+    "bool": "BOOL",
+    "int": "DINT",
+    "float": "REAL",
+    "timer": "TIMER",
+    "counter": "COUNTER",
+}
+
+DISPLAY_TO_TYPE_NAMES = {label: data_type for data_type, label in TYPE_DISPLAY_NAMES.items()}
+
+
+def display_type_name(data_type: str) -> str:
+    return TYPE_DISPLAY_NAMES.get(data_type, data_type.upper())
 
 
 def parse_bool(raw: str) -> bool:
@@ -631,7 +726,7 @@ class VariableDialog(tk.Toplevel):
         self.result: Variable | None = None
 
         self.tag_var = tk.StringVar(value=initial.tag if initial else "")
-        self.type_var = tk.StringVar(value=initial.data_type if initial else "bool")
+        self.type_var = tk.StringVar(value=display_type_name(initial.data_type) if initial else "BOOL")
         seed_value = (
             str(initial.preset)
             if initial and initial.data_type in {"timer", "counter"}
@@ -647,7 +742,7 @@ class VariableDialog(tk.Toplevel):
         ttk.Entry(body, textvariable=self.tag_var, width=28).grid(row=0, column=1, sticky="ew", pady=(0, 8))
 
         ttk.Label(body, text="Type").grid(row=1, column=0, sticky="w", pady=(0, 8))
-        ttk.Combobox(body, textvariable=self.type_var, values=["bool", "int", "float", "timer", "counter"], state="readonly").grid(
+        ttk.Combobox(body, textvariable=self.type_var, values=["BOOL", "DINT", "REAL", "TIMER", "COUNTER"], state="readonly").grid(
             row=1,
             column=1,
             sticky="ew",
@@ -672,12 +767,12 @@ class VariableDialog(tk.Toplevel):
         self.wait_window(self)
 
     def _update_value_label(self) -> None:
-        data_type = self.type_var.get().strip().lower()
+        data_type = DISPLAY_TO_TYPE_NAMES.get(self.type_var.get().strip().upper(), "")
         self.value_label.configure(text="Preset" if data_type in {"timer", "counter"} else "Initial")
 
     def on_ok(self) -> None:
         try:
-            data_type = self.type_var.get().strip().lower()
+            data_type = DISPLAY_TO_TYPE_NAMES.get(self.type_var.get().strip().upper(), "")
             tag = self.tag_var.get().strip()
             if data_type == "bool":
                 variable = Variable(tag=tag, data_type=data_type, initial=parse_bool(self.value_var.get()))
@@ -688,10 +783,10 @@ class VariableDialog(tk.Toplevel):
             elif data_type in {"timer", "counter"}:
                 variable = Variable(tag=tag, data_type=data_type, preset=int(self.value_var.get().strip() or "0"))
             else:
-                raise ValueError("Choose a variable type")
+                raise ValueError("Choose a tag type")
             variable.validate()
         except Exception as exc:
-            messagebox.showerror("Invalid variable", str(exc), parent=self)
+            messagebox.showerror("Invalid tag", str(exc), parent=self)
             return
         self.result = variable
         self.destroy()
@@ -834,6 +929,21 @@ def offline_live_locked(mode: str, simulation_state: str) -> bool:
     return mode == "offline" and simulation_state in {"running", "stepped"}
 
 
+def default_serial_port() -> str:
+    if list_ports is not None:
+        try:
+            devices = sorted(port.device for port in list_ports.comports())
+            for token in ("usbserial", "usbmodem", "ttyUSB", "ttyACM"):
+                for device in devices:
+                    if token in device:
+                        return device
+            if devices:
+                return devices[0]
+        except Exception:
+            pass
+    return "/dev/ttyUSB0"
+
+
 class PLCAsciiIDE:
     def __init__(self, program: Program | None = None, program_path: Path | None = None) -> None:
         self.root = tk.Tk()
@@ -847,6 +957,7 @@ class PLCAsciiIDE:
         self.engine = LadderEngine(self.program)
         self.last_scan: ScanResult | None = None
         self.remote: RemoteSession | None = None
+        self.remote_label: str | None = None
         self.remote_snapshot: dict[str, object] = {}
         self.remote_watch_job: str | None = None
         self.run_job: str | None = None
@@ -856,6 +967,13 @@ class PLCAsciiIDE:
         self.help_text: tk.Text | None = None
         self.step_button: ttk.Button | None = None
         self.run_button: ttk.Button | None = None
+        self.stop_button: ttk.Button | None = None
+        self.download_button: ttk.Button | None = None
+        self.font_label_widget: ttk.Label | None = None
+        self.disconnect_button: ttk.Button | None = None
+        self.reset_button: ttk.Checkbutton | None = None
+        self.scan_label_widget: ttk.Label | None = None
+        self.scan_spinbox_widget: ttk.Spinbox | None = None
         self.tooltip_text_by_widget: dict[str, str] = {}
         self.tooltip_job: str | None = None
         self.tooltip_window: tk.Toplevel | None = None
@@ -871,6 +989,9 @@ class PLCAsciiIDE:
         self.reset_integer_var = tk.BooleanVar(value=True)
         self.scan_ms_var = tk.IntVar(value=100)
         self.font_size_var = tk.IntVar(value=18)
+        self.connection_var = tk.StringVar(value="Board: Disconnected")
+        self.last_serial_port = default_serial_port()
+        self.last_serial_baud = 115200
 
         self.fixed_font = font.nametofont("TkFixedFont").copy()
         self.fixed_font.configure(size=self.font_size_var.get())
@@ -879,6 +1000,7 @@ class PLCAsciiIDE:
         self._build_menu()
         self._build_layout()
         self.sync_program_variables(save_current_values=False)
+        self.update_connection_indicator()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.after(50, self.render_ladder)
 
@@ -931,13 +1053,111 @@ class PLCAsciiIDE:
         file_menu.add_command(label="Exit", command=self.on_close)
         menu.add_cascade(label="File", menu=file_menu)
 
+        remote_menu = tk.Menu(menu, tearoff=False, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"])
+        remote_menu.add_command(label="Install Runtime to CircuitPython...", command=self.install_circuitpython_runtime)
+        remote_menu.add_separator()
+        remote_menu.add_command(label="Download", command=self.remote_download_program)
+        remote_menu.add_command(label="Upload", command=self.remote_upload_program)
+        remote_menu.add_command(label="Go Online", command=self.go_online)
+        remote_menu.add_command(label="Disconnect", command=self.disconnect_remote)
+        menu.add_cascade(label="Runtime", menu=remote_menu)
+
         debug_menu = tk.Menu(menu, tearoff=False, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"])
         debug_menu.add_command(label="Set Tag", command=self.set_tag_dialog)
         debug_menu.add_command(label="Force Tag", command=self.force_tag_dialog)
         debug_menu.add_command(label="Unforce Tag", command=self.unforce_tag_dialog)
         debug_menu.add_command(label="Edit Comment", command=self.edit_rung_comment)
         menu.add_cascade(label="Debug", menu=debug_menu)
+
+        help_menu = tk.Menu(menu, tearoff=False, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"])
+        help_menu.add_command(label="Documentation", command=self.open_docs_document)
+        help_menu.add_command(label="README", command=self.open_readme_document)
+        help_menu.add_command(label="GUI Help", command=self.open_help_document)
+        menu.add_cascade(label="Help", menu=help_menu)
         self.root.config(menu=menu)
+
+    @staticmethod
+    def markdown_viewer_css(body_font_px: int) -> str:
+        body_font_px = max(14, min(30, int(body_font_px)))
+        return (
+            MARKDOWN_VIEWER_CSS
+            .replace("__BODY_FONT_PX__", str(body_font_px))
+            .replace("__H1_FONT_PX__", str(round(body_font_px * 2.0)))
+            .replace("__H2_FONT_PX__", str(round(body_font_px * 1.6)))
+            .replace("__H3_FONT_PX__", str(round(body_font_px * 1.3)))
+            .replace("__H4_FONT_PX__", str(round(body_font_px * 1.15)))
+        )
+
+    def render_markdown_document(self, path: Path, body_font_px: int = 20) -> str:
+        if not path.exists():
+            raise FileNotFoundError(f"Missing document: {path}")
+        markdown_text = path.read_text(encoding="utf-8")
+        html_body = markdown.markdown(
+            markdown_text,
+            extensions=["fenced_code", "tables", "toc", "sane_lists"],
+        )
+        title = path.name
+        return (
+            "<!DOCTYPE html>"
+            "<html><head>"
+            f"<meta charset='utf-8'><title>{title}</title>"
+            f"<style>{self.markdown_viewer_css(body_font_px)}</style>"
+            "</head><body>"
+            f"{html_body}"
+            "</body></html>"
+        )
+
+    def open_markdown_document(self, title: str, path: Path) -> None:
+        window = tk.Toplevel(self.root)
+        window.title(title)
+        window.geometry("1120x780")
+        window.minsize(840, 620)
+        window.configure(bg=PALETTE["bg"])
+
+        header = ttk.Frame(window, style="Card.TFrame", padding=(12, 10, 12, 10))
+        header.pack(fill="x")
+        ttk.Label(header, text=title, style="Header.TLabel").pack(side="left")
+        ttk.Label(header, text=str(path.relative_to(REPO_ROOT)), style="Subtle.TLabel").pack(side="left", padx=(10, 0))
+        font_px_var = tk.IntVar(value=20)
+
+        viewer = HtmlFrame(window, messages_enabled=False)
+        viewer.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+
+        zoom_controls = ttk.Frame(header, style="Card.TFrame")
+        zoom_controls.pack(side="right")
+        ttk.Label(zoom_controls, text="Text", style="Subtle.TLabel").pack(side="left", padx=(0, 8))
+        font_value_label = ttk.Label(zoom_controls, textvariable=font_px_var, style="Subtle.TLabel", width=3)
+        ttk.Button(zoom_controls, text="A-", style="Tool.TButton").pack(side="left", padx=(0, 6))
+        ttk.Button(zoom_controls, text="A+", style="Tool.TButton").pack(side="left")
+        font_value_label.pack(side="left", padx=(8, 0))
+
+        def refresh_view() -> None:
+            try:
+                html = self.render_markdown_document(path, body_font_px=font_px_var.get())
+            except Exception as exc:
+                messagebox.showerror("Documentation failed", str(exc), parent=window)
+                window.destroy()
+                return
+            viewer.load_html(html, base_url=path.parent.as_uri())
+
+        def adjust_font(delta: int) -> None:
+            font_px_var.set(max(14, min(30, font_px_var.get() + delta)))
+            refresh_view()
+
+        zoom_buttons = [child for child in zoom_controls.winfo_children() if isinstance(child, ttk.Button)]
+        zoom_buttons[0].configure(command=lambda: adjust_font(-2))
+        zoom_buttons[1].configure(command=lambda: adjust_font(2))
+
+        refresh_view()
+
+    def open_docs_document(self) -> None:
+        self.open_markdown_document("PLC ASCII Documentation", DOCS_PATH)
+
+    def open_readme_document(self) -> None:
+        self.open_markdown_document("PLC ASCII README", README_PATH)
+
+    def open_help_document(self) -> None:
+        self.open_markdown_document("PLC ASCII Help", HELP_PATH)
 
     def _build_layout(self) -> None:
         outer = ttk.Frame(self.root, padding=(12, 10, 12, 12), style="Card.TFrame")
@@ -962,34 +1182,37 @@ class PLCAsciiIDE:
             stop_button,
             "Stop ends offline simulation. Boolean logic drops out, timers/counters reset, and Reset Integer controls whether numeric tags are cleared to zero. Press Stop again while already stopped to clear forces too.",
         )
+        self.stop_button = stop_button
 
-        connect_demo_button = ttk.Button(toolbar, text="Connect Demo", command=self.connect_demo, style="Accent.TButton")
-        connect_demo_button.pack(side="left", padx=(0, 8))
-        self.register_tooltip(connect_demo_button, "Launch and connect to the bundled demo runtime.")
+        download_button = ttk.Button(toolbar, text="Download", command=self.remote_download_program, style="Tool.TButton")
+        download_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(download_button, "Connect to the board if needed, then send the current ladder program to it.")
+        self.download_button = download_button
 
-        serial_button = ttk.Button(toolbar, text="Serial", command=self.connect_serial, style="Tool.TButton")
-        serial_button.pack(side="left", padx=(0, 8))
-        self.register_tooltip(serial_button, "Connect to a target over the serial JSON link.")
+        upload_button = ttk.Button(toolbar, text="Upload", command=self.remote_upload_program, style="Tool.TButton")
+        upload_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(upload_button, "Connect to the board if needed, then read the stored ladder program back into the IDE.")
 
-        snapshot_button = ttk.Button(toolbar, text="Snapshot", command=self.remote_snapshot_request, style="Tool.TButton")
-        snapshot_button.pack(side="left", padx=(0, 8))
-        self.register_tooltip(snapshot_button, "Refresh the online snapshot from the connected target.")
+        go_online_button = ttk.Button(toolbar, text="Go Online", command=self.go_online, style="Accent.TButton")
+        go_online_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(go_online_button, "Connect to the board if needed, switch to online mode, and start continuous live monitoring.")
 
-        mode_label = ttk.Label(toolbar, text="Mode", style="Subtle.TLabel")
-        mode_label.pack(side="left", padx=(14, 6))
-        self.register_tooltip(mode_label, "Choose between local offline work and live online monitoring.")
+        disconnect_button = ttk.Button(toolbar, text="Disconnect", command=self.disconnect_remote, style="Tool.TButton")
+        disconnect_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(disconnect_button, "Disconnect from the board, stop live monitoring, and return to offline editing.")
+        self.disconnect_button = disconnect_button
 
-        offline_button = ttk.Radiobutton(toolbar, text="Offline", value="offline", variable=self.mode_var, command=self.on_mode_change)
-        offline_button.pack(side="left")
-        self.register_tooltip(offline_button, "Work on the local ladder program and simulation engine.")
-
-        online_button = ttk.Radiobutton(toolbar, text="Online", value="online", variable=self.mode_var, command=self.on_mode_change)
-        online_button.pack(side="left", padx=(0, 8))
-        self.register_tooltip(online_button, "View and debug the live state from the connected runtime.")
-
-        auto_button = ttk.Checkbutton(toolbar, text="Auto", variable=self.auto_online_var, command=self.toggle_remote_watch)
-        auto_button.pack(side="left")
-        self.register_tooltip(auto_button, "Continuously poll the connected target for fresh online data.")
+        connection_label = tk.Label(
+            toolbar,
+            textvariable=self.connection_var,
+            bg=PALETTE["panel"],
+            fg=PALETTE["danger"],
+            padx=10,
+            pady=4,
+        )
+        connection_label.pack(side="left", padx=(14, 8))
+        self.register_tooltip(connection_label, "Shows whether the IDE is currently connected to the board over serial.")
+        self.connection_label = connection_label
 
         help_button = ttk.Checkbutton(toolbar, text="Help", variable=self.help_var, command=self.update_help_visibility)
         help_button.pack(side="left", padx=(12, 0))
@@ -1001,18 +1224,22 @@ class PLCAsciiIDE:
             reset_button,
             "When checked, Stop restores monitor start values for scalars and clears timer/counter accumulators while preserving presets.",
         )
+        self.reset_button = reset_button
 
         scan_label = ttk.Label(toolbar, text="Scan", style="Subtle.TLabel")
         scan_label.pack(side="left", padx=(14, 6))
         self.register_tooltip(scan_label, "Offline scan period in milliseconds.")
+        self.scan_label_widget = scan_label
 
         scan_spinbox = ttk.Spinbox(toolbar, from_=10, to=5000, increment=10, textvariable=self.scan_ms_var, width=7)
         scan_spinbox.pack(side="left")
         self.register_tooltip(scan_spinbox, "Set the offline scan time in milliseconds.")
+        self.scan_spinbox_widget = scan_spinbox
 
         font_label = ttk.Label(toolbar, text="Font", style="Subtle.TLabel")
         font_label.pack(side="left", padx=(14, 6))
         self.register_tooltip(font_label, "Ladder text size.")
+        self.font_label_widget = font_label
 
         font_spinbox = ttk.Spinbox(toolbar, from_=12, to=30, increment=1, textvariable=self.font_size_var, width=5, command=self.update_font_size)
         font_spinbox.pack(side="left")
@@ -1061,12 +1288,12 @@ class PLCAsciiIDE:
         monitor_header.grid(row=0, column=0, sticky="ew", pady=(0, 8))
         monitor_header.columnconfigure(0, weight=1)
         ttk.Label(monitor_header, text="Monitor", style="Header.TLabel").grid(row=0, column=0, sticky="w")
-        add_var_button = ttk.Button(monitor_header, text="Add Var", command=self.add_monitor_variable, style="Tool.TButton")
+        add_var_button = ttk.Button(monitor_header, text="Add Tag", command=self.add_monitor_variable, style="Tool.TButton")
         add_var_button.grid(row=0, column=1, sticky="e")
-        self.register_tooltip(add_var_button, "Add a monitored variable declaration and choose its type.")
-        delete_var_button = ttk.Button(monitor_header, text="Delete Var", command=self.delete_monitor_variable, style="Tool.TButton")
+        self.register_tooltip(add_var_button, "Add a monitored tag declaration and choose its type.")
+        delete_var_button = ttk.Button(monitor_header, text="Delete Tag", command=self.delete_monitor_variable, style="Tool.TButton")
         delete_var_button.grid(row=0, column=2, sticky="e", padx=(6, 0))
-        self.register_tooltip(delete_var_button, "Delete the selected variable. If it is used in the program, its instructions can be removed too.")
+        self.register_tooltip(delete_var_button, "Delete the selected tag. If it is used in the program, its instructions can be removed too.")
 
         self.monitor_tree = ttk.Treeview(monitor, columns=("value", "type"), show="tree headings")
         self.monitor_tree.heading("#0", text="Tag")
@@ -1077,7 +1304,7 @@ class PLCAsciiIDE:
         self.monitor_tree.column("type", width=90, anchor="w")
         self.monitor_tree.grid(row=1, column=0, sticky="nsew")
         self.monitor_tree.bind("<Double-1>", self.on_monitor_double_click)
-        self.register_tooltip(self.monitor_tree, "Watch variables here. Double-click a value to edit it while stopped or stepped offline.")
+        self.register_tooltip(self.monitor_tree, "Watch tags here. Double-click a value to edit it while stopped or stepped offline.")
 
         monitor_scroll = ttk.Scrollbar(monitor, orient="vertical", command=self.monitor_tree.yview)
         monitor_scroll.grid(row=1, column=1, sticky="ns")
@@ -1103,6 +1330,7 @@ class PLCAsciiIDE:
         self.render_help_text()
         self.update_help_visibility()
         self.update_simulation_buttons()
+        self.update_toolbar_visibility()
 
     def ensure_rung(self) -> int:
         if not self.program.rungs:
@@ -1217,11 +1445,11 @@ class PLCAsciiIDE:
         variable_map = self.program.variable_map()
 
         groups = {
-            "bool": self.monitor_tree.insert("", "end", iid="group:bool", text="Boolean", values=("", "group"), open=True),
-            "int": self.monitor_tree.insert("", "end", iid="group:int", text="Integer", values=("", "group"), open=True),
-            "float": self.monitor_tree.insert("", "end", iid="group:float", text="Float", values=("", "group"), open=True),
-            "timer": self.monitor_tree.insert("", "end", iid="group:timer", text="Timer", values=("", "group"), open=True),
-            "counter": self.monitor_tree.insert("", "end", iid="group:counter", text="Counter", values=("", "group"), open=True),
+            "bool": self.monitor_tree.insert("", "end", iid="group:bool", text="BOOL", values=("", "group"), open=True),
+            "int": self.monitor_tree.insert("", "end", iid="group:int", text="DINT", values=("", "group"), open=True),
+            "float": self.monitor_tree.insert("", "end", iid="group:float", text="REAL", values=("", "group"), open=True),
+            "timer": self.monitor_tree.insert("", "end", iid="group:timer", text="TIMER", values=("", "group"), open=True),
+            "counter": self.monitor_tree.insert("", "end", iid="group:counter", text="COUNTER", values=("", "group"), open=True),
         }
 
         scalar_rows: dict[str, tuple[str, object]] = {}
@@ -1246,12 +1474,12 @@ class PLCAsciiIDE:
                 "end",
                 iid=f"scalar:{tag}",
                 text=f"{prefix}{tag}",
-                values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), data_type),
+                values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(data_type)),
             )
 
         for tag in sorted(set(timers) | {name for name, variable in variable_map.items() if variable.data_type == "timer"}):
             timer = timers.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "en": False, "dn": False, "tt": False})
-            parent = self.monitor_tree.insert(groups["timer"], "end", iid=f"timer:{tag}", text=tag, values=("", "timer"), open=open_state.get(f"timer:{tag}", False))
+            parent = self.monitor_tree.insert(groups["timer"], "end", iid=f"timer:{tag}", text=tag, values=("", "TIMER"), open=open_state.get(f"timer:{tag}", False))
             for member in ("pre", "acc", "en", "dn", "tt"):
                 value = timer.get(member, 0)
                 member_type = "bool" if member in {"en", "dn", "tt"} else "int"
@@ -1260,12 +1488,12 @@ class PLCAsciiIDE:
                     "end",
                     iid=f"member:timer:{tag}:{member}",
                     text=f".{member}",
-                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), member_type),
+                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(member_type)),
                 )
 
         for tag in sorted(set(counters) | {name for name, variable in variable_map.items() if variable.data_type == "counter"}):
             counter = counters.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "dn": False})
-            parent = self.monitor_tree.insert(groups["counter"], "end", iid=f"counter:{tag}", text=tag, values=("", "counter"), open=open_state.get(f"counter:{tag}", False))
+            parent = self.monitor_tree.insert(groups["counter"], "end", iid=f"counter:{tag}", text=tag, values=("", "COUNTER"), open=open_state.get(f"counter:{tag}", False))
             for member in ("pre", "acc", "dn"):
                 value = counter.get(member, 0)
                 member_type = "bool" if member == "dn" else "int"
@@ -1274,13 +1502,13 @@ class PLCAsciiIDE:
                     "end",
                     iid=f"member:counter:{tag}:{member}",
                     text=f".{member}",
-                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), member_type),
+                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), display_type_name(member_type)),
                 )
 
     def add_monitor_variable(self) -> None:
         if not self.ensure_monitor_editable():
             return
-        dialog = VariableDialog(self.root, title="Add monitor variable")
+        dialog = VariableDialog(self.root, title="Add tag")
         if dialog.result is None:
             return
         self.upsert_variable(dialog.result)
@@ -1288,7 +1516,7 @@ class PLCAsciiIDE:
         if dialog.result.data_type in {"bool", "int", "float"} and dialog.result.initial is not None:
             self.engine.set_value(dialog.result.tag, dialog.result.initial)
         self.last_scan = None
-        self.status_var.set(f"Added monitor variable {dialog.result.tag}")
+        self.status_var.set(f"Added tag {dialog.result.tag}")
         self.render_ladder()
 
     def selected_monitor_base_tag(self) -> str | None:
@@ -1349,7 +1577,7 @@ class PLCAsciiIDE:
         used = self.variable_used_in_program(tag)
         if used:
             confirm = messagebox.askyesno(
-                "Delete variable",
+                "Delete tag",
                 f"{tag} is used in the program. Delete it and remove all instructions that use it?",
                 parent=self.root,
             )
@@ -1364,7 +1592,7 @@ class PLCAsciiIDE:
                 self.engine.clear_force(forced_tag)
         self.sync_program_variables(save_current_values=True)
         self.last_scan = None
-        self.status_var.set(f"Deleted variable {tag}")
+        self.status_var.set(f"Deleted tag {tag}")
         self.render_ladder()
 
     def on_monitor_double_click(self, event: tk.Event[ttk.Treeview]) -> str:
@@ -1424,7 +1652,78 @@ class PLCAsciiIDE:
             self.status_var.set("Online view selected")
         else:
             self.status_var.set("Offline programming / simulation")
+        self.update_connection_indicator()
+        self.update_toolbar_visibility()
         self.render_ladder()
+
+    @staticmethod
+    def set_toolbar_widget_visible(
+        widget: tk.Misc | None,
+        visible: bool,
+        *,
+        padx: tuple[int, int] | None = None,
+        before: tk.Misc | None = None,
+    ) -> None:
+        if widget is None:
+            return
+        if visible:
+            if not widget.winfo_manager():
+                pack_kwargs: dict[str, object] = {"side": "left"}
+                if padx is not None:
+                    pack_kwargs["padx"] = padx
+                if before is not None:
+                    pack_kwargs["before"] = before
+                widget.pack(**pack_kwargs)
+            return
+        if widget.winfo_manager():
+            widget.pack_forget()
+
+    def update_toolbar_visibility(self) -> None:
+        offline_mode = self.mode_var.get() != "online"
+        online_connected = self.mode_var.get() == "online" and self.remote is not None
+        self.set_toolbar_widget_visible(self.step_button, offline_mode, padx=(0, 8), before=self.download_button)
+        self.set_toolbar_widget_visible(self.run_button, offline_mode, padx=(0, 8), before=self.download_button)
+        self.set_toolbar_widget_visible(self.stop_button, offline_mode, padx=(0, 8), before=self.download_button)
+        self.set_toolbar_widget_visible(self.reset_button, offline_mode, padx=(12, 0), before=self.scan_label_widget)
+        self.set_toolbar_widget_visible(self.scan_label_widget, offline_mode, padx=(14, 6), before=self.font_label_widget)
+        self.set_toolbar_widget_visible(self.scan_spinbox_widget, offline_mode, before=self.font_label_widget)
+        self.set_toolbar_widget_visible(self.disconnect_button, online_connected, padx=(0, 8), before=self.connection_label)
+
+    def update_connection_indicator(self) -> None:
+        if not hasattr(self, "connection_label"):
+            return
+        if self.remote is None:
+            self.connection_var.set("Board: Disconnected")
+            self.connection_label.configure(fg=PALETTE["danger"])
+            return
+        label = self.remote_label or "serial target"
+        mode_text = "Online" if self.mode_var.get() == "online" else "Connected"
+        self.connection_var.set(f"Board: {mode_text} ({label})")
+        self.connection_label.configure(fg=PALETTE["success"])
+
+    def start_remote_watch(self) -> None:
+        self.auto_online_var.set(True)
+        if self.remote_watch_job is None:
+            self._remote_watch_tick()
+
+    def stop_remote_watch(self) -> None:
+        self.auto_online_var.set(False)
+        if self.remote_watch_job is not None:
+            self.root.after_cancel(self.remote_watch_job)
+            self.remote_watch_job = None
+
+    def ensure_serial_connection(self, action_name: str) -> RemoteSession | None:
+        if self.remote is not None:
+            return self.remote
+        should_connect = messagebox.askyesno(
+            "Serial connection required",
+            f"{action_name} requires a serial connection to the board. Connect now?",
+            parent=self.root,
+        )
+        if not should_connect:
+            return None
+        self.connect_serial()
+        return self.remote
 
     def update_help_visibility(self) -> None:
         if self.help_text is None:
@@ -2175,34 +2474,29 @@ class PLCAsciiIDE:
             self.status_var.set("Cleared forces and stopped offline simulation")
         self.render_ladder()
 
-    def connect_demo(self) -> None:
-        self.disconnect_remote(silent=True)
-        try:
-            session = RemoteSession(SubprocessJsonTransport())
-            hello = session.hello(timeout=1.0)
-        except Exception as exc:
-            messagebox.showerror("Connection failed", str(exc), parent=self.root)
-            return
-        if not hello:
-            messagebox.showerror("Connection failed", "Demo runtime did not respond.", parent=self.root)
-            session.transport.close()
-            return
-        self.remote = session
-        self.status_var.set("Connected to demo runtime")
-        self.mode_var.set("online")
-        self.remote_snapshot_request()
+    def prompt_serial_target(self) -> tuple[str, int] | None:
+        port = simpledialog.askstring("Serial port", "Port", parent=self.root, initialvalue=self.last_serial_port)
+        if not port:
+            return None
+        baud = simpledialog.askinteger("Serial baud", "Baud", parent=self.root, initialvalue=self.last_serial_baud)
+        if baud is None:
+            return None
+        self.last_serial_port = port
+        self.last_serial_baud = baud
+        return port, baud
 
     def connect_serial(self) -> None:
-        port = simpledialog.askstring("Serial port", "Port", parent=self.root, initialvalue="/dev/ttyUSB0")
-        if not port:
+        target = self.prompt_serial_target()
+        if target is None:
             return
-        baud = simpledialog.askinteger("Serial baud", "Baud", parent=self.root, initialvalue=115200)
-        if baud is None:
-            return
+        port, baud = target
         self.disconnect_remote(silent=True)
         try:
             session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
             hello = session.hello(timeout=1.0)
+            if not hello and isinstance(session.transport, SerialJsonTransport):
+                session.transport.soft_reboot()
+                hello = session.hello(timeout=2.0)
         except Exception as exc:
             messagebox.showerror("Serial connection failed", str(exc), parent=self.root)
             return
@@ -2210,9 +2504,32 @@ class PLCAsciiIDE:
             messagebox.showerror("Serial connection failed", "No response from target.", parent=self.root)
             return
         self.remote = session
+        self.remote_label = f"serial:{port}"
+        try:
+            self.remote.set_mode("run", timeout=0.5)
+        except Exception:
+            pass
         self.status_var.set(f"Connected to {port}")
-        self.mode_var.set("online")
-        self.remote_snapshot_request()
+        self.mode_var.set("offline")
+        self.update_connection_indicator()
+
+    def install_circuitpython_runtime(self) -> None:
+        target = self.prompt_serial_target()
+        if target is None:
+            return
+        port, _baud = target
+        try:
+            self.sync_program_variables(save_current_values=True)
+            install_circuitpython_runtime(port, program=self.program)
+        except Exception as exc:
+            messagebox.showerror("Install failed", str(exc), parent=self.root)
+            return
+        self.status_var.set(f"Installed CircuitPython runtime on {port}")
+        messagebox.showinfo(
+            "Runtime installed",
+            f"Installed the CircuitPython runtime on {port}.\nUse Go Online, Download, or Upload to connect and work with the board.",
+            parent=self.root,
+        )
 
     def disconnect_remote(self, silent: bool = False) -> None:
         if self.remote is not None:
@@ -2221,18 +2538,18 @@ class PLCAsciiIDE:
             except Exception:
                 pass
         self.remote = None
+        self.remote_label = None
         self.remote_snapshot = {}
-        if self.remote_watch_job is not None:
-            self.root.after_cancel(self.remote_watch_job)
-            self.remote_watch_job = None
-        self.auto_online_var.set(False)
+        self.stop_remote_watch()
+        self.mode_var.set("offline")
+        self.update_connection_indicator()
         if not silent:
-            self.status_var.set("Disconnected remote runtime")
+            self.status_var.set("Disconnected from board")
         self.render_ladder()
 
     def require_remote(self) -> RemoteSession | None:
         if self.remote is None:
-            messagebox.showinfo("Remote runtime", "Connect to a runtime first.", parent=self.root)
+            messagebox.showinfo("Board connection", "Connect to the board first.", parent=self.root)
             return None
         return self.remote
 
@@ -2251,15 +2568,83 @@ class PLCAsciiIDE:
         self.remote_snapshot = response
         self.mode_var.set("online")
         self.status_var.set("Updated online snapshot")
+        self.update_connection_indicator()
         self.render_ladder()
 
-    def toggle_remote_watch(self) -> None:
-        if not self.auto_online_var.get():
-            if self.remote_watch_job is not None:
-                self.root.after_cancel(self.remote_watch_job)
-                self.remote_watch_job = None
+    def remote_download_program(self) -> None:
+        remote = self.ensure_serial_connection("Download")
+        if remote is None:
             return
-        self._remote_watch_tick()
+        was_watching = self.auto_online_var.get()
+        self.stop_remote_watch()
+        response = None
+        try:
+            self.sync_program_variables(save_current_values=True)
+            response = remote.download_program(self.program, timeout=1.0)
+            try:
+                remote.set_mode("run", timeout=0.5)
+            except Exception:
+                pass
+        except Exception as exc:
+            messagebox.showerror("Download failed", str(exc), parent=self.root)
+        else:
+            if response is None:
+                self.status_var.set("Remote download timed out")
+            else:
+                self.status_var.set("Downloaded program to board runtime")
+                self.update_connection_indicator()
+        finally:
+            if was_watching and self.mode_var.get() == "online":
+                self.start_remote_watch()
+                if response is not None:
+                    self.remote_snapshot_request()
+
+    def remote_upload_program(self) -> None:
+        remote = self.ensure_serial_connection("Upload")
+        if remote is None:
+            return
+        was_watching = self.auto_online_var.get()
+        self.stop_remote_watch()
+        response = None
+        try:
+            response = remote.upload_program(timeout=1.0)
+        except Exception as exc:
+            messagebox.showerror("Upload failed", str(exc), parent=self.root)
+        else:
+            if response is None:
+                self.status_var.set("Remote upload timed out")
+            elif response.get("type") != "program" or "program" not in response:
+                messagebox.showerror("Upload failed", f"Unexpected response: {response}", parent=self.root)
+            else:
+                try:
+                    self.program = Program.from_dict(response["program"])
+                    self.engine.load_program(self.program)
+                    self.sync_program_variables(save_current_values=False)
+                except Exception as exc:
+                    messagebox.showerror("Upload failed", str(exc), parent=self.root)
+                else:
+                    self.last_scan = None
+                    self.status_var.set("Uploaded program from board runtime")
+                    self.update_connection_indicator()
+        finally:
+            if was_watching and self.mode_var.get() == "online":
+                self.start_remote_watch()
+                if response is not None and response.get("type") == "program":
+                    self.remote_snapshot_request()
+
+    def go_online(self) -> None:
+        remote = self.ensure_serial_connection("Go Online")
+        if remote is None:
+            return
+        try:
+            remote.set_mode("run", timeout=0.5)
+        except Exception:
+            pass
+        self.mode_var.set("online")
+        self.update_connection_indicator()
+        self.status_var.set("Online live view active")
+        self.start_remote_watch()
+        self.remote_snapshot_request()
 
     def _remote_watch_tick(self) -> None:
         if not self.auto_online_var.get():
@@ -2274,7 +2659,9 @@ class PLCAsciiIDE:
             except Exception:
                 self.auto_online_var.set(False)
                 self.remote_watch_job = None
-                self.status_var.set("Lost communication with remote runtime")
+                self.status_var.set("Lost communication with board runtime")
+                self.mode_var.set("offline")
+                self.update_connection_indicator()
                 return
         self.remote_watch_job = self.root.after(500, self._remote_watch_tick)
 

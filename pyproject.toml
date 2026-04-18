@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "ASCII ladder logic editor, simulator, and remote runtime scaffold."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "Markdown>=3.6",
+  "tkinterweb>=4.2.0",
+]
 
 [project.optional-dependencies]
 serial = ["pyserial>=3.5"]
@@ -23,3 +26,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+plc_ascii = ["circuitpython_assets/*.py"]

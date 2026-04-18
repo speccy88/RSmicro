@@ -31,6 +31,17 @@ class DeviceRuntimeTests(unittest.TestCase):
         self.assertTrue(snapshot["tags"]["motor_cmd"])
         self.assertTrue(snapshot["rung_power"][0])
 
+    def test_upload_program_returns_full_program_payload(self) -> None:
+        runtime = DeviceRuntime()
+        program = build_runtime_program()
+        runtime.load_program(program)
+
+        response = runtime.handle_message({"type": "upload_program"})
+
+        self.assertEqual(response["type"], "program")
+        self.assertEqual(response["program"]["name"], program.name)
+        self.assertEqual(response["program"]["bindings"][0]["tag"], "start_pb")
+
 
 if __name__ == "__main__":
     unittest.main()

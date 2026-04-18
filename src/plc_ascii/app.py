@@ -7,6 +7,7 @@ import threading
 import time
 from pathlib import Path
 
+from .circuitpython import install_runtime as install_circuitpython_runtime
 from .engine import LadderEngine
 from .model import Binding, Program, Rung, Step
 from .program_io import load_program, save_program
@@ -164,11 +165,22 @@ class WorkbenchShell(cmd.Cmd):
         try:
             session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
             hello = session.hello()
+            if not hello and isinstance(session.transport, SerialJsonTransport):
+                session.transport.soft_reboot()
+                hello = session.hello(timeout=2.0)
         except Exception as exc:  # pragma: no cover
             print(f"Serial connection failed: {exc}")
             return
+        if not hello:
+            print("Serial connection failed: no response from target")
+            session.transport.close()
+            return
         self.remote = session
         self.remote_label = f"serial:{port}"
+        try:
+            self.remote.set_mode("run")
+        except Exception:
+            pass
         print(f"Connected to {self.remote_label}: {hello}")
 
     def do_disconnect(self, arg: str) -> None:
@@ -212,12 +224,34 @@ class WorkbenchShell(cmd.Cmd):
             return
         print(remote.download_program(self.program))
 
+    def do_remote_upload(self, arg: str) -> None:
+        """remote_upload"""
+        remote = self._require_remote()
+        if remote is None:
+            return
+        response = remote.upload_program()
+        if not response or response.get("type") != "program":
+            print(response)
+            return
+        self.program = Program.from_dict(response["program"])
+        self._reload_engine()
+        print(f"Loaded remote program '{self.program.name}'")
+
     def do_remote_snapshot(self, arg: str) -> None:
         """remote_snapshot"""
         remote = self._require_remote()
         if remote is None:
             return
         print(remote.request_snapshot())
+
+    def do_install_circuitpython(self, arg: str) -> None:
+        """install_circuitpython PORT"""
+        port = arg.strip()
+        if not port:
+            print("Usage: install_circuitpython PORT")
+            return
+        install_circuitpython_runtime(port, program=self.program)
+        print(f"Installed CircuitPython runtime on {port}")
 
     def do_remote_set(self, arg: str) -> None:
         """remote_set TAG 0|1"""
