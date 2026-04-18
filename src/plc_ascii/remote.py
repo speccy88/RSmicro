@@ -19,11 +19,11 @@ class RemoteSession:
         self.transport.send({"type": "download_program", "program": program.to_dict()})
         return self.transport.recv(timeout=timeout)
 
-    def set_tag(self, tag: str, value: bool, timeout: float = 1.0) -> dict[str, Any] | None:
+    def set_tag(self, tag: str, value: Any, timeout: float = 1.0) -> dict[str, Any] | None:
         self.transport.send({"type": "set_tag", "tag": tag, "value": value})
         return self.transport.recv(timeout=timeout)
 
-    def force_tag(self, tag: str, enabled: bool, value: bool, timeout: float = 1.0) -> dict[str, Any] | None:
+    def force_tag(self, tag: str, enabled: bool, value: Any, timeout: float = 1.0) -> dict[str, Any] | None:
         self.transport.send({"type": "force", "tag": tag, "enabled": enabled, "value": value})
         return self.transport.recv(timeout=timeout)
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TypeAlias
 
 from .engine import BranchTrace, NodeTrace, StepTrace
-from .model import Branch, Node, Program, Rung, Step
+from .model import Branch, Node, Program, Rung, Step, format_operand, step_compare_operator, step_is_contact, step_primary_tag
 
 
 ROLE_TEXT = "text"
@@ -17,31 +17,147 @@ ROLE_ELEMENT_ON = "element_on"
 ROLE_ELEMENT_OFF = "element_off"
 
 
-def step_token(step: Step, timer_values: dict[str, dict[str, int | bool]] | None = None) -> str:
+def step_token(
+    step: Step,
+    timer_values: dict[str, dict[str, int | bool]] | None = None,
+    counter_values: dict[str, dict[str, int | bool]] | None = None,
+    forced_tags: set[str] | None = None,
+    show_timer_acc: bool = False,
+) -> str:
+    forced = (step_primary_tag(step) or "") in (forced_tags or set())
     if step.op == "XIC":
-        return f"[ {step.tag} ]"
+        return f"[f {step.tag}]" if forced else f"[ {step.tag} ]"
     if step.op == "XIO":
-        return f"[/ {step.tag} ]"
+        return f"[/f {step.tag}]" if forced else f"[/ {step.tag} ]"
     if step.op == "OTE":
-        return f"( {step.tag} )"
+        return f"(f {step.tag})" if forced else f"( {step.tag} )"
     if step.op == "OTL":
-        return f"(L {step.tag})"
+        return f"(L f {step.tag})" if forced else f"(L {step.tag})"
     if step.op == "OTU":
-        return f"(U {step.tag})"
+        return f"(U f {step.tag})" if forced else f"(U {step.tag})"
     if step.op == "TON":
         timer = (timer_values or {}).get(step.tag)
-        if timer is not None and "acc" in timer:
+        if show_timer_acc and timer is not None and "acc" in timer:
             preset = int(timer.get("pre", step.arg or 0))
             width = max(1, len(str(preset)))
             acc = int(timer["acc"])
-            return f"[TON {step.tag} acc:{acc:0{width}d}ms]"
-        return f"[TON {step.tag} pre:{step.arg}ms]"
+            prefix = "TON f" if forced else "TON"
+            return f"[{prefix} {step.tag} acc:{acc:0{width}d}ms]"
+        prefix = "TON f" if forced else "TON"
+        preset = int((timer or {}).get("pre", step.arg or 0))
+        return f"[{prefix} {step.tag} pre:{preset}ms]"
+    if step.op == "CTU":
+        counter = (counter_values or {}).get(step.tag, {})
+        pre = int(counter.get("pre", step.arg or 0))
+        acc = int(counter.get("acc", 0))
+        return f"[CTU {'f ' if forced else ''}{step.tag} pre:{pre} acc:{acc}]"
+    if step.op == "CTD":
+        counter = (counter_values or {}).get(step.tag, {})
+        pre = int(counter.get("pre", step.arg or 0))
+        acc = int(counter.get("acc", 0))
+        return f"[CTD {'f ' if forced else ''}{step.tag} pre:{pre} acc:{acc}]"
+    if step.op == "CMP":
+        operator = step_compare_operator(step) or "=="
+        left = format_operand(step.params["left"])
+        right = format_operand(step.params["right"])
+        prefix = "CMP f" if forced and isinstance(step.params.get("left"), str) else "CMP"
+        return f"[{prefix} {left} {operator} {right}]"
+    if step.op in {"EQ", "NE", "GT", "GTE", "LT", "LE"}:
+        left = format_operand(step.params["left"])
+        right = format_operand(step.params["right"])
+        prefix = f"{step.op} f" if forced and isinstance(step.params.get("left"), str) else step.op
+        return f"[{prefix} {left} {right}]"
+    if step.op == "MOV":
+        prefix = "MOV"
+        return f"[{prefix} {format_operand(step.params['source'])} -> {'f ' if forced else ''}{step.tag}]"
+    if step.op == "CLR":
+        return f"[CLR {'f ' if forced else ''}{step.tag}]"
+    if step.op in {"ABS", "NEG"}:
+        return f"[{step.op} {format_operand(step.params['source'])} -> {'f ' if forced else ''}{step.tag}]"
+    if step.op in {"ADD", "SUB", "MUL", "DIV"}:
+        return (
+            f"[{step.op} {format_operand(step.params['left'])} {format_operand(step.params['right'])} "
+            f"-> {'f ' if forced else ''}{step.tag}]"
+        )
     raise ValueError(f"Unsupported instruction {step.op}")
+
+
+def step_segments(
+    step: Step,
+    role: str,
+    timer_values: dict[str, dict[str, int | bool]] | None = None,
+    counter_values: dict[str, dict[str, int | bool]] | None = None,
+    forced_tags: set[str] | None = None,
+    show_timer_acc: bool = False,
+) -> list[tuple[str, str]]:
+    forced = (step_primary_tag(step) or "") in (forced_tags or set())
+    if not forced:
+        return [(step_token(step, timer_values, counter_values, forced_tags, show_timer_acc), role)]
+    if step.op == "XIC":
+        return [("[", role), ("f", ROLE_NUMBER), (f" {step.tag}]", role)]
+    if step.op == "XIO":
+        return [("[/", role), ("f", ROLE_NUMBER), (f" {step.tag}]", role)]
+    if step.op == "OTE":
+        return [("(", role), ("f", ROLE_NUMBER), (f" {step.tag})", role)]
+    if step.op == "OTL":
+        return [("(L ", role), ("f", ROLE_NUMBER), (f" {step.tag})", role)]
+    if step.op == "OTU":
+        return [("(U ", role), ("f", ROLE_NUMBER), (f" {step.tag})", role)]
+    if step.op == "TON":
+        timer = (timer_values or {}).get(step.tag)
+        if show_timer_acc and timer is not None and "acc" in timer:
+            preset = int(timer.get("pre", step.arg or 0))
+            width = max(1, len(str(preset)))
+            acc = int(timer["acc"])
+            suffix = f" {step.tag} acc:{acc:0{width}d}ms]"
+        else:
+            suffix = f" {step.tag} pre:{int((timer or {}).get('pre', step.arg or 0))}ms]"
+        return [("[TON ", role), ("f", ROLE_NUMBER), (suffix, role)]
+    if step.op == "CTU":
+        counter = (counter_values or {}).get(step.tag, {})
+        return [("[CTU ", role), ("f", ROLE_NUMBER), (f" {step.tag} pre:{int(counter.get('pre', step.arg or 0))} acc:{int(counter.get('acc', 0))}]", role)]
+    if step.op == "CTD":
+        counter = (counter_values or {}).get(step.tag, {})
+        return [("[CTD ", role), ("f", ROLE_NUMBER), (f" {step.tag} pre:{int(counter.get('pre', step.arg or 0))} acc:{int(counter.get('acc', 0))}]", role)]
+    if step.op == "CMP" and isinstance(step.params.get("left"), str):
+        operator = step_compare_operator(step) or "=="
+        return [
+            ("[CMP ", role),
+            ("f", ROLE_NUMBER),
+            (f" {format_operand(step.params['left'])} {operator} {format_operand(step.params['right'])}]", role),
+        ]
+    if step.op in {"EQ", "NE", "GT", "GTE", "LT", "LE"} and isinstance(step.params.get("left"), str):
+        return [
+            (f"[{step.op} ", role),
+            ("f", ROLE_NUMBER),
+            (f" {format_operand(step.params['left'])} {format_operand(step.params['right'])}]", role),
+        ]
+    if step.op == "MOV":
+        return [
+            (f"[MOV {format_operand(step.params['source'])} -> ", role),
+            ("f", ROLE_NUMBER),
+            (f" {step.tag}]", role),
+        ]
+    if step.op == "CLR":
+        return [("[CLR ", role), ("f", ROLE_NUMBER), (f" {step.tag}]", role)]
+    if step.op in {"ABS", "NEG"}:
+        return [
+            (f"[{step.op} {format_operand(step.params['source'])} -> ", role),
+            ("f", ROLE_NUMBER),
+            (f" {step.tag}]", role),
+        ]
+    if step.op in {"ADD", "SUB", "MUL", "DIV"}:
+        return [
+            (f"[{step.op} {format_operand(step.params['left'])} {format_operand(step.params['right'])} -> ", role),
+            ("f", ROLE_NUMBER),
+            (f" {step.tag}]", role),
+        ]
+    return [(step_token(step, timer_values, counter_values, forced_tags, show_timer_acc), role)]
 
 
 def node_contains_action(node: Node) -> bool:
     if isinstance(node, Step):
-        return node.op not in {"XIC", "XIO"}
+        return not step_is_contact(node)
     return any(node_contains_action(child) for lane in node.lanes for child in lane)
 
 
@@ -189,10 +305,16 @@ class LadderRenderer:
         program: Program,
         traces: list[list[NodeTrace]] | None = None,
         timer_values: dict[str, dict[str, int | bool]] | None = None,
+        counter_values: dict[str, dict[str, int | bool]] | None = None,
+        forced_tags: set[str] | None = None,
+        show_timer_acc: bool = False,
     ) -> None:
         self.program = program
         self.traces = traces or [[] for _ in program.rungs]
         self.timer_values = timer_values or {}
+        self.counter_values = counter_values or {}
+        self.forced_tags = forced_tags or set()
+        self.show_timer_acc = show_timer_acc
         self.writer = GridWriter()
         self.selections: dict[str, SelectionTarget] = {}
         self.inner_width = self._compute_inner_width()
@@ -202,8 +324,8 @@ class LadderRenderer:
         for rung_index, rung in enumerate(self.program.rungs):
             rung_traces = self.traces[rung_index] if rung_index < len(self.traces) else []
             _, conditions, condition_traces, _, actions, action_traces = split_condition_action(rung.elements, rung_traces)
-            condition_width, _ = _measure_sequence_with_timers(conditions, self.timer_values)
-            action_width, _ = _measure_sequence_with_timers(actions, self.timer_values)
+            condition_width, _ = _measure_sequence_with_timers(conditions, self.timer_values, self.counter_values, self.forced_tags)
+            action_width, _ = _measure_sequence_with_timers(actions, self.timer_values, self.counter_values, self.forced_tags)
             longest = max(longest, condition_width + action_width + 4)
         return longest
 
@@ -223,12 +345,16 @@ class LadderRenderer:
         x: int,
         y: int,
     ) -> tuple[int, bool]:
-        token = step_token(step, self.timer_values)
         truth = trace.truth if trace else False
         power_out = trace.power_out if trace else False
         role = ROLE_ELEMENT_ON if truth else ROLE_ELEMENT_OFF
+        segments = step_segments(step, role, self.timer_values, self.counter_values, self.forced_tags, self.show_timer_acc)
+        token = "".join(text for text, _ in segments)
         selection_key = self._selection_key("step", rung_index, path)
-        self.writer.write_text(x, y, token, role, selection_key)
+        cursor = x
+        for text, text_role in segments:
+            self.writer.write_text(cursor, y, text, text_role, selection_key)
+            cursor += len(text)
         return len(token), power_out
 
     def _render_branch(
@@ -241,7 +367,7 @@ class LadderRenderer:
         y: int,
         rung_key: str,
     ) -> tuple[int, int, bool]:
-        lane_sizes = [_measure_sequence_with_timers(lane, self.timer_values) for lane in branch.lanes]
+        lane_sizes = [_measure_sequence_with_timers(lane, self.timer_values, self.counter_values, self.forced_tags) for lane in branch.lanes]
         max_lane_width = max((width for width, _ in lane_sizes), default=4)
         total_width = max_lane_width + 2
         offset_y = 0
@@ -354,8 +480,8 @@ class LadderRenderer:
         self.writer.write_text(5, line_y, " ", ROLE_TEXT)
 
         condition_offset, conditions, condition_traces, action_offset, actions, action_traces = split_condition_action(rung.elements, traces)
-        condition_width, condition_height = _measure_sequence_with_timers(conditions, self.timer_values)
-        action_width, action_height = _measure_sequence_with_timers(actions, self.timer_values)
+        condition_width, condition_height = _measure_sequence_with_timers(conditions, self.timer_values, self.counter_values, self.forced_tags)
+        action_width, action_height = _measure_sequence_with_timers(actions, self.timer_values, self.counter_values, self.forced_tags)
         seq_height = max(condition_height, action_height, 1)
 
         _, condition_power = self._render_sequence(
@@ -398,22 +524,32 @@ class LadderRenderer:
         return self.writer.to_document(self.selections)
 
 
-def _measure_node_with_timers(node: Node, timer_values: dict[str, dict[str, int | bool]]) -> tuple[int, int]:
+def _measure_node_with_timers(
+    node: Node,
+    timer_values: dict[str, dict[str, int | bool]],
+    counter_values: dict[str, dict[str, int | bool]],
+    forced_tags: set[str],
+) -> tuple[int, int]:
     if isinstance(node, Step):
-        return len(step_token(node, timer_values)), 1
-    lane_sizes = [_measure_sequence_with_timers(lane, timer_values) for lane in node.lanes]
+        return len(step_token(node, timer_values, counter_values, forced_tags, False)), 1
+    lane_sizes = [_measure_sequence_with_timers(lane, timer_values, counter_values, forced_tags) for lane in node.lanes]
     max_width = max((width for width, _ in lane_sizes), default=4)
     height = sum((height for _, height in lane_sizes), 0) or 1
     return max_width + 2, height
 
 
-def _measure_sequence_with_timers(nodes: list[Node], timer_values: dict[str, dict[str, int | bool]]) -> tuple[int, int]:
+def _measure_sequence_with_timers(
+    nodes: list[Node],
+    timer_values: dict[str, dict[str, int | bool]],
+    counter_values: dict[str, dict[str, int | bool]],
+    forced_tags: set[str],
+) -> tuple[int, int]:
     if not nodes:
         return 4, 1
     width = 2
     height = 1
     for node in nodes:
-        node_width, node_height = _measure_node_with_timers(node, timer_values)
+        node_width, node_height = _measure_node_with_timers(node, timer_values, counter_values, forced_tags)
         width += node_width + 2
         height = max(height, node_height)
     return width, height
@@ -423,6 +559,15 @@ def render_program(
     program: Program,
     traces: list[list[NodeTrace]] | None = None,
     timer_values: dict[str, dict[str, int | bool]] | None = None,
+    counter_values: dict[str, dict[str, int | bool]] | None = None,
+    forced_tags: set[str] | None = None,
 ) -> str:
-    document = LadderRenderer(program, traces=traces, timer_values=timer_values).render()
+    document = LadderRenderer(
+        program,
+        traces=traces,
+        timer_values=timer_values,
+        counter_values=counter_values,
+        forced_tags=forced_tags,
+        show_timer_acc=timer_values is not None,
+    ).render()
     return "\n".join(document.lines)

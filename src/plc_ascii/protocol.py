@@ -26,16 +26,18 @@ def hello_message(role: str, platform: str = "python") -> dict[str, Any]:
 
 def snapshot_message(
     mode: str,
-    tags: dict[str, bool],
+    tags: dict[str, Any],
     timers: dict[str, Any],
-    forced: dict[str, bool],
-    rung_power: dict[str, bool] | None = None,
+    counters: dict[str, Any],
+    forced: dict[str, Any],
+    rung_power: list[bool] | None = None,
 ) -> dict[str, Any]:
     return {
         "type": "snapshot",
         "mode": mode,
         "tags": tags,
         "timers": timers,
+        "counters": counters,
         "forced": forced,
-        "rung_power": rung_power or {},
+        "rung_power": rung_power or [],
     }

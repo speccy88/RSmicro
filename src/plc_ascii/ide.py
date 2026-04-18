@@ -5,8 +5,8 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, font, messagebox, simpledialog, ttk
 
-from .engine import LadderEngine, ScanResult, trace_program_state
-from .model import Binding, Branch, Node, Program, Rung, Step
+from .engine import LadderEngine, ScanResult, trace_program_preview, trace_program_state
+from .model import Binding, Branch, Node, Program, Rung, Step, Variable, split_timer_member, step_primary_tag, walk_steps
 from .program_io import load_program, save_program
 from .remote import RemoteSession
 from .render import (
@@ -61,6 +61,31 @@ def parse_bool(raw: str) -> bool:
     raise ValueError(f"Cannot parse boolean from '{raw}'")
 
 
+def parse_scalar_or_tag(raw: str) -> str | int | float:
+    text = raw.strip()
+    if not text:
+        raise ValueError("Value cannot be empty")
+    try:
+        if "." not in text and "e" not in text.lower():
+            return int(text)
+        return float(text)
+    except ValueError:
+        return text
+
+
+def parse_runtime_value(raw: str) -> bool | int | float:
+    text = raw.strip()
+    lowered = text.lower()
+    if lowered in {"true", "on", "yes"}:
+        return True
+    if lowered in {"false", "off", "no"}:
+        return False
+    value = parse_scalar_or_tag(text)
+    if isinstance(value, str):
+        raise ValueError(f"Cannot parse runtime value from '{raw}'")
+    return value
+
+
 def ask_bool(parent: tk.Misc, title: str, prompt: str, initial: str = "0") -> bool | None:
     raw = simpledialog.askstring(title, prompt, parent=parent, initialvalue=initial)
     if raw is None:
@@ -68,16 +93,241 @@ def ask_bool(parent: tk.Misc, title: str, prompt: str, initial: str = "0") -> bo
     return parse_bool(raw)
 
 
+def ask_runtime_value(parent: tk.Misc, title: str, prompt: str, initial: str = "0") -> bool | int | float | None:
+    raw = simpledialog.askstring(title, prompt, parent=parent, initialvalue=initial)
+    if raw is None:
+        return None
+    return parse_runtime_value(raw)
+
+
+def format_runtime_value(value: bool | int | float) -> str:
+    if isinstance(value, bool):
+        return "1" if value else "0"
+    if isinstance(value, float):
+        return format(value, "g")
+    return str(value)
+
+
+def infer_scalar_type(value: bool | int | float) -> str:
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, float):
+        return "float"
+    return "int"
+
+
+def infer_program_variable_types(program: Program) -> tuple[dict[str, str], dict[str, int], dict[str, int]]:
+    inferred: dict[str, str] = {}
+    timer_presets: dict[str, int] = {}
+    counter_presets: dict[str, int] = {}
+    variable_map = program.variable_map()
+
+    def known_numeric_type(tag: str) -> str | None:
+        variable = variable_map.get(tag)
+        if variable is not None and variable.data_type in {"int", "float"}:
+            return variable.data_type
+        return inferred.get(tag) if inferred.get(tag) in {"int", "float"} else None
+
+    for binding in program.bindings:
+        inferred.setdefault(binding.tag, "bool")
+
+    for rung in program.rungs:
+        for step in walk_steps(rung.elements):
+            if step.op in {"XIC", "XIO", "OTE", "OTL", "OTU"} and "." not in step.tag:
+                inferred.setdefault(step.tag, "bool")
+                continue
+            if step.op == "TON":
+                inferred[step.tag] = "timer"
+                next_preset = int(step.arg or timer_presets.get(step.tag, 0))
+                if step.tag in timer_presets and timer_presets[step.tag] != next_preset:
+                    raise ValueError(f"Timer {step.tag} uses conflicting presets")
+                timer_presets[step.tag] = next_preset
+                continue
+            if step.op in {"CTU", "CTD"}:
+                inferred[step.tag] = "counter"
+                next_preset = int(step.arg or counter_presets.get(step.tag, 0))
+                if step.tag in counter_presets and counter_presets[step.tag] != next_preset:
+                    raise ValueError(f"Counter {step.tag} uses conflicting presets")
+                counter_presets[step.tag] = next_preset
+                continue
+
+            float_hint = False
+            for key in ("source", "left", "right"):
+                operand = step.params.get(key)
+                if isinstance(operand, float):
+                    float_hint = True
+                elif isinstance(operand, str):
+                    float_hint = float_hint or known_numeric_type(operand) == "float"
+            numeric_type = "float" if float_hint else "int"
+
+            if step.op in {"MOV", "CLR", "ADD", "ABS", "MUL", "DIV", "NEG", "SUB"} and step.tag and "." not in step.tag:
+                inferred.setdefault(step.tag, numeric_type)
+                for key in ("source", "left", "right"):
+                    operand = step.params.get(key)
+                    if isinstance(operand, str) and "." not in operand:
+                        inferred.setdefault(operand, numeric_type)
+                continue
+
+            if step.op in {"CMP", "EQ", "GT", "GTE", "LT", "LE", "NE"}:
+                for key in ("left", "right"):
+                    operand = step.params.get(key)
+                    if isinstance(operand, str) and "." not in operand:
+                        inferred.setdefault(operand, numeric_type)
+
+    return inferred, timer_presets, counter_presets
+
+
+def populate_program_variables(program: Program, current_values: dict[str, object] | None = None) -> None:
+    inferred, timer_presets, counter_presets = infer_program_variable_types(program)
+    variable_map = program.variable_map()
+
+    for tag, data_type in inferred.items():
+        if tag in variable_map:
+            variable = variable_map[tag]
+            if variable.data_type != data_type:
+                raise ValueError(f"Variable {tag} is declared as {variable.data_type} but is used as {data_type}")
+            continue
+        if data_type == "bool":
+            program.variables.append(Variable(tag=tag, data_type=data_type, initial=False))
+        elif data_type == "int":
+            program.variables.append(Variable(tag=tag, data_type=data_type, initial=0))
+        elif data_type == "float":
+            program.variables.append(Variable(tag=tag, data_type=data_type, initial=0.0))
+        elif data_type == "timer":
+            program.variables.append(Variable(tag=tag, data_type=data_type, preset=timer_presets.get(tag, 0)))
+        elif data_type == "counter":
+            program.variables.append(Variable(tag=tag, data_type=data_type, preset=counter_presets.get(tag, 0)))
+
+    for variable in program.variables:
+        if variable.data_type == "timer" and variable.tag in timer_presets:
+            variable.preset = timer_presets[variable.tag]
+        elif variable.data_type == "counter" and variable.tag in counter_presets:
+            variable.preset = counter_presets[variable.tag]
+
+    if current_values is None:
+        program.validate()
+        return
+
+    for variable in program.variables:
+        if variable.data_type == "bool" and variable.tag in current_values:
+            variable.initial = bool(current_values[variable.tag])
+        elif variable.data_type == "int" and variable.tag in current_values:
+            variable.initial = int(current_values[variable.tag])
+        elif variable.data_type == "float" and variable.tag in current_values:
+            variable.initial = float(current_values[variable.tag])
+        elif variable.data_type in {"timer", "counter"}:
+            preset_key = f"{variable.tag}.pre"
+            if preset_key in current_values:
+                variable.preset = int(current_values[preset_key])
+
+    program.validate()
+
+
+def validate_program_step_types(program: Program, step: Step) -> None:
+    variable_map = program.variable_map()
+
+    def ensure_boolean_ref(tag: str, *, allow_members: bool) -> None:
+        parts = split_timer_member(tag)
+        if parts is None:
+            variable = variable_map.get(tag)
+            if variable is not None and variable.data_type != "bool":
+                raise ValueError(f"{tag} is a {variable.data_type} variable and cannot be used in a boolean instruction")
+            return
+        base, member = parts
+        variable = variable_map.get(base)
+        if not allow_members:
+            raise ValueError(f"{tag} cannot be used here")
+        if variable is None:
+            if member not in {"dn", "en", "tt"}:
+                raise ValueError(f"{tag} is not a valid boolean member")
+            return
+        if variable.data_type == "timer" and member in {"en", "dn", "tt"}:
+            return
+        if variable.data_type == "counter" and member == "dn":
+            return
+        raise ValueError(f"{tag} is not compatible with a boolean instruction")
+
+    def ensure_numeric_ref(tag: str) -> None:
+        parts = split_timer_member(tag)
+        if parts is None:
+            variable = variable_map.get(tag)
+            if variable is not None and variable.data_type not in {"int", "float"}:
+                raise ValueError(f"{tag} is a {variable.data_type} variable and cannot be used in a numeric instruction")
+            return
+        base, member = parts
+        variable = variable_map.get(base)
+        if member not in {"acc", "pre"}:
+            raise ValueError(f"{tag} is not a numeric member")
+        if variable is None:
+            return
+        if variable.data_type not in {"timer", "counter"}:
+            raise ValueError(f"{tag} is not compatible with a numeric instruction")
+
+    def ensure_scalar_destination(tag: str) -> None:
+        if split_timer_member(tag) is not None:
+            raise ValueError(f"{tag} cannot be written by this instruction")
+        variable = variable_map.get(tag)
+        if variable is not None and variable.data_type not in {"int", "float"}:
+            raise ValueError(f"{tag} is a {variable.data_type} variable and cannot be used as a numeric destination")
+
+    def ensure_composite_tag(tag: str, expected_type: str) -> None:
+        if split_timer_member(tag) is not None:
+            raise ValueError(f"{tag} must use the base {expected_type} tag")
+        variable = variable_map.get(tag)
+        if variable is not None and variable.data_type != expected_type:
+            raise ValueError(f"{tag} is a {variable.data_type} variable and cannot be used as a {expected_type}")
+
+    if step.op in {"XIC", "XIO"}:
+        ensure_boolean_ref(step.tag, allow_members=True)
+        return
+    if step.op in {"OTE", "OTL", "OTU"}:
+        ensure_boolean_ref(step.tag, allow_members=False)
+        return
+    if step.op == "TON":
+        ensure_composite_tag(step.tag, "timer")
+        return
+    if step.op in {"CTU", "CTD"}:
+        ensure_composite_tag(step.tag, "counter")
+        return
+    if step.op == "CLR":
+        if split_timer_member(step.tag) is not None:
+            raise ValueError("CLR must target a base variable or composite tag")
+        variable = variable_map.get(step.tag)
+        if variable is not None and variable.data_type not in {"int", "float", "timer", "counter"}:
+            raise ValueError(f"{step.tag} is a {variable.data_type} variable and cannot be cleared")
+        return
+    if step.op in {"MOV", "ABS", "NEG"}:
+        ensure_scalar_destination(step.tag)
+        source = step.params.get("source")
+        if isinstance(source, str):
+            ensure_numeric_ref(source)
+        return
+    if step.op in {"ADD", "SUB", "MUL", "DIV"}:
+        ensure_scalar_destination(step.tag)
+        for key in ("left", "right"):
+            operand = step.params.get(key)
+            if isinstance(operand, str):
+                ensure_numeric_ref(operand)
+        return
+    if step.op in {"CMP", "EQ", "GT", "GTE", "LT", "LE", "NE"}:
+        for key in ("left", "right"):
+            operand = step.params.get(key)
+            if isinstance(operand, str):
+                ensure_numeric_ref(operand)
+
+
 def default_tag_for_selection(selection: SelectionTarget | None, program: Program) -> str | None:
     if selection is None or selection.kind != "step" or selection.path is None:
         return None
     node = get_node_at_path(program.rungs[selection.rung_index].elements, selection.path)
     if isinstance(node, Step):
-        return node.tag
+        return step_primary_tag(node)
     return None
 
 
 class StepDialog(tk.Toplevel):
+    COMPARISON_SYMBOLS = ["==", "!=", ">", ">=", "<", "<="]
+
     def __init__(self, parent: tk.Misc, *, title: str, initial: Step | None = None) -> None:
         super().__init__(parent)
         self.title(title)
@@ -87,10 +337,38 @@ class StepDialog(tk.Toplevel):
         self.result: Step | None = None
 
         self.op_var = tk.StringVar(value=initial.op if initial else "")
-        self.tag_var = tk.StringVar(value=initial.tag if initial else "")
+        self.tag_var = tk.StringVar(value=initial.tag if initial and initial.tag else "")
         self.arg_var = tk.StringVar(value=str(initial.arg) if initial and initial.arg is not None else "")
+        self.source_var = tk.StringVar(value=self._initial_operand(initial, "source"))
+        self.left_var = tk.StringVar(value=self._initial_operand(initial, "left"))
+        self.right_var = tk.StringVar(value=self._initial_operand(initial, "right"))
+        self.compare_var = tk.StringVar(value=str((initial.params.get("cmp") if initial else "") or "=="))
         self.filter_var = tk.StringVar(value=self.op_var.get())
-        self.available_ops = ["XIC", "XIO", "OTE", "OTL", "OTU", "TON"]
+        self.available_ops = [
+            "XIC",
+            "XIO",
+            "CMP",
+            "EQ",
+            "GT",
+            "GTE",
+            "LT",
+            "LE",
+            "NE",
+            "OTE",
+            "OTL",
+            "OTU",
+            "TON",
+            "CTU",
+            "CTD",
+            "MOV",
+            "CLR",
+            "ADD",
+            "ABS",
+            "MUL",
+            "DIV",
+            "NEG",
+            "SUB",
+        ]
 
         body = ttk.Frame(self, padding=12, style="Card.TFrame")
         body.grid(sticky="nsew")
@@ -114,22 +392,50 @@ class StepDialog(tk.Toplevel):
         self.listbox.bind("<<ListboxSelect>>", self._on_pick)
         self.listbox.bind("<Double-1>", lambda event: self.on_ok())
 
-        ttk.Label(body, text="Tag").grid(row=2, column=0, sticky="w", pady=(0, 8))
+        self.tag_label = ttk.Label(body, text="Tag")
+        self.tag_label.grid(row=2, column=0, sticky="w", pady=(0, 8))
         self.tag_entry = ttk.Entry(body, textvariable=self.tag_var, width=28)
         self.tag_entry.grid(row=2, column=1, sticky="ew", pady=(0, 8))
 
-        ttk.Label(body, text="Preset (ms)").grid(row=3, column=0, sticky="w")
+        self.source_label = ttk.Label(body, text="Source")
+        self.source_label.grid(row=3, column=0, sticky="w", pady=(0, 8))
+        self.source_entry = ttk.Entry(body, textvariable=self.source_var, width=28)
+        self.source_entry.grid(row=3, column=1, sticky="ew", pady=(0, 8))
+
+        self.left_label = ttk.Label(body, text="Left")
+        self.left_label.grid(row=4, column=0, sticky="w", pady=(0, 8))
+        self.left_entry = ttk.Entry(body, textvariable=self.left_var, width=28)
+        self.left_entry.grid(row=4, column=1, sticky="ew", pady=(0, 8))
+
+        self.compare_label = ttk.Label(body, text="Compare")
+        self.compare_label.grid(row=5, column=0, sticky="w", pady=(0, 8))
+        self.compare_combo = ttk.Combobox(
+            body,
+            textvariable=self.compare_var,
+            values=self.COMPARISON_SYMBOLS,
+            state="readonly",
+            width=10,
+        )
+        self.compare_combo.grid(row=5, column=1, sticky="w", pady=(0, 8))
+
+        self.right_label = ttk.Label(body, text="Right")
+        self.right_label.grid(row=6, column=0, sticky="w", pady=(0, 8))
+        self.right_entry = ttk.Entry(body, textvariable=self.right_var, width=28)
+        self.right_entry.grid(row=6, column=1, sticky="ew", pady=(0, 8))
+
+        self.arg_label = ttk.Label(body, text="Preset")
+        self.arg_label.grid(row=7, column=0, sticky="w")
         self.arg_entry = ttk.Entry(body, textvariable=self.arg_var, width=28)
-        self.arg_entry.grid(row=3, column=1, sticky="ew")
+        self.arg_entry.grid(row=7, column=1, sticky="ew")
 
         buttons = ttk.Frame(body, style="Card.TFrame")
-        buttons.grid(row=4, column=0, columnspan=2, sticky="e", pady=(12, 0))
+        buttons.grid(row=8, column=0, columnspan=2, sticky="e", pady=(12, 0))
         ttk.Button(buttons, text="Cancel", command=self.destroy, style="Tool.TButton").pack(side="right", padx=(8, 0))
         ttk.Button(buttons, text="OK", command=self.on_ok, style="Accent.TButton").pack(side="right")
 
         self.filter_var.trace_add("write", lambda *_: self._refresh_list())
-        self.op_var.trace_add("write", lambda *_: self._update_preset_state())
-        self._update_preset_state()
+        self.op_var.trace_add("write", lambda *_: self._update_field_states())
+        self._update_field_states()
         self._refresh_list()
 
         self.bind("<Return>", lambda event: self.on_ok())
@@ -137,6 +443,15 @@ class StepDialog(tk.Toplevel):
         self.grab_set()
         self.filter_entry.focus_set()
         self.wait_window(self)
+
+    @staticmethod
+    def _initial_operand(step: Step | None, key: str) -> str:
+        if step is None:
+            return ""
+        value = step.params.get(key)
+        if value is None:
+            return ""
+        return str(value)
 
     def _refresh_list(self) -> None:
         query = self.filter_var.get().strip().upper()
@@ -166,20 +481,82 @@ class StepDialog(tk.Toplevel):
             return
         self.op_var.set(self.listbox.get(selection[0]))
 
-    def _update_preset_state(self) -> None:
-        if self.op_var.get() == "TON":
-            self.arg_entry.state(["!disabled"])
+    def _show_field(self, label: ttk.Label, entry: tk.Widget, enabled: bool, text: str) -> None:
+        label.configure(text=text)
+        if enabled:
+            label.grid()
+            entry.grid()
+            if hasattr(entry, "state"):
+                entry.state(["!disabled"])
         else:
-            self.arg_entry.state(["disabled"])
+            label.grid_remove()
+            entry.grid_remove()
+            if hasattr(entry, "state"):
+                entry.state(["disabled"])
+
+    def _update_field_states(self) -> None:
+        op = self.op_var.get().strip().upper()
+
+        show_tag = op in {"XIC", "XIO", "OTE", "OTL", "OTU", "TON", "CTU", "CTD", "MOV", "CLR", "ADD", "ABS", "MUL", "DIV", "NEG", "SUB"}
+        tag_text = "Destination" if op in {"MOV", "ADD", "ABS", "MUL", "DIV", "NEG", "SUB"} else "Tag"
+        if op == "TON":
+            tag_text = "Timer tag"
+        if op in {"CTU", "CTD"}:
+            tag_text = "Counter tag"
+        self._show_field(self.tag_label, self.tag_entry, show_tag, tag_text)
+
+        self._show_field(self.source_label, self.source_entry, op in {"MOV", "ABS", "NEG"}, "Source")
+        self._show_field(self.left_label, self.left_entry, op in {"CMP", "EQ", "GT", "GTE", "LT", "LE", "NE", "ADD", "MUL", "DIV", "SUB"}, "Left")
+        self._show_field(self.right_label, self.right_entry, op in {"CMP", "EQ", "GT", "GTE", "LT", "LE", "NE", "ADD", "MUL", "DIV", "SUB"}, "Right")
+        self._show_field(self.compare_label, self.compare_combo, op == "CMP", "Compare")
+        self._show_field(self.arg_label, self.arg_entry, op in {"TON", "CTU", "CTD"}, "Preset (ms)" if op == "TON" else "Preset")
+
+        if op not in {"TON", "CTU", "CTD"}:
             self.arg_var.set("")
+        if op not in {"CMP"}:
+            self.compare_var.set("==")
 
     def on_ok(self) -> None:
         try:
             chosen_op = self.op_var.get().strip().upper() or self.filter_var.get().strip().upper()
             if chosen_op not in self.available_ops:
                 raise ValueError("Choose an instruction type")
-            arg = int(self.arg_var.get()) if chosen_op == "TON" else None
-            step = Step(op=chosen_op, tag=self.tag_var.get().strip(), arg=arg)
+            arg = int(self.arg_var.get()) if chosen_op in {"TON", "CTU", "CTD"} and self.arg_var.get().strip() else None
+            step: Step
+            if chosen_op in {"XIC", "XIO", "OTE", "OTL", "OTU", "TON", "CTU", "CTD", "CLR"}:
+                step = Step(op=chosen_op, tag=self.tag_var.get().strip(), arg=arg)
+            elif chosen_op in {"MOV", "ABS", "NEG"}:
+                step = Step(
+                    op=chosen_op,
+                    tag=self.tag_var.get().strip(),
+                    params={"source": parse_scalar_or_tag(self.source_var.get())},
+                )
+            elif chosen_op in {"ADD", "SUB", "MUL", "DIV"}:
+                step = Step(
+                    op=chosen_op,
+                    tag=self.tag_var.get().strip(),
+                    params={
+                        "left": parse_scalar_or_tag(self.left_var.get()),
+                        "right": parse_scalar_or_tag(self.right_var.get()),
+                    },
+                )
+            elif chosen_op == "CMP":
+                step = Step(
+                    op=chosen_op,
+                    params={
+                        "left": parse_scalar_or_tag(self.left_var.get()),
+                        "right": parse_scalar_or_tag(self.right_var.get()),
+                        "cmp": self.compare_var.get().strip(),
+                    },
+                )
+            else:
+                step = Step(
+                    op=chosen_op,
+                    params={
+                        "left": parse_scalar_or_tag(self.left_var.get()),
+                        "right": parse_scalar_or_tag(self.right_var.get()),
+                    },
+                )
             step.validate()
         except Exception as exc:
             messagebox.showerror("Invalid instruction", str(exc), parent=self)
@@ -241,6 +618,82 @@ class BindingDialog(tk.Toplevel):
             messagebox.showerror("Invalid binding", str(exc), parent=self)
             return
         self.result = binding
+        self.destroy()
+
+
+class VariableDialog(tk.Toplevel):
+    def __init__(self, parent: tk.Misc, *, title: str, initial: Variable | None = None) -> None:
+        super().__init__(parent)
+        self.title(title)
+        self.transient(parent)
+        self.configure(bg=PALETTE["panel"])
+        self.resizable(False, False)
+        self.result: Variable | None = None
+
+        self.tag_var = tk.StringVar(value=initial.tag if initial else "")
+        self.type_var = tk.StringVar(value=initial.data_type if initial else "bool")
+        seed_value = (
+            str(initial.preset)
+            if initial and initial.data_type in {"timer", "counter"}
+            else (format_runtime_value(initial.initial) if initial and initial.initial is not None else "0")
+        )
+        self.value_var = tk.StringVar(value=seed_value)
+
+        body = ttk.Frame(self, padding=12, style="Card.TFrame")
+        body.grid(sticky="nsew")
+        body.columnconfigure(1, weight=1)
+
+        ttk.Label(body, text="Tag").grid(row=0, column=0, sticky="w", pady=(0, 8))
+        ttk.Entry(body, textvariable=self.tag_var, width=28).grid(row=0, column=1, sticky="ew", pady=(0, 8))
+
+        ttk.Label(body, text="Type").grid(row=1, column=0, sticky="w", pady=(0, 8))
+        ttk.Combobox(body, textvariable=self.type_var, values=["bool", "int", "float", "timer", "counter"], state="readonly").grid(
+            row=1,
+            column=1,
+            sticky="ew",
+            pady=(0, 8),
+        )
+
+        self.value_label = ttk.Label(body, text="Initial")
+        self.value_label.grid(row=2, column=0, sticky="w")
+        ttk.Entry(body, textvariable=self.value_var, width=28).grid(row=2, column=1, sticky="ew")
+
+        buttons = ttk.Frame(body, style="Card.TFrame")
+        buttons.grid(row=3, column=0, columnspan=2, sticky="e", pady=(12, 0))
+        ttk.Button(buttons, text="Cancel", command=self.destroy, style="Tool.TButton").pack(side="right", padx=(8, 0))
+        ttk.Button(buttons, text="OK", command=self.on_ok, style="Accent.TButton").pack(side="right")
+
+        self.type_var.trace_add("write", lambda *_: self._update_value_label())
+        self._update_value_label()
+
+        self.bind("<Return>", lambda event: self.on_ok())
+        self.bind("<Escape>", lambda event: self.destroy())
+        self.grab_set()
+        self.wait_window(self)
+
+    def _update_value_label(self) -> None:
+        data_type = self.type_var.get().strip().lower()
+        self.value_label.configure(text="Preset" if data_type in {"timer", "counter"} else "Initial")
+
+    def on_ok(self) -> None:
+        try:
+            data_type = self.type_var.get().strip().lower()
+            tag = self.tag_var.get().strip()
+            if data_type == "bool":
+                variable = Variable(tag=tag, data_type=data_type, initial=parse_bool(self.value_var.get()))
+            elif data_type == "int":
+                variable = Variable(tag=tag, data_type=data_type, initial=int(self.value_var.get().strip()))
+            elif data_type == "float":
+                variable = Variable(tag=tag, data_type=data_type, initial=float(self.value_var.get().strip()))
+            elif data_type in {"timer", "counter"}:
+                variable = Variable(tag=tag, data_type=data_type, preset=int(self.value_var.get().strip() or "0"))
+            else:
+                raise ValueError("Choose a variable type")
+            variable.validate()
+        except Exception as exc:
+            messagebox.showerror("Invalid variable", str(exc), parent=self)
+            return
+        self.result = variable
         self.destroy()
 
 
@@ -377,6 +830,10 @@ def first_step_path(nodes: list[Node]) -> tuple[int, ...] | None:
     return None
 
 
+def offline_live_locked(mode: str, simulation_state: str) -> bool:
+    return mode == "offline" and simulation_state in {"running", "stepped"}
+
+
 class PLCAsciiIDE:
     def __init__(self, program: Program | None = None, program_path: Path | None = None) -> None:
         self.root = tk.Tk()
@@ -397,16 +854,21 @@ class PLCAsciiIDE:
         self.selected_key: str | None = None
         self.selection_tag_to_key: dict[str, str] = {}
         self.help_text: tk.Text | None = None
+        self.step_button: ttk.Button | None = None
+        self.run_button: ttk.Button | None = None
         self.tooltip_text_by_widget: dict[str, str] = {}
         self.tooltip_job: str | None = None
         self.tooltip_window: tk.Toplevel | None = None
         self.tooltip_label: tk.Label | None = None
         self.tooltip_widget: tk.Misc | None = None
+        self.simulation_state = "stopped"
+        self.monitor_tree: ttk.Treeview | None = None
 
         self.mode_var = tk.StringVar(value="offline")
         self.status_var = tk.StringVar(value="Offline programming / simulation")
         self.auto_online_var = tk.BooleanVar(value=False)
         self.help_var = tk.BooleanVar(value=False)
+        self.reset_integer_var = tk.BooleanVar(value=True)
         self.scan_ms_var = tk.IntVar(value=100)
         self.font_size_var = tk.IntVar(value=18)
 
@@ -416,6 +878,7 @@ class PLCAsciiIDE:
         self._apply_theme()
         self._build_menu()
         self._build_layout()
+        self.sync_program_variables(save_current_values=False)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.after(50, self.render_ladder)
 
@@ -434,11 +897,26 @@ class PLCAsciiIDE:
         style.map("Tool.TButton", background=[("active", PALETTE["panel_alt"])])
         style.configure("Accent.TButton", background=PALETTE["accent"], foreground=PALETTE["text"], font=("TkDefaultFont", 10, "bold"))
         style.map("Accent.TButton", background=[("active", "#ff7569"), ("pressed", "#ef5044")])
+        style.configure("ActionOff.TButton", background=PALETTE["accent"], foreground=PALETTE["text"], font=("TkDefaultFont", 10, "bold"))
+        style.map("ActionOff.TButton", background=[("active", "#ff7569"), ("pressed", "#ef5044")])
+        style.configure("ActionOn.TButton", background=PALETTE["success"], foreground=PALETTE["text"], font=("TkDefaultFont", 10, "bold"))
+        style.map("ActionOn.TButton", background=[("active", "#58d59a"), ("pressed", "#3aad79")])
         style.configure("TEntry", fieldbackground=PALETTE["panel_alt"], foreground=PALETTE["text"], insertcolor=PALETTE["text"])
         style.configure("TCombobox", fieldbackground=PALETTE["panel_alt"], background=PALETTE["panel_alt"], foreground=PALETTE["text"], arrowcolor=PALETTE["text"])
         style.configure("TRadiobutton", background=PALETTE["bg"], foreground=PALETTE["text"])
         style.configure("TCheckbutton", background=PALETTE["bg"], foreground=PALETTE["text"])
         style.configure("TSpinbox", fieldbackground=PALETTE["panel_alt"], foreground=PALETTE["text"])
+        style.configure(
+            "Treeview",
+            background=PALETTE["panel_alt"],
+            fieldbackground=PALETTE["panel_alt"],
+            foreground=PALETTE["text"],
+            borderwidth=0,
+            rowheight=24,
+        )
+        style.map("Treeview", background=[("selected", PALETTE["accent"])], foreground=[("selected", PALETTE["text"])])
+        style.configure("Treeview.Heading", background=PALETTE["panel"], foreground=PALETTE["text"], relief="flat")
+        style.map("Treeview.Heading", background=[("active", PALETTE["border"])])
 
     def _build_menu(self) -> None:
         menu = tk.Menu(self.root, bg=PALETTE["panel"], fg=PALETTE["text"], activebackground=PALETTE["accent"], activeforeground=PALETTE["text"], bd=0)
@@ -470,17 +948,32 @@ class PLCAsciiIDE:
         toolbar = ttk.Frame(outer, style="Card.TFrame")
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
 
-        for label, command, style_name, tooltip in [
-            ("Step", self.step_scan, "Tool.TButton", "Execute one offline PLC scan."),
-            ("Run", self.start_run, "Accent.TButton", "Start continuous offline simulation scans."),
-            ("Stop", self.stop_run, "Tool.TButton", "Stop the offline simulation loop."),
-            ("Connect Demo", self.connect_demo, "Accent.TButton", "Launch and connect to the bundled demo runtime."),
-            ("Serial", self.connect_serial, "Tool.TButton", "Connect to a target over the serial JSON link."),
-            ("Snapshot", self.remote_snapshot_request, "Tool.TButton", "Refresh the online snapshot from the connected target."),
-        ]:
-            button = ttk.Button(toolbar, text=label, command=command, style=style_name)
-            button.pack(side="left", padx=(0, 8))
-            self.register_tooltip(button, tooltip)
+        self.step_button = ttk.Button(toolbar, text="Step", command=self.step_scan, style="ActionOff.TButton")
+        self.step_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(self.step_button, "Execute one offline PLC scan and retain values until Run or Stop is pressed.")
+
+        self.run_button = ttk.Button(toolbar, text="Run", command=self.start_run, style="ActionOff.TButton")
+        self.run_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(self.run_button, "Start continuous offline simulation scans.")
+
+        stop_button = ttk.Button(toolbar, text="Stop", command=self.stop_run, style="Tool.TButton")
+        stop_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(
+            stop_button,
+            "Stop ends offline simulation. Boolean logic drops out, timers/counters reset, and Reset Integer controls whether numeric tags are cleared to zero. Press Stop again while already stopped to clear forces too.",
+        )
+
+        connect_demo_button = ttk.Button(toolbar, text="Connect Demo", command=self.connect_demo, style="Accent.TButton")
+        connect_demo_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(connect_demo_button, "Launch and connect to the bundled demo runtime.")
+
+        serial_button = ttk.Button(toolbar, text="Serial", command=self.connect_serial, style="Tool.TButton")
+        serial_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(serial_button, "Connect to a target over the serial JSON link.")
+
+        snapshot_button = ttk.Button(toolbar, text="Snapshot", command=self.remote_snapshot_request, style="Tool.TButton")
+        snapshot_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(snapshot_button, "Refresh the online snapshot from the connected target.")
 
         mode_label = ttk.Label(toolbar, text="Mode", style="Subtle.TLabel")
         mode_label.pack(side="left", padx=(14, 6))
@@ -502,6 +995,13 @@ class PLCAsciiIDE:
         help_button.pack(side="left", padx=(12, 0))
         self.register_tooltip(help_button, "Show keyboard shortcuts below and enable hover tooltips.")
 
+        reset_button = ttk.Checkbutton(toolbar, text="Reset Integer", variable=self.reset_integer_var)
+        reset_button.pack(side="left", padx=(12, 0))
+        self.register_tooltip(
+            reset_button,
+            "When checked, Stop restores monitor start values for scalars and clears timer/counter accumulators while preserving presets.",
+        )
+
         scan_label = ttk.Label(toolbar, text="Scan", style="Subtle.TLabel")
         scan_label.pack(side="left", padx=(14, 6))
         self.register_tooltip(scan_label, "Offline scan period in milliseconds.")
@@ -521,7 +1021,8 @@ class PLCAsciiIDE:
         viewer = ttk.Frame(outer, style="Card.TFrame")
         viewer.grid(row=1, column=0, sticky="nsew")
         viewer.rowconfigure(0, weight=1)
-        viewer.columnconfigure(0, weight=1)
+        viewer.columnconfigure(0, weight=4)
+        viewer.columnconfigure(2, weight=2)
 
         self.ladder_text = tk.Text(
             viewer,
@@ -551,6 +1052,37 @@ class PLCAsciiIDE:
         x_scroll.grid(row=1, column=0, sticky="ew")
         self.ladder_text.configure(yscrollcommand=y_scroll.set, xscrollcommand=x_scroll.set)
 
+        monitor = ttk.Frame(viewer, style="Card.TFrame", padding=(10, 10, 10, 10))
+        monitor.grid(row=0, column=2, rowspan=2, sticky="nsew", padx=(10, 0))
+        monitor.rowconfigure(1, weight=1)
+        monitor.columnconfigure(0, weight=1)
+
+        monitor_header = ttk.Frame(monitor, style="Card.TFrame")
+        monitor_header.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        monitor_header.columnconfigure(0, weight=1)
+        ttk.Label(monitor_header, text="Monitor", style="Header.TLabel").grid(row=0, column=0, sticky="w")
+        add_var_button = ttk.Button(monitor_header, text="Add Var", command=self.add_monitor_variable, style="Tool.TButton")
+        add_var_button.grid(row=0, column=1, sticky="e")
+        self.register_tooltip(add_var_button, "Add a monitored variable declaration and choose its type.")
+        delete_var_button = ttk.Button(monitor_header, text="Delete Var", command=self.delete_monitor_variable, style="Tool.TButton")
+        delete_var_button.grid(row=0, column=2, sticky="e", padx=(6, 0))
+        self.register_tooltip(delete_var_button, "Delete the selected variable. If it is used in the program, its instructions can be removed too.")
+
+        self.monitor_tree = ttk.Treeview(monitor, columns=("value", "type"), show="tree headings")
+        self.monitor_tree.heading("#0", text="Tag")
+        self.monitor_tree.heading("value", text="Value")
+        self.monitor_tree.heading("type", text="Type")
+        self.monitor_tree.column("#0", width=170, anchor="w")
+        self.monitor_tree.column("value", width=100, anchor="w")
+        self.monitor_tree.column("type", width=90, anchor="w")
+        self.monitor_tree.grid(row=1, column=0, sticky="nsew")
+        self.monitor_tree.bind("<Double-1>", self.on_monitor_double_click)
+        self.register_tooltip(self.monitor_tree, "Watch variables here. Double-click a value to edit it while stopped or stepped offline.")
+
+        monitor_scroll = ttk.Scrollbar(monitor, orient="vertical", command=self.monitor_tree.yview)
+        monitor_scroll.grid(row=1, column=1, sticky="ns")
+        self.monitor_tree.configure(yscrollcommand=monitor_scroll.set)
+
         status = ttk.Label(outer, textvariable=self.status_var, style="Subtle.TLabel", anchor="w")
         status.grid(row=2, column=0, sticky="ew", pady=(10, 0))
 
@@ -570,6 +1102,7 @@ class PLCAsciiIDE:
         self.help_text.grid(row=3, column=0, sticky="ew", pady=(8, 0))
         self.render_help_text()
         self.update_help_visibility()
+        self.update_simulation_buttons()
 
     def ensure_rung(self) -> int:
         if not self.program.rungs:
@@ -586,6 +1119,305 @@ class PLCAsciiIDE:
         if selection is not None:
             return selection.rung_index
         return self.ensure_rung()
+
+    def is_live_locked(self) -> bool:
+        return offline_live_locked(self.mode_var.get(), self.simulation_state)
+
+    def sync_program_variables(self, save_current_values: bool) -> None:
+        current_values = dict(self.engine.tags) if save_current_values else None
+        populate_program_variables(self.program, current_values=current_values)
+        self.engine.load_program(self.program)
+
+    def validate_step_type_compatibility(self, step: Step) -> None:
+        validate_program_step_types(self.program, step)
+
+    def ensure_live_editable(self) -> bool:
+        if self.is_live_locked():
+            self.status_var.set("Stop simulation before editing or interacting with the ladder.")
+            return False
+        return True
+
+    def is_monitor_editable(self) -> bool:
+        return self.mode_var.get() == "offline" and self.simulation_state != "running"
+
+    def ensure_monitor_editable(self) -> bool:
+        if not self.is_monitor_editable():
+            self.status_var.set("Monitor values can only be edited while offline and stopped or stepped.")
+            return False
+        return True
+
+    def find_variable(self, tag: str) -> Variable | None:
+        for variable in self.program.variables:
+            if variable.tag == tag:
+                return variable
+        return None
+
+    def upsert_variable(self, variable: Variable) -> None:
+        for index, current in enumerate(self.program.variables):
+            if current.tag == variable.tag:
+                self.program.variables[index] = variable
+                return
+        self.program.variables.append(variable)
+
+    def ensure_scalar_variable(self, tag: str, value: bool | int | float) -> None:
+        variable = self.find_variable(tag)
+        if variable is None:
+            variable = Variable(tag=tag, data_type=infer_scalar_type(value), initial=value)
+        else:
+            variable.data_type = infer_scalar_type(value)
+            variable.initial = value
+            variable.preset = None
+        variable.validate()
+        self.upsert_variable(variable)
+
+    def ensure_composite_variable(self, tag: str, data_type: str, preset: int) -> None:
+        variable = self.find_variable(tag) or Variable(tag=tag, data_type=data_type, preset=preset)
+        variable.data_type = data_type
+        variable.initial = None
+        variable.preset = int(preset)
+        variable.validate()
+        self.upsert_variable(variable)
+
+    def inferred_monitor_types(self) -> dict[str, str]:
+        inferred, _, _ = infer_program_variable_types(self.program)
+        return inferred
+
+    def current_monitor_snapshot(
+        self,
+    ) -> tuple[dict[str, object], dict[str, dict[str, object]], dict[str, dict[str, object]], set[str]]:
+        if self.mode_var.get() == "online":
+            tags = self.remote_snapshot.get("tags", {}) if isinstance(self.remote_snapshot, dict) else {}
+            timers = self.remote_snapshot.get("timers", {}) if isinstance(self.remote_snapshot, dict) else {}
+            counters = self.remote_snapshot.get("counters", {}) if isinstance(self.remote_snapshot, dict) else {}
+            forced = self.remote_snapshot.get("forced", {}) if isinstance(self.remote_snapshot, dict) else {}
+            return (
+                tags if isinstance(tags, dict) else {},
+                timers if isinstance(timers, dict) else {},
+                counters if isinstance(counters, dict) else {},
+                set(forced.keys()) if isinstance(forced, dict) else set(),
+            )
+        return (
+            dict(self.engine.tags),
+            {name: timer.snapshot() for name, timer in self.engine.timers.items()},
+            {name: counter.snapshot() for name, counter in self.engine.counters.items()},
+            set(self.engine.forced.keys()),
+        )
+
+    def render_monitor(self) -> None:
+        if self.monitor_tree is None:
+            return
+        open_state = {item: self.monitor_tree.item(item, "open") for item in self.monitor_tree.get_children("")}
+        for item in self.monitor_tree.get_children(""):
+            for child in self.monitor_tree.get_children(item):
+                open_state[child] = self.monitor_tree.item(child, "open")
+
+        self.monitor_tree.delete(*self.monitor_tree.get_children(""))
+        tags, timers, counters, forced_tags = self.current_monitor_snapshot()
+        inferred = self.inferred_monitor_types()
+        variable_map = self.program.variable_map()
+
+        groups = {
+            "bool": self.monitor_tree.insert("", "end", iid="group:bool", text="Boolean", values=("", "group"), open=True),
+            "int": self.monitor_tree.insert("", "end", iid="group:int", text="Integer", values=("", "group"), open=True),
+            "float": self.monitor_tree.insert("", "end", iid="group:float", text="Float", values=("", "group"), open=True),
+            "timer": self.monitor_tree.insert("", "end", iid="group:timer", text="Timer", values=("", "group"), open=True),
+            "counter": self.monitor_tree.insert("", "end", iid="group:counter", text="Counter", values=("", "group"), open=True),
+        }
+
+        scalar_rows: dict[str, tuple[str, object]] = {}
+        for variable in self.program.variables:
+            if variable.data_type in {"bool", "int", "float"}:
+                scalar_rows[variable.tag] = (variable.data_type, tags.get(variable.tag, variable.initial if variable.initial is not None else 0))
+
+        for tag, value in tags.items():
+            if "." in tag:
+                continue
+            if tag in timers or tag in counters:
+                continue
+            data_type = variable_map.get(tag).data_type if tag in variable_map else inferred.get(tag, infer_scalar_type(value if isinstance(value, (bool, int, float)) else 0))
+            if data_type in {"bool", "int", "float"}:
+                scalar_rows[tag] = (data_type, value)
+
+        for tag in sorted(scalar_rows):
+            data_type, value = scalar_rows[tag]
+            prefix = "f " if tag in forced_tags else ""
+            self.monitor_tree.insert(
+                groups[data_type],
+                "end",
+                iid=f"scalar:{tag}",
+                text=f"{prefix}{tag}",
+                values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), data_type),
+            )
+
+        for tag in sorted(set(timers) | {name for name, variable in variable_map.items() if variable.data_type == "timer"}):
+            timer = timers.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "en": False, "dn": False, "tt": False})
+            parent = self.monitor_tree.insert(groups["timer"], "end", iid=f"timer:{tag}", text=tag, values=("", "timer"), open=open_state.get(f"timer:{tag}", False))
+            for member in ("pre", "acc", "en", "dn", "tt"):
+                value = timer.get(member, 0)
+                member_type = "bool" if member in {"en", "dn", "tt"} else "int"
+                self.monitor_tree.insert(
+                    parent,
+                    "end",
+                    iid=f"member:timer:{tag}:{member}",
+                    text=f".{member}",
+                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), member_type),
+                )
+
+        for tag in sorted(set(counters) | {name for name, variable in variable_map.items() if variable.data_type == "counter"}):
+            counter = counters.get(tag, {"pre": variable_map[tag].preset if tag in variable_map else 0, "acc": 0, "dn": False})
+            parent = self.monitor_tree.insert(groups["counter"], "end", iid=f"counter:{tag}", text=tag, values=("", "counter"), open=open_state.get(f"counter:{tag}", False))
+            for member in ("pre", "acc", "dn"):
+                value = counter.get(member, 0)
+                member_type = "bool" if member == "dn" else "int"
+                self.monitor_tree.insert(
+                    parent,
+                    "end",
+                    iid=f"member:counter:{tag}:{member}",
+                    text=f".{member}",
+                    values=(format_runtime_value(value if isinstance(value, (bool, int, float)) else 0), member_type),
+                )
+
+    def add_monitor_variable(self) -> None:
+        if not self.ensure_monitor_editable():
+            return
+        dialog = VariableDialog(self.root, title="Add monitor variable")
+        if dialog.result is None:
+            return
+        self.upsert_variable(dialog.result)
+        self.engine.load_program(self.program)
+        if dialog.result.data_type in {"bool", "int", "float"} and dialog.result.initial is not None:
+            self.engine.set_value(dialog.result.tag, dialog.result.initial)
+        self.last_scan = None
+        self.status_var.set(f"Added monitor variable {dialog.result.tag}")
+        self.render_ladder()
+
+    def selected_monitor_base_tag(self) -> str | None:
+        if self.monitor_tree is None:
+            return None
+        selection = self.monitor_tree.selection()
+        if not selection:
+            return None
+        item_id = selection[0]
+        if item_id.startswith("scalar:"):
+            return item_id.split(":", 1)[1]
+        if item_id.startswith("timer:") or item_id.startswith("counter:"):
+            return item_id.split(":", 1)[1]
+        if item_id.startswith("member:"):
+            _, _, tag, _ = item_id.split(":", 3)
+            return tag
+        return None
+
+    @staticmethod
+    def step_uses_variable(step: Step, tag: str) -> bool:
+        if step.tag == tag or step.tag.startswith(f"{tag}."):
+            return True
+        for operand in step.params.values():
+            if isinstance(operand, str) and (operand == tag or operand.startswith(f"{tag}.")):
+                return True
+        return False
+
+    def variable_used_in_program(self, tag: str) -> bool:
+        for rung in self.program.rungs:
+            for step in walk_steps(rung.elements):
+                if self.step_uses_variable(step, tag):
+                    return True
+        return False
+
+    def remove_variable_from_nodes(self, nodes: list[Node], tag: str) -> list[Node]:
+        kept: list[Node] = []
+        for node in nodes:
+            if isinstance(node, Step):
+                if not self.step_uses_variable(node, tag):
+                    kept.append(node)
+                continue
+            filtered_lanes = [self.remove_variable_from_nodes(lane, tag) for lane in node.lanes]
+            filtered_lanes = [lane for lane in filtered_lanes if lane]
+            if not filtered_lanes:
+                continue
+            if len(filtered_lanes) == 1:
+                kept.extend(filtered_lanes[0])
+                continue
+            kept.append(Branch(lanes=filtered_lanes))
+        return kept
+
+    def delete_monitor_variable(self) -> None:
+        if not self.ensure_monitor_editable():
+            return
+        tag = self.selected_monitor_base_tag()
+        if not tag:
+            return
+        used = self.variable_used_in_program(tag)
+        if used:
+            confirm = messagebox.askyesno(
+                "Delete variable",
+                f"{tag} is used in the program. Delete it and remove all instructions that use it?",
+                parent=self.root,
+            )
+            if not confirm:
+                return
+            for rung in self.program.rungs:
+                rung.elements = normalize_nodes(self.remove_variable_from_nodes(rung.elements, tag))
+        self.program.variables = [variable for variable in self.program.variables if variable.tag != tag]
+        self.program.bindings = [binding for binding in self.program.bindings if binding.tag != tag]
+        for forced_tag in list(self.engine.forced):
+            if forced_tag == tag or forced_tag.startswith(f"{tag}."):
+                self.engine.clear_force(forced_tag)
+        self.sync_program_variables(save_current_values=True)
+        self.last_scan = None
+        self.status_var.set(f"Deleted variable {tag}")
+        self.render_ladder()
+
+    def on_monitor_double_click(self, event: tk.Event[ttk.Treeview]) -> str:
+        self.edit_monitor_value()
+        return "break"
+
+    def edit_monitor_value(self) -> None:
+        if self.monitor_tree is None:
+            return
+        selection = self.monitor_tree.selection()
+        if not selection:
+            return
+        item_id = selection[0]
+        if item_id.startswith("group:") or item_id.startswith("timer:") or item_id.startswith("counter:"):
+            return
+        if not self.ensure_monitor_editable():
+            return
+
+        if item_id.startswith("scalar:"):
+            tag = item_id.split(":", 1)[1]
+            current_value = self.engine.read_tag(tag)
+            variable = self.find_variable(tag)
+            data_type = variable.data_type if variable is not None else infer_scalar_type(current_value if isinstance(current_value, (bool, int, float)) else 0)
+            if data_type == "bool":
+                value = not bool(current_value)
+            elif data_type == "float":
+                raw = simpledialog.askstring("Monitor value", f"Value for {tag}", parent=self.root, initialvalue=format_runtime_value(float(current_value)))
+                value = None if raw is None else float(raw.strip())
+            else:
+                value = simpledialog.askinteger("Monitor value", f"Value for {tag}", parent=self.root, initialvalue=int(current_value))
+            if value is None:
+                return
+            self.engine.set_value(tag, value)
+            self.ensure_scalar_variable(tag, value)
+        elif item_id.startswith("member:"):
+            _, composite_type, tag, member = item_id.split(":", 3)
+            full_tag = f"{tag}.{member}"
+            current_value = self.engine.read_tag(full_tag)
+            if member in {"dn", "en", "tt"}:
+                value = not bool(current_value)
+            else:
+                value = simpledialog.askinteger("Monitor value", f"Value for {full_tag}", parent=self.root, initialvalue=int(current_value))
+            if value is None:
+                return
+            self.engine.set_value(full_tag, value)
+            if member == "pre":
+                self.ensure_composite_variable(tag, composite_type, int(value))
+        else:
+            return
+
+        self.last_scan = None
+        self.status_var.set("Updated monitor value")
+        self.render_ladder()
 
     def on_mode_change(self) -> None:
         if self.mode_var.get() == "online":
@@ -640,6 +1472,12 @@ class PLCAsciiIDE:
         self.fixed_font.configure(size=size)
         self.ladder_text.configure(font=self.fixed_font)
         self.render_ladder()
+
+    def update_simulation_buttons(self) -> None:
+        if self.step_button is not None:
+            self.step_button.configure(style="ActionOn.TButton" if self.simulation_state == "stepped" else "ActionOff.TButton")
+        if self.run_button is not None:
+            self.run_button.configure(style="ActionOn.TButton" if self.simulation_state == "running" else "ActionOff.TButton")
 
     def register_tooltip(self, widget: tk.Misc, text: str) -> None:
         self.tooltip_text_by_widget[str(widget)] = text
@@ -717,10 +1555,15 @@ class PLCAsciiIDE:
 
     def render_ladder(self) -> None:
         timer_values: dict[str, dict[str, object]] | None = None
+        counter_values: dict[str, dict[str, object]] | None = None
+        forced_tags: set[str] = set()
+        show_timer_acc = self.mode_var.get() == "online" or self.simulation_state in {"running", "stepped"}
         if self.mode_var.get() == "online":
             tags = self.remote_snapshot.get("tags", {}) if isinstance(self.remote_snapshot, dict) else {}
             forced = self.remote_snapshot.get("forced", {}) if isinstance(self.remote_snapshot, dict) else {}
+            forced_tags = set(forced.keys()) if isinstance(forced, dict) else set()
             timer_values = self.remote_snapshot.get("timers", {}) if isinstance(self.remote_snapshot, dict) else {}
+            counter_values = self.remote_snapshot.get("counters", {}) if isinstance(self.remote_snapshot, dict) else {}
             rung_power, traces = trace_program_state(
                 self.program,
                 tags if isinstance(tags, dict) else {},
@@ -728,13 +1571,30 @@ class PLCAsciiIDE:
             )
             _ = rung_power
         else:
+            forced_tags = set(self.engine.forced.keys())
             if self.last_scan is not None:
                 traces = self.last_scan.traces
                 timer_values = self.last_scan.timers
+                counter_values = self.last_scan.counters
             else:
-                _, traces = trace_program_state(self.program, self.engine.tags, self.engine.forced)
+                timer_values = {name: timer.snapshot() for name, timer in self.engine.timers.items()}
+                counter_values = {name: counter.snapshot() for name, counter in self.engine.counters.items()}
+                _, traces = trace_program_preview(
+                    self.program,
+                    self.engine.tags,
+                    self.engine.forced,
+                    timer_values=timer_values,
+                    counter_values=counter_values,
+                )
 
-        document = LadderRenderer(self.program, traces=traces, timer_values=timer_values).render()
+        document = LadderRenderer(
+            self.program,
+            traces=traces,
+            timer_values=timer_values,
+            counter_values=counter_values,
+            forced_tags=forced_tags,
+            show_timer_acc=show_timer_acc,
+        ).render()
         self.current_document = document
         if self.selected_key not in document.selections:
             self.selected_key = None
@@ -772,8 +1632,11 @@ class PLCAsciiIDE:
         self.ladder_text.configure(state="disabled")
         self.root.title(f"PLC ASCII IDE - {self.program.name} - {'online' if self.mode_var.get() == 'online' else 'offline'}")
         self.ladder_text.focus_set()
+        self.render_monitor()
 
     def on_click(self, event: tk.Event[tk.Text]) -> str:
+        if self.is_live_locked():
+            return "break"
         self.ladder_text.focus_set()
         index = self.ladder_text.index(f"@{event.x},{event.y}")
         for tag_name in reversed(self.ladder_text.tag_names(index)):
@@ -784,11 +1647,15 @@ class PLCAsciiIDE:
         return "break"
 
     def on_double_click(self, event: tk.Event[tk.Text]) -> str:
+        if self.is_live_locked():
+            return "break"
         self.on_click(event)
         self.edit_selected()
         return "break"
 
     def on_key_press(self, event: tk.Event[tk.Text]) -> str:
+        if self.is_live_locked():
+            return "break"
         key = event.keysym.lower()
         char = event.char.lower() if event.char else ""
         shifted = bool(event.state & 0x1)
@@ -978,7 +1845,10 @@ class PLCAsciiIDE:
         self.program = Program(name="untitled", rungs=[Rung(comment="", elements=[])])
         self.program_path = None
         self.engine = LadderEngine(self.program)
+        self.sync_program_variables(save_current_values=False)
         self.last_scan = None
+        self.simulation_state = "stopped"
+        self.update_simulation_buttons()
         self.selected_key = None
         self.status_var.set("Created new program")
         self.render_ladder()
@@ -996,7 +1866,10 @@ class PLCAsciiIDE:
             self.program = load_program(path)
             self.program_path = Path(path)
             self.engine = LadderEngine(self.program)
+            self.sync_program_variables(save_current_values=False)
             self.last_scan = None
+            self.simulation_state = "stopped"
+            self.update_simulation_buttons()
             self.selected_key = None
         except Exception as exc:
             messagebox.showerror("Open failed", str(exc), parent=self.root)
@@ -1009,6 +1882,7 @@ class PLCAsciiIDE:
             self.save_program_as()
             return
         try:
+            self.sync_program_variables(save_current_values=True)
             save_program(self.program, self.program_path)
         except Exception as exc:
             messagebox.showerror("Save failed", str(exc), parent=self.root)
@@ -1028,10 +1902,14 @@ class PLCAsciiIDE:
         self.save_program()
 
     def manage_bindings(self) -> None:
+        if not self.ensure_live_editable():
+            return
         BindingsManagerDialog(self.root, self.program)
         self.render_ladder()
 
     def edit_rung_comment(self) -> None:
+        if not self.ensure_live_editable():
+            return
         rung_index = self.current_rung_index()
         rung = self.program.rungs[rung_index]
         comment = simpledialog.askstring("Rung comment", "Comment", parent=self.root, initialvalue=rung.comment)
@@ -1042,9 +1920,16 @@ class PLCAsciiIDE:
         self.render_ladder()
 
     def insert_instruction(self, before: bool) -> None:
+        if not self.ensure_live_editable():
+            return
         selection = self.current_selection()
         dialog = StepDialog(self.root, title="Insert instruction")
         if dialog.result is None:
+            return
+        try:
+            self.validate_step_type_compatibility(dialog.result)
+        except Exception as exc:
+            messagebox.showerror("Invalid instruction", str(exc), parent=self.root)
             return
 
         rung_index = self.current_rung_index()
@@ -1066,12 +1951,14 @@ class PLCAsciiIDE:
             container, index = resolve_parent_list(rung.elements, selection.path)
             container.insert(index + 1, dialog.result)
             self.selected_key = step_selection_key(selection.rung_index, (*selection.path[:-1], index + 1))
-        self.engine.load_program(self.program)
+        self.sync_program_variables(save_current_values=True)
         self.last_scan = None
         self.status_var.set("Inserted instruction")
         self.render_ladder()
 
     def add_rung_after(self) -> None:
+        if not self.ensure_live_editable():
+            return
         if not self.program.rungs:
             self.program.rungs.append(Rung(comment="", elements=[]))
             self.engine.load_program(self.program)
@@ -1089,6 +1976,8 @@ class PLCAsciiIDE:
         self.render_ladder()
 
     def insert_rung_before(self) -> None:
+        if not self.ensure_live_editable():
+            return
         if not self.program.rungs:
             self.program.rungs.append(Rung(comment="", elements=[]))
             self.engine.load_program(self.program)
@@ -1106,6 +1995,8 @@ class PLCAsciiIDE:
         self.render_ladder()
 
     def move_rung(self, direction: int) -> None:
+        if not self.ensure_live_editable():
+            return
         rung_index = self.current_rung_index()
         target = rung_index + direction
         if target < 0 or target >= len(self.program.rungs):
@@ -1118,11 +2009,19 @@ class PLCAsciiIDE:
         self.render_ladder()
 
     def create_branch_under(self) -> None:
+        if not self.ensure_live_editable():
+            return
         selection = self.current_selection()
         if selection is None or selection.kind != "step" or selection.path is None:
             return
         rung = self.program.rungs[selection.rung_index]
         dialog = StepDialog(self.root, title="New branch instruction")
+        if dialog.result is not None:
+            try:
+                self.validate_step_type_compatibility(dialog.result)
+            except Exception as exc:
+                messagebox.showerror("Invalid instruction", str(exc), parent=self.root)
+                return
 
         if len(selection.path) >= 3:
             parent_branch_path = selection.path[:-2]
@@ -1138,7 +2037,7 @@ class PLCAsciiIDE:
                     self.selected_key = f"step:{selection.rung_index}:{'.'.join(str(part) for part in new_path)}"
                 else:
                     self.selected_key = f"branch_end:{selection.rung_index}:{'.'.join(str(part) for part in parent_branch_path)}"
-                self.engine.load_program(self.program)
+                self.sync_program_variables(save_current_values=True)
                 self.last_scan = None
                 self.status_var.set("Stacked branch lane")
                 self.render_ladder()
@@ -1155,12 +2054,14 @@ class PLCAsciiIDE:
         else:
             self.selected_key = f"branch_end:{selection.rung_index}:{'.'.join(str(part) for part in selection.path)}"
 
-        self.engine.load_program(self.program)
+        self.sync_program_variables(save_current_values=True)
         self.last_scan = None
         self.status_var.set("Created branch")
         self.render_ladder()
 
     def edit_selected(self) -> None:
+        if not self.ensure_live_editable():
+            return
         selection = self.current_selection()
         if selection is None:
             return
@@ -1177,13 +2078,20 @@ class PLCAsciiIDE:
         dialog = StepDialog(self.root, title="Edit instruction", initial=current)
         if dialog.result is None:
             return
+        try:
+            self.validate_step_type_compatibility(dialog.result)
+        except Exception as exc:
+            messagebox.showerror("Invalid instruction", str(exc), parent=self.root)
+            return
         container[index] = dialog.result
-        self.engine.load_program(self.program)
+        self.sync_program_variables(save_current_values=True)
         self.last_scan = None
         self.status_var.set("Updated instruction")
         self.render_ladder()
 
     def delete_selected(self) -> None:
+        if not self.ensure_live_editable():
+            return
         selection = self.current_selection()
         if selection is None:
             return
@@ -1193,7 +2101,7 @@ class PLCAsciiIDE:
             self.program.rungs.pop(selection.rung_index)
             if not self.program.rungs:
                 self.program.rungs.append(Rung(comment="", elements=[]))
-            self.engine.load_program(self.program)
+            self.sync_program_variables(save_current_values=True)
             self.last_scan = None
             self.selected_key = f"rung:{min(selection.rung_index, len(self.program.rungs) - 1)}"
             self.status_var.set("Deleted rung")
@@ -1204,23 +2112,38 @@ class PLCAsciiIDE:
             container, index = resolve_parent_list(rung.elements, selection.path)
             container.pop(index)
             rung.elements = normalize_nodes(rung.elements)
-            self.engine.load_program(self.program)
+            self.sync_program_variables(save_current_values=True)
             self.last_scan = None
             self.selected_key = f"rung:{selection.rung_index}"
             self.status_var.set("Deleted instruction")
             self.render_ladder()
 
+    def _offline_scan(self, *, state_after_scan: str) -> bool:
+        if self.mode_var.get() != "offline":
+            return False
+        scan_ms = max(10, int(self.scan_ms_var.get()))
+        self.last_scan = self.engine.scan(scan_ms=scan_ms)
+        self.simulation_state = state_after_scan
+        self.update_simulation_buttons()
+        self.status_var.set(
+            f"Executed one offline scan ({scan_ms} ms)"
+            if state_after_scan == "stepped"
+            else f"Running offline simulation ({scan_ms} ms scan)"
+        )
+        self.render_ladder()
+        return True
+
     def step_scan(self) -> None:
         if self.mode_var.get() != "offline":
             self.status_var.set("Step is only available in offline mode")
             return
-        scan_ms = max(10, int(self.scan_ms_var.get()))
-        self.last_scan = self.engine.scan(scan_ms=scan_ms)
-        self.status_var.set(f"Executed one offline scan ({scan_ms} ms)")
-        self.render_ladder()
+        self._offline_scan(state_after_scan="stepped")
 
     def _run_tick(self) -> None:
-        self.step_scan()
+        if self.mode_var.get() != "offline":
+            self.stop_run()
+            return
+        self._offline_scan(state_after_scan="running")
         self.run_job = self.root.after(max(10, int(self.scan_ms_var.get())), self._run_tick)
 
     def start_run(self) -> None:
@@ -1228,16 +2151,28 @@ class PLCAsciiIDE:
             self.status_var.set("Run is only available in offline mode")
             return
         if self.run_job is None:
+            self.simulation_state = "running"
+            self.update_simulation_buttons()
             self.run_job = self.root.after(0, self._run_tick)
             self.status_var.set("Started offline simulation")
 
     def stop_run(self) -> None:
+        if self.mode_var.get() != "offline":
+            self.status_var.set("Stop is only available in offline mode")
+            return
+        was_active = self.run_job is not None or self.simulation_state == "stepped"
         if self.run_job is not None:
             self.root.after_cancel(self.run_job)
             self.run_job = None
-        self.engine.reset_timers()
         self.last_scan = None
-        self.status_var.set("Stopped offline simulation")
+        self.simulation_state = "stopped"
+        self.update_simulation_buttons()
+        if was_active:
+            self.engine.stop_offline(reset_numeric=self.reset_integer_var.get(), clear_forces=False)
+            self.status_var.set("Stopped offline simulation")
+        else:
+            self.engine.stop_offline(reset_numeric=self.reset_integer_var.get(), clear_forces=True)
+            self.status_var.set("Cleared forces and stopped offline simulation")
         self.render_ladder()
 
     def connect_demo(self) -> None:
@@ -1344,11 +2279,14 @@ class PLCAsciiIDE:
         self.remote_watch_job = self.root.after(500, self._remote_watch_tick)
 
     def set_tag_dialog(self) -> None:
+        if not self.ensure_live_editable():
+            return
         default_tag = default_tag_for_selection(self.current_selection(), self.program)
         tag = simpledialog.askstring("Set tag", "Tag", parent=self.root, initialvalue=default_tag or "")
         if not tag:
             return
-        value = ask_bool(self.root, "Set tag", f"Value for {tag}", initial="1")
+        current_value = self.engine.read_tag(tag) if self.mode_var.get() == "offline" else False
+        value = ask_runtime_value(self.root, "Set tag", f"Value for {tag}", initial=format_runtime_value(current_value))
         if value is None:
             return
         if self.mode_var.get() == "online":
@@ -1360,15 +2298,18 @@ class PLCAsciiIDE:
         else:
             self.engine.set_tag(tag, value)
             self.last_scan = None
-            self.status_var.set(f"Set {tag} = {int(value)}")
+            self.status_var.set(f"Set {tag} = {format_runtime_value(value)}")
             self.render_ladder()
 
     def force_tag_dialog(self) -> None:
+        if not self.ensure_live_editable():
+            return
         default_tag = default_tag_for_selection(self.current_selection(), self.program)
         tag = simpledialog.askstring("Force tag", "Tag", parent=self.root, initialvalue=default_tag or "")
         if not tag:
             return
-        value = ask_bool(self.root, "Force tag", f"Force value for {tag}", initial="1")
+        current_value = self.engine.read_tag(tag) if self.mode_var.get() == "offline" else False
+        value = ask_runtime_value(self.root, "Force tag", f"Force value for {tag}", initial=format_runtime_value(current_value))
         if value is None:
             return
         if self.mode_var.get() == "online":
@@ -1380,10 +2321,12 @@ class PLCAsciiIDE:
         else:
             self.engine.set_force(tag, value)
             self.last_scan = None
-            self.status_var.set(f"Forced {tag} = {int(value)}")
+            self.status_var.set(f"Forced {tag} = {format_runtime_value(value)}")
             self.render_ladder()
 
     def unforce_tag_dialog(self) -> None:
+        if not self.ensure_live_editable():
+            return
         default_tag = default_tag_for_selection(self.current_selection(), self.program)
         tag = simpledialog.askstring("Unforce tag", "Tag", parent=self.root, initialvalue=default_tag or "")
         if not tag:
@@ -1401,6 +2344,8 @@ class PLCAsciiIDE:
             self.render_ladder()
 
     def toggle_force_selected(self) -> None:
+        if not self.ensure_live_editable():
+            return
         tag = default_tag_for_selection(self.current_selection(), self.program)
         if not tag:
             return
@@ -1416,8 +2361,8 @@ class PLCAsciiIDE:
                 self.status_var.set(f"Removed force from {tag}")
                 return
             tags = self.remote_snapshot.get("tags", {}) if isinstance(self.remote_snapshot, dict) else {}
-            current_value = bool(tags.get(tag, False)) if isinstance(tags, dict) else False
-            value = ask_bool(self.root, "Force tag", f"Force value for {tag}", initial="1" if current_value else "0")
+            current_value = tags.get(tag, False) if isinstance(tags, dict) else False
+            value = ask_runtime_value(self.root, "Force tag", f"Force value for {tag}", initial=format_runtime_value(current_value))
             if value is None:
                 return
             remote = self.require_remote()
@@ -1425,7 +2370,7 @@ class PLCAsciiIDE:
                 return
             remote.force_tag(tag, enabled=True, value=value, timeout=0.5)
             self.remote_snapshot_request()
-            self.status_var.set(f"Forced {tag} = {int(value)}")
+            self.status_var.set(f"Forced {tag} = {format_runtime_value(value)}")
             return
 
         if tag in self.engine.forced:
@@ -1436,12 +2381,12 @@ class PLCAsciiIDE:
             return
 
         current_value = self.engine.read_tag(tag)
-        value = ask_bool(self.root, "Force tag", f"Force value for {tag}", initial="1" if current_value else "0")
+        value = ask_runtime_value(self.root, "Force tag", f"Force value for {tag}", initial=format_runtime_value(current_value))
         if value is None:
             return
         self.engine.set_force(tag, value)
         self.last_scan = None
-        self.status_var.set(f"Forced {tag} = {int(value)}")
+        self.status_var.set(f"Forced {tag} = {format_runtime_value(value)}")
         self.render_ladder()
 
     def on_close(self) -> None:

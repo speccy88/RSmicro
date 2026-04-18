@@ -39,6 +39,45 @@ class RenderTests(unittest.TestCase):
         rendered = render_program(program, traces=traces, timer_values={"timer1": {"acc": 250, "pre": 10000, "en": True, "dn": False, "tt": True}})
         self.assertIn("[TON timer1 acc:00250ms]", rendered)
 
+    def test_forced_contact_is_marked_in_render(self) -> None:
+        program = Program(
+            name="forced-render",
+            rungs=[Rung(conditions=[Step("XIC", "x1")], actions=[Step("OTE", "y1")])],
+        )
+        rendered = render_program(program, forced_tags={"x1"})
+        self.assertIn("[f x1]", rendered)
+
+    def test_numeric_instructions_render_in_ascii_view(self) -> None:
+        program = Program(
+            name="numeric-render",
+            rungs=[
+                Rung(
+                    comment="Math rung",
+                    conditions=[Step("CMP", params={"left": "count", "right": 5, "cmp": ">="})],
+                    actions=[
+                        Step("MOV", "dest", params={"source": 5}),
+                        Step("ADD", "sum", params={"left": "dest", "right": 2}),
+                    ],
+                )
+            ],
+        )
+
+        rendered = render_program(program)
+
+        self.assertIn("[CMP count >= 5]", rendered)
+        self.assertIn("[MOV 5 -> dest]", rendered)
+        self.assertIn("[ADD dest 2 -> sum]", rendered)
+
+    def test_counter_instruction_renders(self) -> None:
+        program = Program(
+            name="counter-render",
+            rungs=[Rung(conditions=[Step("XIC", "pulse")], actions=[Step("CTU", "counter1")])],
+        )
+
+        rendered = render_program(program)
+
+        self.assertIn("[CTU counter1 pre:0 acc:0]", rendered)
+
 
 if __name__ == "__main__":
     unittest.main()

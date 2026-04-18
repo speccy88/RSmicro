@@ -50,6 +50,7 @@ class DeviceRuntime:
             mode=self.mode,
             tags=result.tags,
             timers=result.timers,
+            counters=result.counters,
             forced=dict(self.engine.forced),
             rung_power=result.rung_power,
         )
@@ -64,7 +65,7 @@ class DeviceRuntime:
             return {"type": "ack", "request": "download_program", "program": self.program.name}
         if message_type == "set_tag":
             tag = str(payload["tag"])
-            value = bool(payload["value"])
+            value = payload["value"]
             binding = self.find_binding(tag)
             if binding is not None:
                 self.backend.write(binding.address, value)
@@ -73,7 +74,7 @@ class DeviceRuntime:
         if message_type == "force":
             tag = str(payload["tag"])
             if bool(payload["enabled"]):
-                self.engine.set_force(tag, bool(payload["value"]))
+                self.engine.set_force(tag, payload["value"])
             else:
                 self.engine.clear_force(tag)
             return {"type": "ack", "request": "force", "tag": tag}
