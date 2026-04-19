@@ -347,7 +347,11 @@ class LadderRenderer:
     ) -> tuple[int, bool]:
         truth = trace.truth if trace else False
         power_out = trace.power_out if trace else False
-        role = ROLE_ELEMENT_ON if truth else ROLE_ELEMENT_OFF
+        if step.op in {"CTU", "CTD"}:
+            counter = self.counter_values.get(step.tag, {})
+            role = ROLE_ELEMENT_ON if bool(counter.get("dn", False)) else ROLE_ELEMENT_OFF
+        else:
+            role = ROLE_ELEMENT_ON if truth else ROLE_ELEMENT_OFF
         segments = step_segments(step, role, self.timer_values, self.counter_values, self.forced_tags, self.show_timer_acc)
         token = "".join(text for text, _ in segments)
         selection_key = self._selection_key("step", rung_index, path)

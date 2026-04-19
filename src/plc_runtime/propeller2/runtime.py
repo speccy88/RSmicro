@@ -14,11 +14,12 @@ except ImportError:  # pragma: no cover
     serial = None
 
 
-DEFAULT_SCAN_MS = 50
+DEFAULT_SCAN_MS = 1
+DEFAULT_BAUDRATE = 921600
 PROGRAM_HEX_CHUNK_SIZE = 96
 DEFAULT_ACTIVE_LOW_OUTPUTS = {56, 57, 58, 59, 60, 61, 62, 63}
 SUPPORTED_VARIABLE_TYPES = {"bool", "int", "timer", "counter"}
-DATA_RAM_BASE = 0x12000
+FALLBACK_BAUDRATES = (DEFAULT_BAUDRATE, 115200)
 
 
 class Propeller2RuntimeError(RuntimeError):
@@ -53,6 +54,12 @@ class CounterSymbols:
 
 
 @dataclass(slots=True)
+class ForceSymbols:
+    enabled: str
+    value: str
+
+
+@dataclass(slots=True)
 class CompileContext:
     program: Program
     scan_ms: int
@@ -62,13 +69,15 @@ class CompileContext:
     mode_symbol: str = ""
     scan_ms_symbol: str = ""
     scalar_symbols: dict[str, str] = field(default_factory=dict)
+    scalar_force_symbols: dict[str, ForceSymbols] = field(default_factory=dict)
     timer_symbols: dict[str, TimerSymbols] = field(default_factory=dict)
     counter_symbols: dict[str, CounterSymbols] = field(default_factory=dict)
     input_bindings: list[ScalarBinding] = field(default_factory=list)
     output_bindings: list[ScalarBinding] = field(default_factory=list)
     branch_symbols: list[tuple[str, str]] = field(default_factory=list)
+    data_symbols: list[str] = field(default_factory=list)
     _branch_index: int = 0
-    _next_address: int = DATA_RAM_BASE
+    _data_index: int = 0
 
     def alloc_branch_symbols(self) -> tuple[str, str]:
         self._branch_index += 1
@@ -77,9 +86,10 @@ class CompileContext:
         return symbols
 
     def alloc_long_symbol(self) -> str:
-        address = self._next_address
-        self._next_address += 4
-        return f"${address:05X}"
+        symbol = f"PLCDATA{self._data_index}"
+        self._data_index += 1
+        self.data_symbols.append(symbol)
+        return symbol
 
 
 class TaqozConsole:
@@ -90,12 +100,14 @@ class TaqozConsole:
 
     def enter_taqoz(self, *, reset: bool = True, timeout: float = 2.0) -> str:
         self.serial_port.reset_input_buffer()
+        if hasattr(self.serial_port, "reset_output_buffer"):
+            self.serial_port.reset_output_buffer()
         if reset:
             self.serial_port.write(bytes([0x3E, 0x20, 0x1B]))
             time.sleep(0.6)
         else:
             self.serial_port.write(b"\r")
-            time.sleep(0.05)
+            time.sleep(0.005)
         return self.read_until_prompt(timeout=timeout)
 
     def read_until_prompt(self, timeout: float = 2.0) -> str:
@@ -109,12 +121,12 @@ class TaqozConsole:
                 if self.PROMPT in text:
                     return text
                 continue
-            time.sleep(0.01)
+            time.sleep(0.001)
         return b"".join(chunks).decode("utf-8", "ignore")
 
     def send_command(self, command: str, timeout: float = 2.0) -> str:
         self.serial_port.write(command.encode("utf-8") + b"\r")
-        time.sleep(0.05)
+        time.sleep(0.005)
         return self.read_until_prompt(timeout=timeout)
 
     def send_source(self, source: str, timeout: float = 2.0) -> list[str]:
@@ -149,7 +161,7 @@ class TaqozConsole:
         return responses
 
 
-def open_serial_port(port: str, baudrate: int = 115200, timeout: float = 0.2) -> Any:
+def open_serial_port(port: str, baudrate: int = DEFAULT_BAUDRATE, timeout: float = 0.2) -> Any:
     if serial is None:
         raise Propeller2RuntimeError("pyserial is not installed. Install with: pip install -e .[serial]")
     serial_port = serial.Serial()
@@ -160,6 +172,52 @@ def open_serial_port(port: str, baudrate: int = 115200, timeout: float = 0.2) ->
     serial_port.rts = False
     serial_port.open()
     return serial_port
+
+
+def propeller2_baud_candidates(baudrate: int | None = None) -> list[int]:
+    candidates: list[int] = []
+    for candidate in (baudrate, *FALLBACK_BAUDRATES):
+        if candidate is None:
+            continue
+        value = int(candidate)
+        if value <= 0 or value in candidates:
+            continue
+        candidates.append(value)
+    return candidates or [DEFAULT_BAUDRATE]
+
+
+def open_taqoz_console(
+    port: str,
+    *,
+    baudrate: int = DEFAULT_BAUDRATE,
+    timeout: float = 0.2,
+    reset: bool = True,
+    attach_timeout: float = 2.5,
+) -> tuple[Any, TaqozConsole, int]:
+    last_response = ""
+    tried: list[int] = []
+    for candidate in propeller2_baud_candidates(baudrate):
+        serial_port = open_serial_port(port, baudrate=candidate, timeout=timeout)
+        console = TaqozConsole(serial_port)
+        prompt_seen = False
+        try:
+            response = console.enter_taqoz(reset=reset, timeout=attach_timeout)
+            prompt_seen = console.PROMPT in response
+            if prompt_seen:
+                return serial_port, console, candidate
+            last_response = response.strip()
+        except Exception as exc:
+            last_response = str(exc).strip()
+        finally:
+            if not prompt_seen and serial_port.is_open:
+                serial_port.close()
+        tried.append(candidate)
+
+    detail = f" Last response: {last_response!r}." if last_response else ""
+    tried_text = ", ".join(str(candidate) for candidate in tried)
+    raise Propeller2RuntimeError(
+        f"Unable to enter TAQOZ on {port}. Tried baud rates: {tried_text}.{detail}"
+    )
 
 
 def _bool_word(value: bool) -> str:
@@ -215,6 +273,10 @@ def _build_context(program: Program, scan_ms: int) -> CompileContext:
     for index, variable in enumerate(scalar_variables):
         _ = index
         context.scalar_symbols[variable.tag] = context.alloc_long_symbol()
+        context.scalar_force_symbols[variable.tag] = ForceSymbols(
+            enabled=context.alloc_long_symbol(),
+            value=context.alloc_long_symbol(),
+        )
 
     timer_configs = list(program.timer_configs().values())
     for index, timer in enumerate(timer_configs):
@@ -325,6 +387,16 @@ def _emit_scalar_store(context: CompileContext, tag: str) -> str:
     if variable_type == "bool":
         return _emit_bool_store(context.scalar_symbols[tag])
     return f"{context.scalar_symbols[tag]} !"
+
+
+def _emit_force_value_store(context: CompileContext, tag: str) -> str:
+    force_symbols = context.scalar_force_symbols.get(tag)
+    if force_symbols is None:
+        raise Propeller2RuntimeError(f"Tag '{tag}' cannot be forced directly on the Propeller 2 runtime")
+    variable_type = next(variable.data_type for variable in context.scalar_variables if variable.tag == tag)
+    if variable_type == "bool":
+        return _emit_bool_store(force_symbols.value)
+    return f"{force_symbols.value} !"
 
 
 def _emit_timer_word(symbols: TimerSymbols, scan_ms_symbol: str) -> list[str]:
@@ -497,11 +569,40 @@ class Propeller2Runtime(BoardRuntime):
             for index in range(0, len(program_hex), PROGRAM_HEX_CHUNK_SIZE)
         ] or [""]
 
+        data_words = [
+            "128 bytes PLCHOSTBUF",
+            "VAR PLCHOSTLEN",
+            "VAR PLCHOSTPTR",
+            "VAR PLCHOSTA",
+            "VAR PLCHOSTB",
+            "VAR PLCHOSTC",
+            *[f"VAR {symbol}" for symbol in context.data_symbols],
+        ]
+
         core_words = [
             ": PLC.BOOL 0<> IF 1 ELSE 0 THEN ;",
-            ": PLC.HELLO .\" PLC HELLO 1\" CRLF ;",
+            ": PLC.HELLO .\" PLC HELLO 2\" CRLF ;",
             f": PLC.RUN 1 {context.mode_symbol} ! ;",
             f": PLC.STOP 0 {context.mode_symbol} ! ;",
+        ]
+        runtime_words = [
+            ": PLC.RUNNER",
+            f"  BEGIN {context.mode_symbol} @ IF PLC.SCAN THEN {context.scan_ms_symbol} @ ms AGAIN",
+            ";",
+            ": PLC.START.COG",
+            "  1 COGSTOP",
+            "  1 NEWCOG",
+            "  5 ms",
+            "  ' PLC.RUNNER 1 TASK W!",
+            ";",
+            ": PLC.RESTORE.RUNTIME",
+            "  PLC.STOP",
+            "  PLC.START.COG",
+            ";",
+            ": PLC.START.RUNTIME",
+            "  PLC.INIT",
+            "  PLC.RESTORE.RUNTIME",
+            ";",
         ]
 
         timer_words: list[str] = []
@@ -533,25 +634,90 @@ class Propeller2Runtime(BoardRuntime):
             else:
                 output_lines.append(f"  {state} @ IF {item.address} HIGH ELSE {item.address} LOW THEN")
 
+        force_lines = [
+            (
+                f"  {context.scalar_force_symbols[variable.tag].enabled} @ IF "
+                f"{context.scalar_force_symbols[variable.tag].value} @ "
+                f"{_emit_scalar_store(context, variable.tag)} THEN"
+            )
+            for variable in context.scalar_variables
+        ]
+
         scan_rung_calls = [f"  PLC.RUNG.{index}" for index, _rung in enumerate(program.rungs)]
         set_words = [
             f": PLC.SET.{index} {_emit_scalar_store(context, variable.tag)} ;"
             for index, variable in enumerate(context.scalar_variables)
         ]
+        for index, variable in enumerate(context.scalar_variables):
+            force_symbols = context.scalar_force_symbols[variable.tag]
+            set_words.extend(
+                [
+                    (
+                        f": PLC.FORCE.SET.{index} "
+                        f"DUP {_emit_force_value_store(context, variable.tag)} "
+                        f"DROP 1 {force_symbols.enabled} ! ;"
+                    ),
+                    f": PLC.FORCE.CLEAR.{index} 0 {force_symbols.enabled} ! ;",
+                ]
+            )
+        for index, timer in enumerate(program.timer_configs().values()):
+            symbols = context.timer_symbols[timer.tag]
+            set_words.extend(
+                [
+                    (
+                        f": PLC.SET.TIMER.PRE.{index} "
+                        f"0 MAX DUP {symbols.pre} ! DROP "
+                        f"{symbols.acc} @ {symbols.pre} @ MIN {symbols.acc} ! "
+                        f"{symbols.acc} @ {symbols.pre} @ => PLC.BOOL {symbols.dn} ! "
+                        f"{symbols.en} @ {symbols.dn} @ 0= AND PLC.BOOL {symbols.tt} ! ;"
+                    ),
+                    (
+                        f": PLC.SET.TIMER.ACC.{index} "
+                        f"0 MAX {symbols.pre} @ MIN DUP {symbols.acc} ! DROP "
+                        f"{symbols.acc} @ {symbols.pre} @ => PLC.BOOL {symbols.dn} ! "
+                        f"{symbols.en} @ {symbols.dn} @ 0= AND PLC.BOOL {symbols.tt} ! ;"
+                    ),
+                    f": PLC.SET.TIMER.DN.{index} PLC.BOOL {symbols.dn} ! ;",
+                    f": PLC.SET.TIMER.EN.{index} PLC.BOOL {symbols.en} ! ;",
+                    f": PLC.SET.TIMER.TT.{index} PLC.BOOL {symbols.tt} ! ;",
+                ]
+            )
+        for index, counter in enumerate(program.counter_configs().values()):
+            symbols = context.counter_symbols[counter.tag]
+            set_words.extend(
+                [
+                    (
+                        f": PLC.SET.COUNTER.PRE.{index} "
+                        f"0 MAX DUP {symbols.pre} ! DROP "
+                        f"{symbols.acc} @ {symbols.pre} @ = PLC.BOOL {symbols.dn} ! ;"
+                    ),
+                    (
+                        f": PLC.SET.COUNTER.ACC.{index} "
+                        f"DUP {symbols.acc} ! DROP "
+                        f"{symbols.acc} @ {symbols.pre} @ = PLC.BOOL {symbols.dn} ! ;"
+                    ),
+                    f": PLC.SET.COUNTER.DN.{index} PLC.BOOL {symbols.dn} ! ;",
+                ]
+            )
 
         snapshot_lines = [f"  .\" PLC MODE \" {context.mode_symbol} @ . CRLF"]
         for index, variable in enumerate(context.scalar_variables):
             snapshot_lines.append(f"  .\" PLC VAR {index} \" {context.scalar_symbols[variable.tag]} @ . CRLF")
+        for index, variable in enumerate(context.scalar_variables):
+            force_symbols = context.scalar_force_symbols[variable.tag]
+            snapshot_lines.append(
+                f"  {force_symbols.enabled} @ IF .\" PLC FORCE {index} \" {force_symbols.value} @ . CRLF THEN"
+            )
         for index, timer in enumerate(program.timer_configs().values()):
             symbols = context.timer_symbols[timer.tag]
             snapshot_lines.append(
                 " ".join(
                     [
                         f"  .\" PLC TIMER {index} \"",
-                        f"{symbols.pre} @ .",
-                        f"{symbols.acc} @ .",
-                        f"{symbols.dn} @ .",
-                        f"{symbols.en} @ .",
+                        f"{symbols.pre} @ . SPACE",
+                        f"{symbols.acc} @ . SPACE",
+                        f"{symbols.dn} @ . SPACE",
+                        f"{symbols.en} @ . SPACE",
                         f"{symbols.tt} @ .",
                         "CRLF",
                     ]
@@ -563,8 +729,8 @@ class Propeller2Runtime(BoardRuntime):
                 " ".join(
                     [
                         f"  .\" PLC COUNTER {index} \"",
-                        f"{symbols.pre} @ .",
-                        f"{symbols.acc} @ .",
+                        f"{symbols.pre} @ . SPACE",
+                        f"{symbols.acc} @ . SPACE",
                         f"{symbols.dn} @ .",
                         "CRLF",
                     ]
@@ -573,13 +739,183 @@ class Propeller2Runtime(BoardRuntime):
 
         upload_lines = [f"  .\" PLC CHUNK {index} {chunk}\" CRLF" for index, chunk in enumerate(program_chunks)]
 
+        host_words = [
+            ": PLC.HOST.RESET 0 PLCHOSTLEN ! 0 PLCHOSTPTR ! 0 PLCHOSTBUF C! ;",
+            ": PLC.HOST.APPEND PLCHOSTLEN @ 127 < IF PLCHOSTBUF PLCHOSTLEN @ + C! 1 PLCHOSTLEN +! 0 PLCHOSTBUF PLCHOSTLEN @ + C! ELSE DROP THEN ;",
+            ": PLC.HOST.READ.LINE PLC.HOST.RESET BEGIN KEY DUP 10 = OVER 13 = OR IF DROP EXIT THEN DUP 32 >= IF PLC.HOST.APPEND ELSE DROP THEN AGAIN ;",
+            ": PLC.HOST.CHAR PLCHOSTBUF PLCHOSTPTR @ + C@ ;",
+            ": PLC.HOST.NEXT 1 PLCHOSTPTR +! ;",
+            ": PLC.HOST.SKIP BEGIN PLC.HOST.CHAR BL = WHILE PLC.HOST.NEXT REPEAT ;",
+            ": PLC.HOST.DIGIT? DUP '0' => SWAP '9' <= AND ;",
+            ": PLC.HOST.PARSE.UINT PLC.HOST.SKIP 0 BEGIN PLC.HOST.CHAR PLC.HOST.DIGIT? WHILE 10 * PLC.HOST.CHAR '0' - + PLC.HOST.NEXT REPEAT ;",
+            ": PLC.HOST.PARSE.INT PLC.HOST.SKIP PLC.HOST.CHAR '-' = IF PLC.HOST.NEXT PLC.HOST.PARSE.UINT NEGATE ELSE PLC.HOST.PARSE.UINT THEN ;",
+            ": PLC.HOST.END .\" !END\" CRLF ;",
+            ": PLC.HOST.CMD.HELLO .\" !HELLO \" "
+            f"{context.mode_symbol} @ . CRLF 0 ;",
+            ": PLC.HOST.CMD.SNAPSHOT",
+            f"  .\" !MODE \" {context.mode_symbol} @ . CRLF",
+        ]
+        for index, variable in enumerate(context.scalar_variables):
+            host_words.append(f"  .\" !VAR {index} \" {context.scalar_symbols[variable.tag]} @ . CRLF")
+        for index, variable in enumerate(context.scalar_variables):
+            force_symbols = context.scalar_force_symbols[variable.tag]
+            host_words.append(
+                f"  {force_symbols.enabled} @ IF .\" !FORCE {index} \" {force_symbols.value} @ . CRLF THEN"
+            )
+        for index, timer in enumerate(program.timer_configs().values()):
+            symbols = context.timer_symbols[timer.tag]
+            host_words.append(
+                " ".join(
+                    [
+                        f"  .\" !TIMER {index} \"",
+                        f"{symbols.pre} @ . SPACE",
+                        f"{symbols.acc} @ . SPACE",
+                        f"{symbols.dn} @ . SPACE",
+                        f"{symbols.en} @ . SPACE",
+                        f"{symbols.tt} @ .",
+                        "CRLF",
+                    ]
+                )
+            )
+        for index, counter in enumerate(program.counter_configs().values()):
+            symbols = context.counter_symbols[counter.tag]
+            host_words.append(
+                " ".join(
+                    [
+                        f"  .\" !COUNTER {index} \"",
+                        f"{symbols.pre} @ . SPACE",
+                        f"{symbols.acc} @ . SPACE",
+                        f"{symbols.dn} @ .",
+                        "CRLF",
+                    ]
+                )
+            )
+        host_words.extend(
+            [
+                "  PLC.HOST.END",
+                "  0",
+                ";",
+                ": PLC.HOST.CMD.UPLOAD",
+            ]
+        )
+        for chunk in program_chunks:
+            host_words.append(f"  .\" !UPLOAD {chunk}\" CRLF")
+        host_words.extend(
+            [
+                "  PLC.HOST.END",
+                "  0",
+                ";",
+                f": PLC.HOST.CMD.RUN PLC.HOST.NEXT PLC.HOST.PARSE.INT IF PLC.RUN ELSE PLC.STOP THEN .\" !ACK RUN \" {context.mode_symbol} @ . CRLF 0 ;",
+                ": PLC.HOST.CMD.SET",
+                "  PLC.HOST.NEXT",
+                "  PLC.HOST.PARSE.UINT PLCHOSTA !",
+            ]
+        )
+        for index, variable in enumerate(context.scalar_variables):
+            store_value = "PLC.HOST.PARSE.INT"
+            host_words.append(
+                f"  PLCHOSTA @ {index} = IF {store_value} PLC.SET.{index} .\" !ACK SET {index}\" CRLF 0 EXIT THEN"
+            )
+        host_words.extend(
+            [
+                "  .\" !ERR SET\" CRLF",
+                "  0",
+                ";",
+                ": PLC.HOST.CMD.FORCE",
+                "  PLC.HOST.NEXT",
+                "  PLC.HOST.PARSE.UINT PLCHOSTA !",
+                "  PLC.HOST.PARSE.INT PLCHOSTB !",
+            ]
+        )
+        for index, variable in enumerate(context.scalar_variables):
+            host_words.append(f"  PLCHOSTA @ {index} = IF")
+            host_words.append(
+                f"    PLCHOSTB @ IF PLC.HOST.PARSE.INT PLC.FORCE.SET.{index} ELSE PLC.FORCE.CLEAR.{index} THEN"
+            )
+            host_words.append(f"    .\" !ACK FORCE {index}\" CRLF 0 EXIT")
+            host_words.append("  THEN")
+        host_words.extend(
+            [
+                "  .\" !ERR FORCE\" CRLF",
+                "  0",
+                ";",
+                ": PLC.HOST.CMD.TIMER",
+                "  PLC.HOST.NEXT",
+                "  PLC.HOST.PARSE.UINT PLCHOSTA !",
+                "  PLC.HOST.PARSE.UINT PLCHOSTB !",
+            ]
+        )
+        timer_member_selectors = {
+            "pre": 0,
+            "acc": 1,
+            "dn": 2,
+            "en": 3,
+            "tt": 4,
+        }
+        for index, _timer in enumerate(program.timer_configs().values()):
+            for member, selector in timer_member_selectors.items():
+                host_words.append(f"  PLCHOSTB @ {index} = PLCHOSTA @ {selector} = AND IF")
+                host_words.append(
+                    f"    PLC.HOST.PARSE.INT PLC.SET.TIMER.{member.upper()}.{index} .\" !ACK TIMER {selector} {index}\" CRLF 0 EXIT"
+                )
+                host_words.append("  THEN")
+        host_words.extend(
+            [
+                "  .\" !ERR TIMER\" CRLF",
+                "  0",
+                ";",
+                ": PLC.HOST.CMD.COUNTER",
+                "  PLC.HOST.NEXT",
+                "  PLC.HOST.PARSE.UINT PLCHOSTA !",
+                "  PLC.HOST.PARSE.UINT PLCHOSTB !",
+            ]
+        )
+        counter_member_selectors = {
+            "pre": 0,
+            "acc": 1,
+            "dn": 2,
+        }
+        for index, _counter in enumerate(program.counter_configs().values()):
+            for member, selector in counter_member_selectors.items():
+                host_words.append(f"  PLCHOSTB @ {index} = PLCHOSTA @ {selector} = AND IF")
+                host_words.append(
+                    f"    PLC.HOST.PARSE.INT PLC.SET.COUNTER.{member.upper()}.{index} .\" !ACK COUNTER {selector} {index}\" CRLF 0 EXIT"
+                )
+                host_words.append("  THEN")
+        host_words.extend(
+            [
+                "  .\" !ERR COUNTER\" CRLF",
+                "  0",
+                ";",
+                ": PLC.HOST.CMD.QUIT .\" !ACK QUIT\" CRLF 1 ;",
+                ": PLC.HOST.DISPATCH",
+                "  0 PLCHOSTPTR !",
+                "  PLC.HOST.SKIP",
+                "  PLC.HOST.CHAR DUP 0= IF DROP 0 EXIT THEN",
+                "  DUP 'H' = IF DROP PLC.HOST.CMD.HELLO EXIT THEN",
+                "  DUP 'S' = IF DROP PLC.HOST.CMD.SNAPSHOT EXIT THEN",
+                "  DUP 'U' = IF DROP PLC.HOST.CMD.UPLOAD EXIT THEN",
+                "  DUP 'R' = IF DROP PLC.HOST.CMD.RUN EXIT THEN",
+                "  DUP 'V' = IF DROP PLC.HOST.CMD.SET EXIT THEN",
+                "  DUP 'F' = IF DROP PLC.HOST.CMD.FORCE EXIT THEN",
+                "  DUP 'T' = IF DROP PLC.HOST.CMD.TIMER EXIT THEN",
+                "  DUP 'C' = IF DROP PLC.HOST.CMD.COUNTER EXIT THEN",
+                "  DUP 'Q' = IF DROP PLC.HOST.CMD.QUIT EXIT THEN",
+                "  DROP .\" !ERR UNKNOWN\" CRLF 0",
+                ";",
+                ": PLC.HOST BEGIN PLC.HOST.READ.LINE PLC.HOST.DISPATCH UNTIL ;",
+            ]
+        )
+
         init_lines = [
             f"  {context.scan_ms} {context.scan_ms_symbol} !",
-            f"  1 {context.mode_symbol} !",
+            f"  0 {context.mode_symbol} !",
         ]
         for variable in context.scalar_variables:
             initial = variable.initial if variable.initial is not None else 0
             init_lines.append(f"  {_normalize_literal(initial)} {context.scalar_symbols[variable.tag]} !")
+            init_lines.append(f"  0 {context.scalar_force_symbols[variable.tag].enabled} !")
+            init_lines.append(f"  {_normalize_literal(initial)} {context.scalar_force_symbols[variable.tag].value} !")
         for timer in program.timer_configs().values():
             symbols = context.timer_symbols[timer.tag]
             init_lines.append(f"  {int(timer.preset_ms)} {symbols.pre} !")
@@ -597,17 +933,21 @@ class Propeller2Runtime(BoardRuntime):
 
         template = self.resource_text("runtime.fth")
         sections = {
+            "@@DATA_WORDS@@": "\n".join(data_words),
             "@@CORE_WORDS@@": "\n".join(core_words),
             "@@TIMER_WORDS@@": "\n".join(timer_words),
             "@@COUNTER_WORDS@@": "\n".join(counter_words),
             "@@RUNG_WORDS@@": "\n".join(rung_words),
             "@@INPUT_LINES@@": "\n".join(input_lines),
             "@@OUTPUT_LINES@@": "\n".join(output_lines),
+            "@@FORCE_LINES@@": "\n".join(force_lines),
             "@@SCAN_RUNG_CALLS@@": "\n".join(scan_rung_calls),
             "@@SET_WORDS@@": "\n".join(set_words),
+            "@@HOST_WORDS@@": "\n".join(host_words),
             "@@SNAPSHOT_LINES@@": "\n".join(snapshot_lines),
             "@@UPLOAD_LINES@@": "\n".join(upload_lines),
             "@@INIT_LINES@@": "\n".join(init_lines),
+            "@@RUNTIME_WORDS@@": "\n".join(runtime_words),
         }
         for marker, content in sections.items():
             template = template.replace(marker, content)
@@ -618,13 +958,17 @@ class Propeller2Runtime(BoardRuntime):
         port: str,
         *,
         program: Program,
-        baudrate: int = 115200,
+        baudrate: int = DEFAULT_BAUDRATE,
         scan_ms: int = DEFAULT_SCAN_MS,
     ) -> None:
-        serial_port = open_serial_port(port, baudrate=baudrate)
+        serial_port, console, _actual_baudrate = open_taqoz_console(
+            port,
+            baudrate=baudrate,
+            timeout=0.2,
+            reset=True,
+            attach_timeout=4.0,
+        )
         try:
-            console = TaqozConsole(serial_port)
-            console.enter_taqoz(reset=True, timeout=2.5)
             console.send_source(self.build_runtime_source(program, scan_ms=scan_ms), timeout=2.0)
         finally:
             serial_port.close()
@@ -641,7 +985,7 @@ def install_runtime(
     port: str,
     *,
     program: Program,
-    baudrate: int = 115200,
+    baudrate: int = DEFAULT_BAUDRATE,
     scan_ms: int = DEFAULT_SCAN_MS,
 ) -> None:
     _RUNTIME.install(port, program=program, baudrate=baudrate, scan_ms=scan_ms)

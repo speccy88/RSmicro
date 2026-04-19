@@ -38,26 +38,31 @@ class CircuitPythonRuntime(BoardRuntime):
 
     def board_files(self, program: Program | None = None, **kwargs: Any) -> dict[str, str]:
         config = kwargs.get("config")
-        payload_program = (
-            program.to_dict()
-            if program is not None
-            else {"name": "device", "rungs": [], "variables": [], "bindings": []}
-        )
+        include_program = bool(kwargs.get("include_program", False))
         payload_config = self.merge_config(config)
-        return {
+        bundle = {
             "plc_runtime_portable.py": self.resource_text("plc_runtime_portable.py"),
             "plc_runtime_board.py": self.resource_text("plc_runtime_board.py"),
             "plc_runtime_config.json": json.dumps(payload_config, indent=2),
-            "plc_program.json": json.dumps(payload_program, indent=2),
             "code.py": self.resource_text("code.py"),
         }
+        if include_program:
+            payload_program = (
+                program.to_dict()
+                if program is not None
+                else {"name": "device", "runtime_target": "circuitpython", "rungs": [], "variables": [], "bindings": []}
+            )
+            bundle["plc_program.json"] = json.dumps(payload_program, indent=2)
+        return bundle
 
     def build_runtime_bundle(
         self,
         program: Program | None = None,
         config: dict[str, Any] | None = None,
+        *,
+        include_program: bool = False,
     ) -> dict[str, str]:
-        return self.board_files(program, config=config)
+        return self.board_files(program, config=config, include_program=include_program)
 
     def _run_ampy(self, port: str, *args: str) -> None:
         command = ["ampy", "--port", port, "--delay", "1", *args]
@@ -66,6 +71,15 @@ class CircuitPythonRuntime(BoardRuntime):
             return
         details = result.stderr.strip() or result.stdout.strip() or f"Command failed: {' '.join(command)}"
         raise RuntimeError(details)
+
+    def _remove_program_via_ampy(self, port: str) -> None:
+        try:
+            self._run_ampy(port, "rm", "plc_program.json")
+        except Exception as exc:
+            details = str(exc).lower()
+            if "no such file" in details or "not found" in details or "enoent" in details:
+                return
+            raise
 
     @staticmethod
     def _mounted_circuitpython_volume() -> Path | None:
@@ -91,6 +105,9 @@ class CircuitPythonRuntime(BoardRuntime):
             )
         for remote_name, content in bundle.items():
             (volume / remote_name).write_text(content, encoding="utf-8")
+        program_path = volume / "plc_program.json"
+        if program_path.exists():
+            program_path.unlink()
         return volume
 
     def install(
@@ -100,12 +117,12 @@ class CircuitPythonRuntime(BoardRuntime):
         program: Program | None = None,
         config: dict[str, Any] | None = None,
     ) -> None:
-        bundle = self.build_runtime_bundle(program, config)
+        _ = program
+        bundle = self.build_runtime_bundle(config=config, include_program=False)
         upload_order = [
             "plc_runtime_portable.py",
             "plc_runtime_board.py",
             "plc_runtime_config.json",
-            "plc_program.json",
             "code.py",
         ]
         with tempfile.TemporaryDirectory(prefix="plc-circuitpython-") as tempdir:
@@ -115,6 +132,7 @@ class CircuitPythonRuntime(BoardRuntime):
                     local_path = temp_root / remote_name
                     local_path.write_text(bundle[remote_name], encoding="utf-8")
                     self._run_ampy(port, "put", str(local_path), remote_name)
+                self._remove_program_via_ampy(port)
                 self._run_ampy(port, "reset")
                 return
             except Exception as exc:
@@ -139,8 +157,13 @@ def merge_config(config: dict[str, Any] | None) -> dict[str, Any]:
     return _RUNTIME.merge_config(config)
 
 
-def build_runtime_bundle(program: Program | None = None, config: dict[str, Any] | None = None) -> dict[str, str]:
-    return _RUNTIME.build_runtime_bundle(program, config)
+def build_runtime_bundle(
+    program: Program | None = None,
+    config: dict[str, Any] | None = None,
+    *,
+    include_program: bool = False,
+) -> dict[str, str]:
+    return _RUNTIME.build_runtime_bundle(program, config, include_program=include_program)
 
 
 def install_runtime(

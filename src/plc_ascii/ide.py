@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, font, messagebox, simpledialog, ttk
@@ -13,6 +14,7 @@ from .model import (
     Node,
     Program,
     RUNTIME_TARGET_CIRCUITPYTHON,
+    RUNTIME_TARGET_MICROPYTHON,
     RUNTIME_TARGET_PROPELLER2,
     Rung,
     Step,
@@ -40,7 +42,8 @@ from .render import (
 from .serial_link import SerialJsonTransport
 from tkinterweb import HtmlFrame
 from plc_runtime.circuitpython import install_runtime as install_circuitpython_runtime
-from plc_runtime.propeller2 import Propeller2Transport, install_runtime as install_propeller2_runtime
+from plc_runtime.micropython import install_runtime as install_micropython_runtime
+from plc_runtime.propeller2 import DEFAULT_BAUDRATE as PROPELLER2_DEFAULT_BAUDRATE, Propeller2Transport, install_runtime as install_propeller2_runtime
 
 try:
     from serial.tools import list_ports  # type: ignore
@@ -158,12 +161,55 @@ TYPE_DISPLAY_NAMES = {
 DISPLAY_TO_TYPE_NAMES = {label: data_type for data_type, label in TYPE_DISPLAY_NAMES.items()}
 RUNTIME_TARGET_LABELS = {
     RUNTIME_TARGET_CIRCUITPYTHON: "CircuitPython",
+    RUNTIME_TARGET_MICROPYTHON: "MicroPython",
     RUNTIME_TARGET_PROPELLER2: "Propeller2 TAQOZ",
+}
+
+TARGET_BEHAVIORS: dict[str, dict[str, bool]] = {
+    RUNTIME_TARGET_CIRCUITPYTHON: {
+        "allow_download_bootstrap": True,
+        "auto_run_after_download": True,
+        "auto_online_after_download": True,
+        "supports_run_control": True,
+        "supports_live_edit": False,
+    },
+    RUNTIME_TARGET_MICROPYTHON: {
+        "allow_download_bootstrap": True,
+        "auto_run_after_download": True,
+        "auto_online_after_download": True,
+        "supports_run_control": True,
+        "supports_live_edit": False,
+    },
+    RUNTIME_TARGET_PROPELLER2: {
+        "allow_download_bootstrap": False,
+        "auto_run_after_download": True,
+        "auto_online_after_download": True,
+        "supports_run_control": True,
+        "supports_live_edit": False,
+    },
 }
 
 
 def runtime_target_label(target: str) -> str:
     return RUNTIME_TARGET_LABELS.get(normalize_runtime_target(target), "CircuitPython")
+
+
+def runtime_target_behavior(target: str) -> dict[str, bool]:
+    return TARGET_BEHAVIORS.get(normalize_runtime_target(target), TARGET_BEHAVIORS[RUNTIME_TARGET_CIRCUITPYTHON])
+
+
+def default_serial_baud_for_target(target: str) -> int:
+    normalized = normalize_runtime_target(target)
+    if normalized == RUNTIME_TARGET_PROPELLER2:
+        return PROPELLER2_DEFAULT_BAUDRATE
+    return 115200
+
+
+def remote_watch_interval_ms(target: str) -> int:
+    normalized = normalize_runtime_target(target)
+    if normalized == RUNTIME_TARGET_PROPELLER2:
+        return 100
+    return 500
 
 
 def display_type_name(data_type: str) -> str:
@@ -204,6 +250,51 @@ def parse_runtime_value(raw: str) -> bool | int | float:
     return value
 
 
+def parse_binding_address(raw: str) -> str | int:
+    text = raw.strip()
+    if not text:
+        raise ValueError("Binding requires a tag and address")
+    try:
+        return int(text, 10)
+    except ValueError:
+        return text
+
+
+def stopped_runtime_writebacks(program: Program, snapshot: dict[str, object] | None) -> dict[str, bool | int]:
+    if not isinstance(snapshot, dict):
+        return {}
+
+    writebacks: dict[str, bool | int] = {}
+    timers = snapshot.get("timers", {})
+    counters = snapshot.get("counters", {})
+
+    if isinstance(timers, dict):
+        for tag in program.timer_configs():
+            timer = timers.get(tag)
+            if not isinstance(timer, dict):
+                continue
+            if "acc" in timer:
+                writebacks[f"{tag}.acc"] = int(timer["acc"])
+            if "dn" in timer:
+                writebacks[f"{tag}.dn"] = bool(timer["dn"])
+            if "en" in timer:
+                writebacks[f"{tag}.en"] = bool(timer["en"])
+            if "tt" in timer:
+                writebacks[f"{tag}.tt"] = bool(timer["tt"])
+
+    if isinstance(counters, dict):
+        for tag in program.counter_configs():
+            counter = counters.get(tag)
+            if not isinstance(counter, dict):
+                continue
+            if "acc" in counter:
+                writebacks[f"{tag}.acc"] = int(counter["acc"])
+            if "dn" in counter:
+                writebacks[f"{tag}.dn"] = bool(counter["dn"])
+
+    return writebacks
+
+
 def ask_bool(parent: tk.Misc, title: str, prompt: str, initial: str = "0") -> bool | None:
     raw = simpledialog.askstring(title, prompt, parent=parent, initialvalue=initial)
     if raw is None:
@@ -224,6 +315,15 @@ def format_runtime_value(value: bool | int | float) -> str:
     if isinstance(value, float):
         return format(value, "g")
     return str(value)
+
+
+def parse_runtime_string(raw: str, data_type: str) -> bool | int | float:
+    text = raw.strip()
+    if data_type == "bool":
+        return parse_bool(text)
+    if data_type == "float":
+        return float(text)
+    return int(text)
 
 
 def infer_scalar_type(value: bool | int | float) -> str:
@@ -338,7 +438,22 @@ def populate_program_variables(program: Program, current_values: dict[str, objec
             if preset_key in current_values:
                 variable.preset = int(current_values[preset_key])
 
+    sync_composite_presets_into_steps(program)
     program.validate()
+
+
+def sync_composite_presets_into_steps(program: Program) -> None:
+    variable_map = program.variable_map()
+    for rung in program.rungs:
+        for step in walk_steps(rung.elements):
+            if step.op == "TON":
+                variable = variable_map.get(step.tag)
+                if variable is not None and variable.data_type == "timer":
+                    step.arg = int(variable.preset or 0)
+            elif step.op in {"CTU", "CTD"}:
+                variable = variable_map.get(step.tag)
+                if variable is not None and variable.data_type == "counter":
+                    step.arg = int(variable.preset or 0)
 
 
 def validate_program_step_types(program: Program, step: Step) -> None:
@@ -694,7 +809,7 @@ class BindingDialog(tk.Toplevel):
 
         self.tag_var = tk.StringVar(value=initial.tag if initial else "")
         self.direction_var = tk.StringVar(value=initial.direction if initial else "input")
-        self.address_var = tk.StringVar(value=initial.address if initial else "")
+        self.address_var = tk.StringVar(value=str(initial.address) if initial else "")
 
         body = ttk.Frame(self, padding=12, style="Card.TFrame")
         body.grid(sticky="nsew")
@@ -729,7 +844,7 @@ class BindingDialog(tk.Toplevel):
             binding = Binding(
                 tag=self.tag_var.get().strip(),
                 direction=self.direction_var.get().strip(),
-                address=self.address_var.get().strip(),
+                address=parse_binding_address(self.address_var.get()),
             )
             binding.validate()
         except Exception as exc:
@@ -992,6 +1107,10 @@ class PLCAsciiIDE:
         self.run_button: ttk.Button | None = None
         self.stop_button: ttk.Button | None = None
         self.download_button: ttk.Button | None = None
+        self.target_start_button: ttk.Button | None = None
+        self.target_stop_button: ttk.Button | None = None
+        self.edit_live_button: ttk.Button | None = None
+        self.upload_button: ttk.Button | None = None
         self.font_label_widget: ttk.Label | None = None
         self.disconnect_button: ttk.Button | None = None
         self.reset_button: ttk.Checkbutton | None = None
@@ -1006,6 +1125,7 @@ class PLCAsciiIDE:
         self.monitor_tree: ttk.Treeview | None = None
 
         self.mode_var = tk.StringVar(value="offline")
+        self.mode_var.trace_add("write", lambda *_: self._sync_mode_widgets())
         self.status_var = tk.StringVar(value="Offline programming / simulation")
         self.auto_online_var = tk.BooleanVar(value=False)
         self.help_var = tk.BooleanVar(value=False)
@@ -1016,7 +1136,16 @@ class PLCAsciiIDE:
         self.runtime_target_var = tk.StringVar(value=normalize_runtime_target(self.program.runtime_target))
         self.runtime_target_label_var = tk.StringVar(value=f"Target: {runtime_target_label(self.program.runtime_target)}")
         self.last_serial_port = default_serial_port()
-        self.last_serial_baud = 115200
+        self.last_serial_baud = default_serial_baud_for_target(self.program.runtime_target)
+        self.last_serial_baud_by_target = {
+            RUNTIME_TARGET_CIRCUITPYTHON: default_serial_baud_for_target(RUNTIME_TARGET_CIRCUITPYTHON),
+            RUNTIME_TARGET_MICROPYTHON: default_serial_baud_for_target(RUNTIME_TARGET_MICROPYTHON),
+            RUNTIME_TARGET_PROPELLER2: default_serial_baud_for_target(RUNTIME_TARGET_PROPELLER2),
+        }
+        self.remote_platform: str | None = None
+        self.remote_execution_mode: str | None = None
+        self.remote_program_loaded: bool | None = None
+        self.target_program_signature: str | None = None
 
         self.fixed_font = font.nametofont("TkFixedFont").copy()
         self.fixed_font.configure(size=self.font_size_var.get())
@@ -1087,6 +1216,12 @@ class PLCAsciiIDE:
             command=self.on_runtime_target_selected,
         )
         target_menu.add_radiobutton(
+            label="MicroPython",
+            variable=self.runtime_target_var,
+            value=RUNTIME_TARGET_MICROPYTHON,
+            command=self.on_runtime_target_selected,
+        )
+        target_menu.add_radiobutton(
             label="Propeller2 TAQOZ",
             variable=self.runtime_target_var,
             value=RUNTIME_TARGET_PROPELLER2,
@@ -1095,6 +1230,7 @@ class PLCAsciiIDE:
         remote_menu.add_cascade(label="Target Board", menu=target_menu)
         remote_menu.add_separator()
         remote_menu.add_command(label="Install Runtime to CircuitPython...", command=self.install_circuitpython_runtime)
+        remote_menu.add_command(label="Install Runtime to MicroPython...", command=self.install_micropython_runtime)
         remote_menu.add_command(label="Load Runtime to Propeller 2 (RAM)...", command=self.install_propeller2_runtime)
         remote_menu.add_separator()
         remote_menu.add_command(label="Download", command=self.remote_download_program)
@@ -1233,10 +1369,26 @@ class PLCAsciiIDE:
         upload_button = ttk.Button(toolbar, text="Upload", command=self.remote_upload_program, style="Tool.TButton")
         upload_button.pack(side="left", padx=(0, 8))
         self.register_tooltip(upload_button, "Connect to the board if needed, then read the stored ladder program back into the IDE.")
+        self.upload_button = upload_button
 
         go_online_button = ttk.Button(toolbar, text="Go Online", command=self.go_online, style="Accent.TButton")
         go_online_button.pack(side="left", padx=(0, 8))
         self.register_tooltip(go_online_button, "Connect to the board if needed, switch to online mode, and start continuous live monitoring.")
+
+        target_start_button = ttk.Button(toolbar, text="Start Target", command=self.remote_start_execution, style="Tool.TButton")
+        target_start_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(target_start_button, "Start ladder execution on the connected target without changing the saved project file.")
+        self.target_start_button = target_start_button
+
+        target_stop_button = ttk.Button(toolbar, text="Stop Target", command=self.remote_stop_execution, style="Tool.TButton")
+        target_stop_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(target_stop_button, "Stop ladder execution on the connected target while keeping the serial session active.")
+        self.target_stop_button = target_stop_button
+
+        edit_live_button = ttk.Button(toolbar, text="Edit Live", command=self.edit_live_program, style="Tool.TButton")
+        edit_live_button.pack(side="left", padx=(0, 8))
+        self.register_tooltip(edit_live_button, "Load the current ladder from the board into the live editor without saving it back to disk.")
+        self.edit_live_button = edit_live_button
 
         disconnect_button = ttk.Button(toolbar, text="Disconnect", command=self.disconnect_remote, style="Tool.TButton")
         disconnect_button.pack(side="left", padx=(0, 8))
@@ -1407,7 +1559,13 @@ class PLCAsciiIDE:
         return offline_live_locked(self.mode_var.get(), self.simulation_state)
 
     def sync_program_variables(self, save_current_values: bool) -> None:
-        current_values = dict(self.engine.tags) if save_current_values else None
+        current_values: dict[str, object] | None = None
+        if save_current_values:
+            if self.mode_var.get() == "online" and isinstance(self.remote_snapshot, dict):
+                tags = self.remote_snapshot.get("tags", {})
+                current_values = dict(tags) if isinstance(tags, dict) else {}
+            else:
+                current_values = dict(self.engine.tags)
         populate_program_variables(self.program, current_values=current_values)
         self.engine.load_program(self.program)
 
@@ -1421,11 +1579,17 @@ class PLCAsciiIDE:
         return True
 
     def is_monitor_editable(self) -> bool:
-        return self.mode_var.get() == "offline" and self.simulation_state != "running"
+        if self.mode_var.get() == "offline":
+            return self.simulation_state != "running"
+        return self.mode_var.get() == "online" and self.remote is not None and self.remote_execution_mode == "stop"
+
+    def _sync_mode_widgets(self) -> None:
+        self.update_connection_indicator()
+        self.update_toolbar_visibility()
 
     def ensure_monitor_editable(self) -> bool:
         if not self.is_monitor_editable():
-            self.status_var.set("Monitor values can only be edited while offline and stopped or stepped.")
+            self.status_var.set("Monitor values can only be edited while offline, or while online with the target stopped.")
             return False
         return True
 
@@ -1460,6 +1624,7 @@ class PLCAsciiIDE:
         variable.preset = int(preset)
         variable.validate()
         self.upsert_variable(variable)
+        sync_composite_presets_into_steps(self.program)
 
     def inferred_monitor_types(self) -> dict[str, str]:
         inferred, _, _ = infer_program_variable_types(self.program)
@@ -1692,42 +1857,86 @@ class PLCAsciiIDE:
             return
         if not self.ensure_monitor_editable():
             return
+        is_online_stopped = self.mode_var.get() == "online"
+        remote = self.require_remote() if is_online_stopped else None
+        if is_online_stopped and remote is None:
+            return
 
         if item_id.startswith("scalar:"):
             tag = item_id.split(":", 1)[1]
-            current_value = self.engine.read_tag(tag)
+            if is_online_stopped:
+                tags = self.remote_snapshot.get("tags", {}) if isinstance(self.remote_snapshot, dict) else {}
+                current_value = tags.get(tag, False) if isinstance(tags, dict) else False
+            else:
+                current_value = self.engine.read_tag(tag)
             variable = self.find_variable(tag)
             data_type = variable.data_type if variable is not None else infer_scalar_type(current_value if isinstance(current_value, (bool, int, float)) else 0)
             if data_type == "bool":
                 value = not bool(current_value)
             elif data_type == "float":
                 raw = simpledialog.askstring("Monitor value", f"Value for {tag}", parent=self.root, initialvalue=format_runtime_value(float(current_value)))
-                value = None if raw is None else float(raw.strip())
+                value = None if raw is None else parse_runtime_string(raw, "float")
             else:
-                value = simpledialog.askinteger("Monitor value", f"Value for {tag}", parent=self.root, initialvalue=int(current_value))
+                raw = simpledialog.askstring("Monitor value", f"Value for {tag}", parent=self.root, initialvalue=format_runtime_value(int(current_value)))
+                value = None if raw is None else parse_runtime_string(raw, data_type)
             if value is None:
                 return
-            self.engine.set_value(tag, value)
-            self.ensure_scalar_variable(tag, value)
+            if is_online_stopped:
+                response = remote.set_tag(tag, value, timeout=0.5)
+                if response is None:
+                    self.status_var.set("Monitor update timed out")
+                    return
+                if response.get("type") == "error":
+                    messagebox.showerror("Monitor value failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+                    return
+                self.ensure_scalar_variable(tag, value)
+            else:
+                self.engine.set_value(tag, value)
+                self.ensure_scalar_variable(tag, value)
         elif item_id.startswith("member:"):
             _, composite_type, tag, member = item_id.split(":", 3)
             full_tag = f"{tag}.{member}"
-            current_value = self.engine.read_tag(full_tag)
+            if is_online_stopped:
+                tags = self.remote_snapshot.get("tags", {}) if isinstance(self.remote_snapshot, dict) else {}
+                current_value = tags.get(full_tag, False) if isinstance(tags, dict) else False
+            else:
+                current_value = self.engine.read_tag(full_tag)
             if member in {"dn", "en", "tt"}:
                 value = not bool(current_value)
             else:
-                value = simpledialog.askinteger("Monitor value", f"Value for {full_tag}", parent=self.root, initialvalue=int(current_value))
+                raw = simpledialog.askstring("Monitor value", f"Value for {full_tag}", parent=self.root, initialvalue=format_runtime_value(int(current_value)))
+                value = None if raw is None else parse_runtime_string(raw, "int")
             if value is None:
                 return
-            self.engine.set_value(full_tag, value)
+            if is_online_stopped:
+                response = remote.set_tag(full_tag, value, timeout=0.5)
+                if response is None:
+                    self.status_var.set("Monitor update timed out")
+                    return
+                if response.get("type") == "error":
+                    messagebox.showerror("Monitor value failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+                    return
+            else:
+                self.engine.set_value(full_tag, value)
             if member == "pre":
                 self.ensure_composite_variable(tag, composite_type, int(value))
+                if is_online_stopped:
+                    synced = self._sync_live_program_to_stopped_target(remote, error_title="Monitor value failed")
+                    if not synced:
+                        return
+                    self.last_scan = None
+                    self.status_var.set("Updated monitor value")
+                    self.remote_snapshot_request(switch_to_online=False)
+                    return
         else:
             return
 
         self.last_scan = None
         self.status_var.set("Updated monitor value")
-        self.render_ladder()
+        if is_online_stopped:
+            self.remote_snapshot_request(switch_to_online=False)
+        else:
+            self.render_ladder()
 
     def on_mode_change(self) -> None:
         if self.mode_var.get() == "online":
@@ -1753,7 +1962,7 @@ class PLCAsciiIDE:
                 pack_kwargs: dict[str, object] = {"side": "left"}
                 if padx is not None:
                     pack_kwargs["padx"] = padx
-                if before is not None:
+                if before is not None and before.winfo_manager() == "pack":
                     pack_kwargs["before"] = before
                 widget.pack(**pack_kwargs)
             return
@@ -1762,25 +1971,52 @@ class PLCAsciiIDE:
 
     def update_toolbar_visibility(self) -> None:
         offline_mode = self.mode_var.get() != "online"
-        online_connected = self.mode_var.get() == "online" and self.remote is not None
+        remote_connected = self.remote is not None
+        behavior = self.active_target_behavior()
+        show_run_control = remote_connected and behavior.get("supports_run_control", False)
+        show_live_edit = remote_connected and behavior.get("supports_live_edit", False)
         self.set_toolbar_widget_visible(self.step_button, offline_mode, padx=(0, 8), before=self.download_button)
         self.set_toolbar_widget_visible(self.run_button, offline_mode, padx=(0, 8), before=self.download_button)
         self.set_toolbar_widget_visible(self.stop_button, offline_mode, padx=(0, 8), before=self.download_button)
+        self.set_toolbar_widget_visible(self.upload_button, False)
         self.set_toolbar_widget_visible(self.reset_button, offline_mode, padx=(12, 0), before=self.scan_label_widget)
         self.set_toolbar_widget_visible(self.scan_label_widget, offline_mode, padx=(14, 6), before=self.font_label_widget)
         self.set_toolbar_widget_visible(self.scan_spinbox_widget, offline_mode, before=self.font_label_widget)
-        self.set_toolbar_widget_visible(self.disconnect_button, online_connected, padx=(0, 8), before=self.connection_label)
+        self.set_toolbar_widget_visible(self.target_start_button, show_run_control, padx=(0, 8), before=self.connection_label)
+        self.set_toolbar_widget_visible(self.target_stop_button, show_run_control, padx=(0, 8), before=self.connection_label)
+        self.set_toolbar_widget_visible(self.edit_live_button, show_live_edit, padx=(0, 8), before=self.connection_label)
+        self.set_toolbar_widget_visible(self.disconnect_button, remote_connected, padx=(0, 8), before=self.connection_label)
+        self.update_remote_control_buttons()
+
+    def update_remote_control_buttons(self) -> None:
+        can_control = self.remote is not None and self.active_target_behavior().get("supports_run_control", False)
+        if self.target_start_button is not None:
+            if can_control and self.remote_execution_mode != "run":
+                self.target_start_button.state(["!disabled"])
+            else:
+                self.target_start_button.state(["disabled"])
+        if self.target_stop_button is not None:
+            if can_control and self.remote_execution_mode != "stop":
+                self.target_stop_button.state(["!disabled"])
+            else:
+                self.target_stop_button.state(["disabled"])
 
     def update_connection_indicator(self) -> None:
         if not hasattr(self, "connection_label"):
             return
-        self.runtime_target_label_var.set(f"Target: {runtime_target_label(self.program.runtime_target)}")
+        self.runtime_target_label_var.set(f"Target: {runtime_target_label(self.active_runtime_target())}")
         if self.remote is None:
             self.connection_var.set("Board: Disconnected")
             self.connection_label.configure(fg=PALETTE["danger"])
             return
         label = self.remote_label or "serial target"
-        mode_text = "Online" if self.mode_var.get() == "online" else "Connected"
+        if self.remote_execution_mode == "run":
+            execution_text = "Running"
+        elif self.remote_execution_mode == "stop":
+            execution_text = "Stopped"
+        else:
+            execution_text = "Connected"
+        mode_text = "Online" if self.mode_var.get() == "online" else execution_text
         self.connection_var.set(f"Board: {mode_text} ({label})")
         self.connection_label.configure(fg=PALETTE["success"])
 
@@ -1805,11 +2041,33 @@ class PLCAsciiIDE:
         )
         if not should_connect:
             return None
-        self.connect_serial(action_name=action_name, allow_runtime_bootstrap=(action_name == "Download"))
+        allow_runtime_bootstrap = action_name == "Download" and self.active_target_behavior().get("allow_download_bootstrap", False)
+        self.connect_serial(action_name=action_name, allow_runtime_bootstrap=allow_runtime_bootstrap)
         return self.remote
 
     def selected_runtime_target(self) -> str:
         return normalize_runtime_target(self.runtime_target_var.get())
+
+    def active_runtime_target(self) -> str:
+        if self.remote_platform == "circuitpython":
+            return RUNTIME_TARGET_CIRCUITPYTHON
+        if self.remote_platform == "micropython":
+            return RUNTIME_TARGET_MICROPYTHON
+        if self.remote_platform == "propeller2-taqoz":
+            return RUNTIME_TARGET_PROPELLER2
+        return self.selected_runtime_target()
+
+    def active_target_behavior(self) -> dict[str, bool]:
+        return runtime_target_behavior(self.active_runtime_target())
+
+    def update_remote_execution_mode(self, mode: object) -> None:
+        value = str(mode or "").strip().lower()
+        self.remote_execution_mode = value if value in {"run", "stop"} else None
+        self.update_connection_indicator()
+        self.update_toolbar_visibility()
+
+    def current_program_signature(self) -> str:
+        return json.dumps(self.program.to_dict(), sort_keys=True, separators=(",", ":"))
 
     def apply_runtime_target(self, target: str, *, disconnect_if_needed: bool) -> None:
         normalized = normalize_runtime_target(target)
@@ -2035,7 +2293,9 @@ class PLCAsciiIDE:
             f"PLC ASCII IDE - {self.program.name} - {runtime_target_label(self.program.runtime_target)} - "
             f"{'online' if self.mode_var.get() == 'online' else 'offline'}"
         )
-        self.ladder_text.focus_set()
+        current_focus = self.root.focus_get()
+        if current_focus is self.ladder_text or current_focus is None:
+            self.ladder_text.focus_set()
         self.render_monitor()
 
     def on_click(self, event: tk.Event[tk.Text]) -> str:
@@ -2583,17 +2843,20 @@ class PLCAsciiIDE:
         self.render_ladder()
 
     def prompt_serial_target(self) -> tuple[str, int] | None:
+        runtime_target = self.selected_runtime_target()
         port = simpledialog.askstring("Serial port", "Port", parent=self.root, initialvalue=self.last_serial_port)
         if not port:
             return None
-        baud = simpledialog.askinteger("Serial baud", "Baud", parent=self.root, initialvalue=self.last_serial_baud)
+        initial_baud = self.last_serial_baud_by_target.get(runtime_target, self.last_serial_baud)
+        baud = simpledialog.askinteger("Serial baud", "Baud", parent=self.root, initialvalue=initial_baud)
         if baud is None:
             return None
         self.last_serial_port = port
         self.last_serial_baud = baud
+        self.last_serial_baud_by_target[runtime_target] = baud
         return port, baud
 
-    def _connect_circuitpython_session(self, port: str, baud: int) -> tuple[RemoteSession | None, dict[str, object] | None]:
+    def _connect_serial_json_session(self, port: str, baud: int) -> tuple[RemoteSession | None, dict[str, object] | None]:
         session = RemoteSession(SerialJsonTransport(port=port, baudrate=baud))
         hello = session.hello(timeout=1.0)
         if not hello and isinstance(session.transport, SerialJsonTransport):
@@ -2604,21 +2867,31 @@ class PLCAsciiIDE:
             return None, None
         return session, hello
 
-    def _maybe_install_circuitpython_runtime_for_download(self, port: str) -> bool:
+    def _install_runtime_for_target(self, target: str, port: str) -> None:
+        if target == RUNTIME_TARGET_CIRCUITPYTHON:
+            install_circuitpython_runtime(port)
+            return
+        if target == RUNTIME_TARGET_MICROPYTHON:
+            install_micropython_runtime(port)
+            return
+        raise ValueError(f"Runtime install is not supported for {runtime_target_label(target)}")
+
+    def _maybe_install_serial_json_runtime_for_download(self, target: str, port: str) -> bool:
+        target_label = runtime_target_label(target)
         should_install = messagebox.askyesno(
-            "CircuitPython runtime not found",
-            "No CircuitPython PLC runtime responded on this port.\n\nDownload can install the runtime first, then send your ladder program.\n\nInstall the runtime now?",
+            f"{target_label} runtime not found",
+            f"No {target_label} PLC runtime responded on this port.\n\nDownload can install the runtime first, then send your ladder program.\n\nInstall the runtime now?",
             parent=self.root,
         )
         if not should_install:
             return False
         try:
             self.sync_program_variables(save_current_values=True)
-            install_circuitpython_runtime(port, program=self.program)
+            self._install_runtime_for_target(target, port)
         except Exception as exc:
             messagebox.showerror("Install failed", str(exc), parent=self.root)
             return False
-        self.status_var.set(f"Installed CircuitPython runtime on {port}")
+        self.status_var.set(f"Installed {target_label} runtime on {port}")
         return True
 
     def connect_serial(self, *, action_name: str = "Connect", allow_runtime_bootstrap: bool = False) -> None:
@@ -2644,31 +2917,37 @@ class PLCAsciiIDE:
                 hello = session.hello(timeout=1.0)
                 runtime_type = RUNTIME_TARGET_PROPELLER2
             else:
-                session, hello = self._connect_circuitpython_session(port, baud)
-                runtime_type = RUNTIME_TARGET_CIRCUITPYTHON
-                if hello is None and allow_runtime_bootstrap and self._maybe_install_circuitpython_runtime_for_download(port):
-                    session, hello = self._connect_circuitpython_session(port, baud)
+                session, hello = self._connect_serial_json_session(port, baud)
+                runtime_type = runtime_target
+                if hello is None and allow_runtime_bootstrap and self._maybe_install_serial_json_runtime_for_download(runtime_target, port):
+                    session, hello = self._connect_serial_json_session(port, baud)
         except Exception as exc:
             messagebox.showerror("Serial connection failed", str(exc), parent=self.root)
             return
         if not hello:
-            if self.selected_runtime_target() == RUNTIME_TARGET_CIRCUITPYTHON:
+            if self.selected_runtime_target() in {RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_MICROPYTHON}:
+                target_label = runtime_target_label(self.selected_runtime_target())
                 messagebox.showerror(
                     "Serial connection failed",
-                    f"No CircuitPython runtime responded on {port}.\n\nUse 'Install Runtime to CircuitPython...' first, or use Download to install it automatically.",
+                    f"No {target_label} runtime responded on {port}.\n\nUse the runtime install action first, or use Download to install it automatically.",
                     parent=self.root,
                 )
             else:
                 messagebox.showerror("Serial connection failed", "No response from target.", parent=self.root)
             return
         self.remote = session
+        self.remote_platform = str(hello.get("platform", "")) if isinstance(hello, dict) else None
+        self.update_remote_execution_mode(hello.get("mode") if isinstance(hello, dict) else None)
+        self.remote_program_loaded = bool(hello.get("program_loaded", True)) if isinstance(hello, dict) else None
+        if self.remote_program_loaded is False:
+            self.target_program_signature = None
         self.remote_label = f"{runtime_target_label(runtime_type)}:{port}"
-        try:
-            self.remote.set_mode("run", timeout=0.5)
-        except Exception:
-            pass
         if hello.get("runtime") == "missing" and runtime_type == RUNTIME_TARGET_PROPELLER2:
             self.status_var.set(f"Connected to Propeller 2 on {port} (runtime not loaded yet)")
+        elif runtime_type in {RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_MICROPYTHON} and not bool(hello.get("program_loaded", True)):
+            self.status_var.set(f"Connected to {port} (runtime idle, waiting for a download)")
+        elif self.remote_execution_mode == "stop":
+            self.status_var.set(f"Connected to {port} (target stopped)")
         else:
             self.status_var.set(f"Connected to {port}")
         self.mode_var.set("offline")
@@ -2682,7 +2961,7 @@ class PLCAsciiIDE:
         port, _baud = target
         try:
             self.sync_program_variables(save_current_values=True)
-            install_circuitpython_runtime(port, program=self.program)
+            install_circuitpython_runtime(port)
         except Exception as exc:
             messagebox.showerror("Install failed", str(exc), parent=self.root)
             return
@@ -2690,6 +2969,25 @@ class PLCAsciiIDE:
         messagebox.showinfo(
             "Runtime installed",
             f"Installed the CircuitPython runtime on {port}.\nUse Go Online, Download, or Upload to connect and work with the board.",
+            parent=self.root,
+        )
+
+    def install_micropython_runtime(self) -> None:
+        self.apply_runtime_target(RUNTIME_TARGET_MICROPYTHON, disconnect_if_needed=True)
+        target = self.prompt_serial_target()
+        if target is None:
+            return
+        port, _baud = target
+        try:
+            self.sync_program_variables(save_current_values=True)
+            install_micropython_runtime(port)
+        except Exception as exc:
+            messagebox.showerror("Install failed", str(exc), parent=self.root)
+            return
+        self.status_var.set(f"Installed MicroPython runtime on {port}")
+        messagebox.showinfo(
+            "Runtime installed",
+            f"Installed the MicroPython runtime on {port}.\nUse Go Online, Download, or Upload to connect and work with the board.",
             parent=self.root,
         )
 
@@ -2705,10 +3003,13 @@ class PLCAsciiIDE:
         except Exception as exc:
             messagebox.showerror("Load failed", str(exc), parent=self.root)
             return
-        self.status_var.set(f"Loaded Propeller 2 runtime into RAM on {port}")
+        self.status_var.set(f"Installed Propeller 2 runtime on {port}")
         messagebox.showinfo(
-            "Runtime loaded",
-            f"Loaded the Propeller 2 TAQOZ runtime into RAM on {port}.\nUse Download, Upload, or Go Online in the same session to work with the board.",
+            "Runtime installed",
+            (
+                f"Loaded the Propeller 2 TAQOZ runtime into RAM on {port}.\n"
+                "Use Download or Go Online in the same session to work with the board."
+            ),
             parent=self.root,
         )
 
@@ -2720,6 +3021,10 @@ class PLCAsciiIDE:
                 pass
         self.remote = None
         self.remote_label = None
+        self.remote_platform = None
+        self.remote_execution_mode = None
+        self.remote_program_loaded = None
+        self.target_program_signature = None
         self.remote_snapshot = {}
         self.stop_remote_watch()
         self.mode_var.set("offline")
@@ -2734,7 +3039,7 @@ class PLCAsciiIDE:
             return None
         return self.remote
 
-    def remote_snapshot_request(self) -> None:
+    def remote_snapshot_request(self, *, switch_to_online: bool = True) -> None:
         remote = self.require_remote()
         if remote is None:
             return
@@ -2747,8 +3052,10 @@ class PLCAsciiIDE:
             self.status_var.set("Remote snapshot timed out")
             return
         self.remote_snapshot = response
-        self.mode_var.set("online")
-        self.status_var.set("Updated online snapshot")
+        self.update_remote_execution_mode(response.get("mode") if isinstance(response, dict) else None)
+        if switch_to_online:
+            self.mode_var.set("online")
+        self.status_var.set("Updated online snapshot" if switch_to_online else "Updated target snapshot")
         self.update_connection_indicator()
         self.render_ladder()
 
@@ -2756,79 +3063,272 @@ class PLCAsciiIDE:
         remote = self.ensure_serial_connection("Download")
         if remote is None:
             return
+        behavior = self.active_target_behavior()
         was_watching = self.auto_online_var.get()
         self.stop_remote_watch()
         response = None
         try:
             self.sync_program_variables(save_current_values=True)
+            if behavior.get("supports_run_control", False):
+                try:
+                    remote.set_mode("stop", timeout=0.5)
+                    self.update_remote_execution_mode("stop")
+                except Exception:
+                    pass
             response = remote.download_program(self.program, timeout=1.0)
-            try:
-                remote.set_mode("run", timeout=0.5)
-            except Exception:
-                pass
+            if response is not None and response.get("type") != "error":
+                if not self._reapply_stopped_runtime_writebacks(remote, error_title="Download failed"):
+                    return
+            if response is not None and response.get("type") != "error" and behavior.get("auto_run_after_download", False):
+                try:
+                    remote.set_mode("run", timeout=0.5)
+                    self.update_remote_execution_mode("run")
+                except Exception:
+                    pass
         except Exception as exc:
             messagebox.showerror("Download failed", str(exc), parent=self.root)
         else:
             if response is None:
                 self.status_var.set("Remote download timed out")
+            elif response.get("type") == "error":
+                messagebox.showerror("Download failed", str(response.get("message", "Unknown remote error")), parent=self.root)
             else:
-                self.status_var.set("Downloaded program to board runtime")
+                self.remote_program_loaded = True
+                self.target_program_signature = self.current_program_signature()
+                if behavior.get("auto_online_after_download", False):
+                    self.mode_var.set("online")
+                    self.status_var.set("Downloaded live program to board and returned online")
+                else:
+                    self.status_var.set("Downloaded program to board runtime")
                 self.update_connection_indicator()
         finally:
-            if was_watching and self.mode_var.get() == "online":
+            should_resume_online = (
+                response is not None
+                and response.get("type") != "error"
+                and (
+                    behavior.get("auto_online_after_download", False)
+                    or (was_watching and self.mode_var.get() == "online")
+                )
+            )
+            if should_resume_online:
+                self.mode_var.set("online")
                 self.start_remote_watch()
-                if response is not None:
-                    self.remote_snapshot_request()
+                self.remote_snapshot_request()
 
     def remote_upload_program(self) -> None:
-        remote = self.ensure_serial_connection("Upload")
-        if remote is None:
-            return
-        was_watching = self.auto_online_var.get()
-        self.stop_remote_watch()
+        self.go_online()
+
+    def _load_program_from_target(self, remote: RemoteSession, *, timeout: float, error_title: str) -> bool:
         response = None
         try:
-            response = remote.upload_program(timeout=1.0)
+            response = remote.upload_program(timeout=timeout)
         except Exception as exc:
-            messagebox.showerror("Upload failed", str(exc), parent=self.root)
-        else:
+            messagebox.showerror(error_title, str(exc), parent=self.root)
+            return False
+        if response is None:
+            self.status_var.set(f"{error_title} timed out")
+            return False
+        if response.get("type") != "program" or "program" not in response:
+            messagebox.showerror(error_title, f"Unexpected response: {response}", parent=self.root)
+            return False
+        try:
+            self.program = Program.from_dict(response["program"])
+            self.apply_runtime_target(self.program.runtime_target, disconnect_if_needed=False)
+            self.engine.load_program(self.program)
+            self.sync_program_variables(save_current_values=False)
+        except Exception as exc:
+            messagebox.showerror(error_title, str(exc), parent=self.root)
+            return False
+        self.last_scan = None
+        self.remote_program_loaded = True
+        self.target_program_signature = self.current_program_signature()
+        return True
+
+    def _sync_live_program_to_stopped_target(self, remote: RemoteSession, *, error_title: str) -> bool:
+        response = None
+        try:
+            response = remote.download_program(self.program, timeout=1.0)
+        except Exception as exc:
+            messagebox.showerror(error_title, str(exc), parent=self.root)
+            return False
+        if response is None:
+            self.status_var.set(f"{error_title} timed out")
+            return False
+        if response.get("type") == "error":
+            messagebox.showerror(error_title, str(response.get("message", "Unknown remote error")), parent=self.root)
+            return False
+        try:
+            stop_response = remote.set_mode("stop", timeout=0.5)
+        except Exception as exc:
+            messagebox.showerror(error_title, str(exc), parent=self.root)
+            return False
+        if stop_response is not None and stop_response.get("type") == "error":
+            messagebox.showerror(error_title, str(stop_response.get("message", "Unknown remote error")), parent=self.root)
+            return False
+        if not self._reapply_stopped_runtime_writebacks(remote, error_title=error_title):
+            return False
+        self.remote_program_loaded = True
+        self.target_program_signature = self.current_program_signature()
+        self.update_remote_execution_mode("stop")
+        return True
+
+    def _reapply_stopped_runtime_writebacks(self, remote: RemoteSession, *, error_title: str) -> bool:
+        if self.mode_var.get() != "online" or self.remote_execution_mode != "stop":
+            return True
+        for tag, value in stopped_runtime_writebacks(self.program, self.remote_snapshot).items():
+            try:
+                response = remote.set_tag(tag, value, timeout=0.5)
+            except Exception as exc:
+                messagebox.showerror(error_title, str(exc), parent=self.root)
+                return False
             if response is None:
-                self.status_var.set("Remote upload timed out")
-            elif response.get("type") != "program" or "program" not in response:
-                messagebox.showerror("Upload failed", f"Unexpected response: {response}", parent=self.root)
-            else:
-                try:
-                    self.program = Program.from_dict(response["program"])
-                    self.engine.load_program(self.program)
-                    self.sync_program_variables(save_current_values=False)
-                except Exception as exc:
-                    messagebox.showerror("Upload failed", str(exc), parent=self.root)
-                else:
-                    self.last_scan = None
-                    self.status_var.set("Uploaded program from board runtime")
-                    self.update_connection_indicator()
-        finally:
-            if was_watching and self.mode_var.get() == "online":
-                self.start_remote_watch()
-                if response is not None and response.get("type") == "program":
-                    self.remote_snapshot_request()
+                self.status_var.set(f"{error_title} timed out")
+                return False
+            if response.get("type") == "error":
+                messagebox.showerror(error_title, str(response.get("message", "Unknown remote error")), parent=self.root)
+                return False
+        return True
 
     def go_online(self) -> None:
         remote = self.ensure_serial_connection("Go Online")
         if remote is None:
             return
+        if self.remote_program_loaded is False:
+            self.status_var.set("Target has no program loaded yet. Edit the live view and press Start or Download to run it.")
+            return
+        loaded = self._load_program_from_target(remote, timeout=1.0, error_title="Go Online failed")
+        if not loaded:
+            return
         try:
-            remote.set_mode("run", timeout=0.5)
-        except Exception:
-            pass
+            response = remote.set_mode("run", timeout=0.5)
+            if response is not None and response.get("type") == "error":
+                messagebox.showerror("Go Online failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+                return
+            self.update_remote_execution_mode("run")
+        except Exception as exc:
+            messagebox.showerror("Go Online failed", str(exc), parent=self.root)
+            return
         self.mode_var.set("online")
         self.update_connection_indicator()
-        self.status_var.set("Online live view active")
+        self.status_var.set("Connected, synced the target program, and started online live view")
         self.start_remote_watch()
         self.remote_snapshot_request()
 
+    def remote_start_execution(self) -> None:
+        if not self.active_target_behavior().get("supports_run_control", False):
+            self.status_var.set("This target does not expose start control yet.")
+            return
+        remote = self.require_remote()
+        if remote is None:
+            return
+        current_signature = self.current_program_signature()
+        if self.target_program_signature != current_signature:
+            self.sync_program_variables(save_current_values=True)
+            current_signature = self.current_program_signature()
+            self.stop_remote_watch()
+            try:
+                response = remote.download_program(self.program, timeout=1.0)
+            except Exception as exc:
+                messagebox.showerror("Start failed", str(exc), parent=self.root)
+                return
+            if response is None:
+                self.status_var.set("Target download timed out")
+                return
+            if response.get("type") == "error":
+                messagebox.showerror("Start failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+                return
+            if not self._reapply_stopped_runtime_writebacks(remote, error_title="Start failed"):
+                return
+            self.remote_program_loaded = True
+            self.target_program_signature = current_signature
+        try:
+            response = remote.set_mode("run", timeout=0.5)
+        except Exception as exc:
+            messagebox.showerror("Start failed", str(exc), parent=self.root)
+            return
+        if response is None:
+            self.status_var.set("Target start timed out")
+            return
+        if response.get("type") == "error":
+            messagebox.showerror("Start failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+            return
+        self.update_remote_execution_mode(response.get("mode", "run"))
+        self.status_var.set("Started target execution")
+        if self.mode_var.get() == "online":
+            self.start_remote_watch()
+            self.remote_snapshot_request()
+
+    def remote_stop_execution(self) -> None:
+        if not self.active_target_behavior().get("supports_run_control", False):
+            self.status_var.set("This target does not expose stop control yet.")
+            return
+        remote = self.require_remote()
+        if remote is None:
+            return
+        try:
+            response = remote.set_mode("stop", timeout=0.5)
+        except Exception as exc:
+            messagebox.showerror("Stop failed", str(exc), parent=self.root)
+            return
+        if response is None:
+            self.status_var.set("Target stop timed out")
+            return
+        if response.get("type") == "error":
+            messagebox.showerror("Stop failed", str(response.get("message", "Unknown remote error")), parent=self.root)
+            return
+        self.update_remote_execution_mode(response.get("mode", "stop"))
+        self.stop_remote_watch()
+        self.status_var.set("Stopped target execution")
+        if self.mode_var.get() == "online":
+            self.remote_snapshot_request(switch_to_online=False)
+
+    def edit_live_program(self) -> None:
+        if not self.active_target_behavior().get("supports_live_edit", False):
+            self.status_var.set("This target does not support live program editing yet.")
+            return
+        remote = self.require_remote()
+        if remote is None:
+            return
+        was_online = self.mode_var.get() == "online"
+        self.stop_remote_watch()
+        try:
+            response = remote.upload_program(timeout=1.0)
+        except Exception as exc:
+            messagebox.showerror("Edit Live failed", str(exc), parent=self.root)
+            if was_online:
+                self.start_remote_watch()
+            return
+        if response is None:
+            self.status_var.set("Edit Live timed out")
+            if was_online:
+                self.start_remote_watch()
+            return
+        if response.get("type") != "program" or "program" not in response:
+            messagebox.showerror("Edit Live failed", f"Unexpected response: {response}", parent=self.root)
+            if was_online:
+                self.start_remote_watch()
+            return
+        try:
+            self.program = Program.from_dict(response["program"])
+            self.apply_runtime_target(self.program.runtime_target, disconnect_if_needed=False)
+            self.engine.load_program(self.program)
+            self.sync_program_variables(save_current_values=False)
+        except Exception as exc:
+            messagebox.showerror("Edit Live failed", str(exc), parent=self.root)
+            if was_online:
+                self.start_remote_watch()
+            return
+        self.last_scan = None
+        self.mode_var.set("offline")
+        self.status_var.set("Loaded the board program into the live editor. Save only writes it to disk when you choose Save or Save As.")
+        self.update_connection_indicator()
+        self.render_ladder()
+
     def _remote_watch_tick(self) -> None:
         if not self.auto_online_var.get():
+            self.remote_watch_job = None
+            return
+        if self.remote_execution_mode == "stop":
             self.remote_watch_job = None
             return
         if self.remote is not None:
@@ -2836,6 +3336,7 @@ class PLCAsciiIDE:
                 response = self.remote.request_snapshot(timeout=0.3)
                 if response is not None:
                     self.remote_snapshot = response
+                    self.update_remote_execution_mode(response.get("mode") if isinstance(response, dict) else None)
                     self.render_ladder()
             except Exception:
                 self.auto_online_var.set(False)
@@ -2844,7 +3345,7 @@ class PLCAsciiIDE:
                 self.mode_var.set("offline")
                 self.update_connection_indicator()
                 return
-        self.remote_watch_job = self.root.after(500, self._remote_watch_tick)
+        self.remote_watch_job = self.root.after(remote_watch_interval_ms(self.active_runtime_target()), self._remote_watch_tick)
 
     def set_tag_dialog(self) -> None:
         if not self.ensure_live_editable():

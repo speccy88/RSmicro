@@ -1,6 +1,8 @@
 \ Auto-generated PLC runtime for Propeller 2 TAQOZ.
 \ Generated source is assembled from this template plus the current ladder program.
 
+@@DATA_WORDS@@
+
 @@CORE_WORDS@@
 
 @@TIMER_WORDS@@
@@ -18,16 +20,20 @@
 ;
 
 : PLC.APPLY.FORCES
+@@FORCE_LINES@@
 ;
 
 : PLC.SCAN
   PLC.INPUTS
+  PLC.APPLY.FORCES
 @@SCAN_RUNG_CALLS@@
   PLC.APPLY.FORCES
   PLC.OUTPUTS
 ;
 
 @@SET_WORDS@@
+
+@@HOST_WORDS@@
 
 : PLC.SNAPSHOT
   ." PLC SNAPSHOT BEGIN" CRLF
@@ -45,5 +51,6 @@
 @@INIT_LINES@@
 ;
 
-: PLC.START.RUNTIME PLC.INIT ;
+@@RUNTIME_WORDS@@
+
 PLC.START.RUNTIME

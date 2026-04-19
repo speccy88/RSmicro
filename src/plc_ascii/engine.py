@@ -136,6 +136,9 @@ def _trace_step(read_tag: Any, step: Step, power_in: bool) -> tuple[bool, StepTr
         right = _resolve_step_operand(read_tag, step.params["right"])
         truth = _apply_compare(left, right, step_compare_operator(step) or "==")
         return power_in and truth, StepTrace(step.op, step.tag, step.arg, power_in, truth, power_in and truth)
+    if step.op in {"OTE", "OTL", "OTU", "MOV", "CLR", "ABS", "NEG", "ADD", "SUB", "MUL", "DIV"}:
+        truth = _coerce_truth(read_tag(step.tag))
+        return power_in, StepTrace(step.op, step.tag, step.arg, power_in, truth, power_in)
     truth = power_in
     return power_in, StepTrace(step.op, step.tag, step.arg, power_in, truth, power_in)
 

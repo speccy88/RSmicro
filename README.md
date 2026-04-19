@@ -108,6 +108,7 @@ when one is available.
 For the Propeller 2 setup tested in this repo:
 
 - TAQOZ console over `/dev/tty.usbserial-P2EEQZ7`
+- TAQOZ console defaults to `921600` baud in the IDE/CLI, with fallback probing for `115200`
 - onboard LEDs on `P56` to `P63`
 - those LEDs are active-low
 - example program: `examples/propeller2_led56.json`
@@ -124,10 +125,9 @@ Recommended flow:
 Current limitation:
 
 - the Propeller 2 runtime is RAM-only for now
-- the current live view drives on-board scans from the IDE session instead of keeping a fully autonomous background task alive in TAQOZ
-- online force support is not implemented yet for the Propeller 2 target
-- reacquiring the TAQOZ console after closing the serial session cold-starts the board on the tested setup, so `Upload` after a fresh reconnect is not yet reliable
-- within one connected session, `Download`, `Upload`, and `Go Online` work against the live TAQOZ runtime
+- TAQOZ is used as the bootstrap loader, then the board switches into a dedicated line-framed host loop for online commands
+- reconnecting after a reset or fresh serial attach loses the RAM runtime, so a fresh `Download` is still the normal recovery path
+- scalar online set/force support is available inside one live session; timer and counter live-edit behavior still needs more hardware validation
 
 ## Device runtime
 

@@ -1,6 +1,6 @@
 import unittest
 
-from plc_ascii.engine import LadderEngine, trace_program_preview
+from plc_ascii.engine import LadderEngine, trace_program_preview, trace_program_state
 from plc_ascii.model import Program, Rung, Step, Variable
 
 
@@ -71,6 +71,19 @@ class LadderEngineTests(unittest.TestCase):
         engine.set_tag("stop", False)
         result = engine.scan(100)
         self.assertFalse(result.tags["motor"])
+
+    def test_trace_program_state_uses_forced_output_value_for_ote_truth(self) -> None:
+        program = build_program()
+
+        _, traces = trace_program_state(
+            program,
+            tags={"start": True, "stop": False, "motor": True},
+            forced={"motor": False},
+        )
+
+        coil_trace = traces[0][-1]
+        self.assertFalse(coil_trace.truth)
+        self.assertTrue(coil_trace.power_out)
 
     def test_reset_runtime_clears_tags_and_optionally_forces(self) -> None:
         engine = LadderEngine(build_program())

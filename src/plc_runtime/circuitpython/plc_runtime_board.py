@@ -30,6 +30,14 @@ class JsonFileStorage:
         with open(self.path, "w") as handle:
             json.dump(program, handle)
 
+    def delete_program(self):
+        try:
+            import os
+
+            os.remove(self.path)
+        except OSError:
+            return
+
 
 class CircuitPythonIOBackend:
     def __init__(self, config):
@@ -118,7 +126,7 @@ def main():
     config = load_config()
     backend = CircuitPythonIOBackend(config)
     runtime = PortableRuntime(backend, JsonFileStorage(PROGRAM_PATH))
-    runtime.mode = "run"
+    runtime.mode = "run" if runtime.program_loaded else "stop"
     tick_period_ms = int(config.get("scan_ms", 50) or 50)
     last_tick = time.monotonic()
     buffer = ""

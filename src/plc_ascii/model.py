@@ -6,6 +6,7 @@ from typing import Any, TypeAlias
 
 Operand: TypeAlias = str | int | float
 ScalarValue: TypeAlias = bool | int | float
+BindingAddress: TypeAlias = str | int
 
 
 VALID_CONTACTS = {"XIC", "XIO", "CMP", "EQ", "GT", "GTE", "LT", "LE", "NE"}
@@ -13,8 +14,9 @@ VALID_ACTIONS = {"OTE", "OTL", "OTU", "TON", "CTU", "CTD", "MOV", "CLR", "ADD", 
 TIMER_CONTACT_MEMBERS = {"en", "dn", "tt"}
 VARIABLE_TYPES = {"bool", "int", "float", "timer", "counter"}
 RUNTIME_TARGET_CIRCUITPYTHON = "circuitpython"
+RUNTIME_TARGET_MICROPYTHON = "micropython"
 RUNTIME_TARGET_PROPELLER2 = "propeller2"
-VALID_RUNTIME_TARGETS = {RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_PROPELLER2}
+VALID_RUNTIME_TARGETS = {RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_MICROPYTHON, RUNTIME_TARGET_PROPELLER2}
 COMPARE_SYMBOLS = {
     "CMP": "==",
     "EQ": "==",
@@ -34,6 +36,8 @@ def normalize_runtime_target(value: Any) -> str:
     text = str(value or RUNTIME_TARGET_CIRCUITPYTHON).strip().lower()
     if text in {"propeller2", "propeller2-taqoz", "taqoz"}:
         return RUNTIME_TARGET_PROPELLER2
+    if text in {"micropython", "micro-python"}:
+        return RUNTIME_TARGET_MICROPYTHON
     if text in VALID_RUNTIME_TARGETS:
         return text
     return RUNTIME_TARGET_CIRCUITPYTHON
@@ -299,23 +303,30 @@ def walk_steps(nodes: list[Node]) -> list[Step]:
 class Binding:
     tag: str
     direction: str
-    address: str
+    address: BindingAddress
 
     def validate(self) -> None:
         if self.direction not in {"input", "output"}:
             raise ValueError("Binding direction must be 'input' or 'output'")
-        if not self.tag or not self.address:
+        if not self.tag:
             raise ValueError("Binding requires a tag and address")
+        if isinstance(self.address, str):
+            self.address = self.address.strip()
+            if not self.address:
+                raise ValueError("Binding requires a tag and address")
+        elif not isinstance(self.address, int):
+            raise ValueError("Binding address must be a string or integer")
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, BindingAddress]:
         return {"tag": self.tag, "direction": self.direction, "address": self.address}
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Binding":
+        raw_address = payload["address"]
         binding = cls(
             tag=str(payload["tag"]),
             direction=str(payload["direction"]),
-            address=str(payload["address"]),
+            address=raw_address if isinstance(raw_address, int) else str(raw_address),
         )
         binding.validate()
         return binding
@@ -423,7 +434,11 @@ class Program:
         for rung in self.rungs:
             for step in walk_steps(rung.elements):
                 if step.op in {"CTU", "CTD"} and step.tag:
-                    preset = variable_map.get(step.tag).preset if step.tag in variable_map and variable_map[step.tag].data_type == "counter" else 0
+                    preset = (
+                        variable_map.get(step.tag).preset
+                        if step.tag in variable_map and variable_map[step.tag].data_type == "counter"
+                        else step.arg
+                    )
                     counters.setdefault(step.tag, CounterConfig(tag=step.tag, preset=int(preset or 0)))
         return counters
 

@@ -2,7 +2,7 @@ import unittest
 
 from plc_ascii.engine import trace_program_state
 from plc_ascii.model import Program, Rung, Step
-from plc_ascii.render import render_program
+from plc_ascii.render import LadderRenderer, ROLE_ELEMENT_OFF, ROLE_ELEMENT_ON, render_program
 
 
 class RenderTests(unittest.TestCase):
@@ -77,6 +77,50 @@ class RenderTests(unittest.TestCase):
         rendered = render_program(program)
 
         self.assertIn("[CTU counter1 pre:0 acc:0]", rendered)
+
+    def test_done_counter_renders_as_on_role(self) -> None:
+        program = Program(
+            name="counter-done",
+            rungs=[Rung(conditions=[Step("XIC", "pulse")], actions=[Step("CTU", "counter1")])],
+        )
+
+        document = LadderRenderer(
+            program,
+            counter_values={"counter1": {"pre": 10, "acc": 10, "dn": True}},
+        ).render()
+        counter_text = "[CTU counter1 pre:10 acc:10]"
+        line_index = next(index for index, line in enumerate(document.lines) if counter_text in line)
+        start = document.lines[line_index].index(counter_text)
+        end = start + len(counter_text)
+
+        self.assertTrue(
+            any(
+                span.tag == ROLE_ELEMENT_ON and span.line == line_index and span.start <= start and span.end >= end
+                for span in document.role_spans
+            )
+        )
+
+    def test_not_done_counter_renders_as_off_role(self) -> None:
+        program = Program(
+            name="counter-not-done",
+            rungs=[Rung(conditions=[Step("XIC", "pulse")], actions=[Step("CTD", "counter1")])],
+        )
+
+        document = LadderRenderer(
+            program,
+            counter_values={"counter1": {"pre": 10, "acc": 3, "dn": False}},
+        ).render()
+        counter_text = "[CTD counter1 pre:10 acc:3]"
+        line_index = next(index for index, line in enumerate(document.lines) if counter_text in line)
+        start = document.lines[line_index].index(counter_text)
+        end = start + len(counter_text)
+
+        self.assertTrue(
+            any(
+                span.tag == ROLE_ELEMENT_OFF and span.line == line_index and span.start <= start and span.end >= end
+                for span in document.role_spans
+            )
+        )
 
 
 if __name__ == "__main__":

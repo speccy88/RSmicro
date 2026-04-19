@@ -318,8 +318,8 @@ The host now generates TAQOZ source that:
 - declares the ladder state in hub RAM
 - embeds the full ladder JSON into the TAQOZ runtime for `Upload`
 - binds Propeller 2 pins to ladder tags
-- answers simple host commands through the TAQOZ console
-- executes ladder scans on the Propeller 2 when the IDE requests them online
+- starts a dedicated background scan cog on the Propeller 2
+- switches the active serial session into a dedicated line-framed host loop after download
 
 ### Load Runtime to Propeller 2 (RAM)
 
@@ -333,6 +333,7 @@ The `Load Runtime to Propeller 2 (RAM)...` menu action:
 The current tested setup assumes:
 
 - TAQOZ over the board USB serial link
+- TAQOZ console defaults to `921600` baud in the IDE/CLI, with fallback probing for `115200`
 - onboard LEDs on pins `56` through `63`
 - those LEDs are active-low
 
@@ -347,11 +348,10 @@ This runtime is intentionally RAM-only for now.
 On the tested board, re-entering TAQOZ after closing the serial session triggers
 a cold start, which clears the RAM runtime. That means:
 
-- `Download`, `Upload`, and `Go Online` work within one live TAQOZ session
-- the current implementation performs scans on demand from the live IDE session
-- online force support is not implemented yet for the Propeller 2 target
-- persistence across a fresh reconnect will need a later flash or SD solution,
-  or a dedicated serial runtime that does not depend on re-entering TAQOZ
+- `Download`, `Upload`, and `Go Online` work within one live RAM session
+- TAQOZ is only used to bootstrap the runtime before the board switches into the dedicated host loop
+- scalar online set/force support is available within one live session
+- persistence across a fresh reconnect will need a later flash or SD solution
 
 ## Live View Behavior
 

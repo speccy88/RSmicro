@@ -1,0 +1,77 @@
+{
+  "name": "micropython_pico2w",
+  "runtime_target": "micropython",
+  "rungs": [
+    {
+      "comment": "Blink 1s on LED pin",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIO",
+          "tag": "timer2.dn"
+        },
+        {
+          "kind": "step",
+          "op": "TON",
+          "tag": "timer1",
+          "arg": 1000
+        }
+      ]
+    },
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "timer1.dn"
+        },
+        {
+          "kind": "step",
+          "op": "TON",
+          "tag": "timer2",
+          "arg": 1000
+        }
+      ]
+    },
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "timer2.tt"
+        },
+        {
+          "kind": "step",
+          "op": "OTE",
+          "tag": "LED"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "tag": "LED",
+      "type": "bool",
+      "initial": true
+    },
+    {
+      "tag": "timer1",
+      "type": "timer",
+      "preset": 1000
+    },
+    {
+      "tag": "timer2",
+      "type": "timer",
+      "preset": 1000
+    }
+  ],
+  "bindings": [
+    {
+      "tag": "LED",
+      "direction": "output",
+      "address": 0
+    }
+  ]
+}

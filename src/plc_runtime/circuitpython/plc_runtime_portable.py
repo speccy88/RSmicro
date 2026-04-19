@@ -95,6 +95,7 @@ def normalize_program(program):
     payload = program or {}
     return {
         "name": str(payload.get("name", "device")),
+        "runtime_target": str(payload.get("runtime_target", "circuitpython") or "circuitpython"),
         "rungs": [normalize_rung(rung) for rung in payload.get("rungs", [])],
         "variables": [normalize_variable(variable) for variable in payload.get("variables", [])],
         "bindings": [normalize_binding(binding) for binding in payload.get("bindings", [])],
@@ -175,13 +176,27 @@ class MemoryStorage:
     def save_program(self, program):
         self.program = clone_value(program)
 
+    def delete_program(self):
+        self.program = None
+
+
+def blank_program():
+    return {
+        "name": "device",
+        "runtime_target": "circuitpython",
+        "rungs": [],
+        "variables": [],
+        "bindings": [],
+    }
+
 
 class PortableRuntime:
     def __init__(self, backend, storage=None):
         self.backend = backend
         self.storage = storage or MemoryStorage()
         self.mode = "run"
-        self.program = {"name": "device", "rungs": [], "variables": [], "bindings": []}
+        self.program_loaded = False
+        self.program = blank_program()
         self.tags = {}
         self.forced = {}
         self.timers = {}
@@ -191,10 +206,10 @@ class PortableRuntime:
         self.download_chunks = []
         self.upload_chunks = []
         stored = self.storage.load_program()
-        if stored:
+        if stored is not None:
             self.load_program(stored, persist=False)
         else:
-            self.load_program(self.program, persist=False)
+            self.clear_program(persist=False)
 
     def sorted_copy(self, mapping):
         result = {}
@@ -238,12 +253,41 @@ class PortableRuntime:
 
     def load_program(self, program, persist=True):
         self.program = normalize_program(program)
+        self.program_loaded = True
         self.restore_initial_values()
         if persist:
             self.storage.save_program(self.program)
 
+    def clear_program(self, persist=True):
+        self.program = blank_program()
+        self.program_loaded = False
+        self.restore_initial_values()
+        if persist and hasattr(self.storage, "delete_program"):
+            self.storage.delete_program()
+
     def upload_program(self):
-        return clone_value(self.program)
+        program = clone_value(self.program)
+
+        for variable in program.get("variables", []):
+            tag = str(variable.get("tag", ""))
+            var_type = variable.get("type")
+            if var_type in ("bool", "int", "float") and tag in self.tags:
+                variable["initial"] = clone_value(self.tags[tag])
+            elif var_type == "timer" and tag in self.timers:
+                variable["preset"] = int(self.timers[tag].get("pre", variable.get("preset", 0)))
+            elif var_type == "counter" and tag in self.counters:
+                variable["preset"] = int(self.counters[tag].get("pre", variable.get("preset", 0)))
+
+        for rung in program.get("rungs", []):
+            for step in walk_steps(rung.get("elements", [])):
+                op = step.get("op")
+                tag = str(step.get("tag", ""))
+                if op == "TON" and tag in self.timers:
+                    step["arg"] = int(self.timers[tag].get("pre", step.get("arg", 0)))
+                elif op in ("CTU", "CTD") and tag in self.counters:
+                    step["arg"] = int(self.counters[tag].get("pre", step.get("arg", 0)))
+
+        return program
 
     def sync_timer(self, tag):
         timer = self.timers.get(tag)
@@ -297,6 +341,43 @@ class PortableRuntime:
     def set_tag(self, tag, value):
         self.tags[tag] = value
 
+    def set_value(self, tag, value):
+        parts = split_timer_member(tag)
+        if parts:
+            base, member = parts
+            timer = self.timers.get(base)
+            if timer is not None:
+                if member == "pre":
+                    timer["pre"] = int(value)
+                    if int(timer["acc"]) > int(timer["pre"]):
+                        timer["acc"] = int(timer["pre"])
+                    timer["dn"] = int(timer["acc"]) >= int(timer["pre"])
+                    timer["tt"] = bool(timer["en"]) and not bool(timer["dn"])
+                elif member == "acc":
+                    timer["acc"] = max(0, min(int(value), int(timer["pre"])))
+                    timer["dn"] = int(timer["acc"]) >= int(timer["pre"])
+                    timer["tt"] = bool(timer["en"]) and not bool(timer["dn"])
+                elif member == "dn":
+                    timer["dn"] = bool(value)
+                elif member == "en":
+                    timer["en"] = bool(value)
+                elif member == "tt":
+                    timer["tt"] = bool(value)
+                self.sync_timer(base)
+                return
+            counter = self.counters.get(base)
+            if counter is not None:
+                if member == "pre":
+                    counter["pre"] = int(value)
+                elif member == "acc":
+                    counter["acc"] = int(value)
+                elif member == "dn":
+                    counter["dn"] = bool(value)
+                counter["dn"] = int(counter["acc"]) == int(counter["pre"])
+                self.sync_counter(base)
+                return
+        self.set_tag(tag, value)
+
     def set_force(self, tag, value):
         self.forced[tag] = value
         self.tags[tag] = value
@@ -340,6 +421,42 @@ class PortableRuntime:
         if op == "DIV":
             return left / right
         return 0
+
+    def evaluate_power(self, step, power_in):
+        op = step.get("op")
+        tag = step.get("tag", "")
+        if op == "XIC":
+            return bool(power_in) and bool(self.read_tag(tag))
+        if op == "XIO":
+            return bool(power_in) and (not bool(self.read_tag(tag)))
+        operator = step_compare_operator(step)
+        if operator is not None:
+            params = step.get("params", {})
+            left = self.resolve_operand(params.get("left"))
+            right = self.resolve_operand(params.get("right"))
+            return bool(power_in) and self.apply_compare(left, right, operator)
+        return bool(power_in)
+
+    def prime_counter_edges_in_nodes(self, nodes, power_in, prefix=()):
+        current = bool(power_in)
+        for index, node in enumerate(nodes):
+            if node.get("kind", "step") == "branch":
+                outputs = []
+                for lane_index, lane in enumerate(node.get("lanes", [])):
+                    lane_power = self.prime_counter_edges_in_nodes(lane, current, prefix + (index, lane_index))
+                    outputs.append(bool(lane_power))
+                current = any(outputs) if outputs else current
+                continue
+            step_key = ".".join([str(part) for part in prefix + (index,)])
+            if node.get("op") in ("CTU", "CTD"):
+                self.edge_memory[step_key] = bool(current)
+            current = self.evaluate_power(node, current)
+        return current
+
+    def prime_counter_edges(self):
+        self.edge_memory = {}
+        for rung in self.program.get("rungs", []):
+            self.prime_counter_edges_in_nodes(rung.get("elements", []), True)
 
     def execute_step(self, step, power_in, scan_ms, step_key):
         op = step.get("op")
@@ -463,7 +580,14 @@ class PortableRuntime:
     def handle_message(self, payload):
         message_type = payload.get("type")
         if message_type == "hello":
-            return {"type": "hello", "role": "device", "version": 1, "platform": "circuitpython"}
+            return {
+                "type": "hello",
+                "role": "device",
+                "version": 1,
+                "platform": "circuitpython",
+                "mode": self.mode,
+                "program_loaded": self.program_loaded,
+            }
         if message_type == "download_program":
             self.load_program(payload.get("program", {}), persist=True)
             return {"type": "ack", "request": "download_program", "program": self.program.get("name", "")}
@@ -498,7 +622,7 @@ class PortableRuntime:
             binding = self.find_binding(tag)
             if binding is not None and binding.get("direction") == "input":
                 self.backend.write(binding.get("address", ""), value)
-            self.set_tag(tag, value)
+            self.set_value(tag, value)
             return {"type": "ack", "request": "set_tag", "tag": tag}
         if message_type == "force":
             tag = str(payload.get("tag", ""))
@@ -517,10 +641,14 @@ class PortableRuntime:
             bindings = [current for current in self.program.get("bindings", []) if current.get("tag") != tag]
             bindings.append(binding)
             self.program["bindings"] = bindings
+            self.program_loaded = True
             self.storage.save_program(self.program)
             return {"type": "ack", "request": "bind", "tag": tag}
         if message_type == "run":
-            self.mode = str(payload.get("mode", "run"))
+            next_mode = str(payload.get("mode", "run"))
+            if next_mode == "run" and self.mode != "run":
+                self.prime_counter_edges()
+            self.mode = next_mode
             return {"type": "ack", "request": "run", "mode": self.mode}
         if message_type == "scan_once":
             return self.scan_once(int(payload.get("scan_ms", 0)))

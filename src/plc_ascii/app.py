@@ -8,14 +8,15 @@ import time
 from pathlib import Path
 
 from .engine import LadderEngine
-from .model import Binding, Program, Rung, Step, RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_PROPELLER2
+from .model import Binding, Program, Rung, Step, RUNTIME_TARGET_CIRCUITPYTHON, RUNTIME_TARGET_MICROPYTHON, RUNTIME_TARGET_PROPELLER2
 from .program_io import load_program, save_program
 from .remote import RemoteSession
 from .render import render_program
 from .serial_link import SerialJsonTransport
 from .subprocess_link import SubprocessJsonTransport
 from plc_runtime.circuitpython import install_runtime as install_circuitpython_runtime
-from plc_runtime.propeller2 import Propeller2Transport, install_runtime as install_propeller2_runtime
+from plc_runtime.micropython import install_runtime as install_micropython_runtime
+from plc_runtime.propeller2 import DEFAULT_BAUDRATE as PROPELLER2_DEFAULT_BAUDRATE, Propeller2Transport, install_runtime as install_propeller2_runtime
 
 
 def parse_bool(raw: str) -> bool:
@@ -25,6 +26,16 @@ def parse_bool(raw: str) -> bool:
     if value in {"0", "false", "off", "no"}:
         return False
     raise ValueError(f"Cannot parse boolean from '{raw}'")
+
+
+def parse_binding_address(raw: str) -> str | int:
+    text = raw.strip()
+    if not text:
+        raise ValueError("Binding requires a tag and address")
+    try:
+        return int(text, 10)
+    except ValueError:
+        return text
 
 
 class WorkbenchShell(cmd.Cmd):
@@ -63,7 +74,10 @@ class WorkbenchShell(cmd.Cmd):
                 hello = session.hello(timeout=2.0)
             if not hello:
                 session.transport.close()
-            return (session if hello else None, "circuitpython" if hello else None, hello)
+            if not hello:
+                return None, None, None
+            runtime_type = str(hello.get("platform", target))
+            return session, runtime_type, hello
         except Exception as exc:  # pragma: no cover
             print(f"Serial connection failed: {exc}")
             return None, None, None
@@ -153,7 +167,7 @@ class WorkbenchShell(cmd.Cmd):
         if len(parts) != 3:
             print("Usage: bind TAG input|output ADDRESS")
             return
-        binding = Binding(tag=parts[0], direction=parts[1], address=parts[2])
+        binding = Binding(tag=parts[0], direction=parts[1], address=parse_binding_address(parts[2]))
         binding.validate()
         self.program.bindings = [b for b in self.program.bindings if b.tag != binding.tag]
         self.program.bindings.append(binding)
@@ -181,7 +195,8 @@ class WorkbenchShell(cmd.Cmd):
             print("Usage: connect_serial PORT [BAUD]")
             return
         port = parts[0]
-        baud = int(parts[1]) if len(parts) > 1 else 115200
+        default_baud = PROPELLER2_DEFAULT_BAUDRATE if self.program.runtime_target == RUNTIME_TARGET_PROPELLER2 else 115200
+        baud = int(parts[1]) if len(parts) > 1 else default_baud
         session, runtime_type, hello = self._connect_for_target(port, baud)
         if not hello:
             print("Serial connection failed: no response from target")
@@ -190,10 +205,6 @@ class WorkbenchShell(cmd.Cmd):
             return
         self.remote = session
         self.remote_label = f"{runtime_type}:{port}"
-        try:
-            self.remote.set_mode("run")
-        except Exception:
-            pass
         print(f"Connected to {self.remote_label}: {hello}")
 
     def do_disconnect(self, arg: str) -> None:
@@ -263,8 +274,17 @@ class WorkbenchShell(cmd.Cmd):
         if not port:
             print("Usage: install_circuitpython PORT")
             return
-        install_circuitpython_runtime(port, program=self.program)
+        install_circuitpython_runtime(port)
         print(f"Installed CircuitPython runtime on {port}")
+
+    def do_install_micropython(self, arg: str) -> None:
+        """install_micropython PORT"""
+        port = arg.strip()
+        if not port:
+            print("Usage: install_micropython PORT")
+            return
+        install_micropython_runtime(port)
+        print(f"Installed MicroPython runtime on {port}")
 
     def do_install_propeller2(self, arg: str) -> None:
         """install_propeller2 PORT [BAUD]"""
@@ -273,7 +293,7 @@ class WorkbenchShell(cmd.Cmd):
             print("Usage: install_propeller2 PORT [BAUD]")
             return
         port = parts[0]
-        baud = int(parts[1]) if len(parts) > 1 else 115200
+        baud = int(parts[1]) if len(parts) > 1 else PROPELLER2_DEFAULT_BAUDRATE
         install_propeller2_runtime(port, program=self.program, baudrate=baud)
         print(f"Loaded Propeller 2 runtime into RAM on {port}")
 

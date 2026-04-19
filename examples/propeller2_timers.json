@@ -1,0 +1,107 @@
+{
+  "name": "propeller2-led56",
+  "runtime_target": "propeller2",
+  "rungs": [
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIO",
+          "tag": "timer2.dn"
+        },
+        {
+          "kind": "step",
+          "op": "TON",
+          "tag": "timer1",
+          "arg": 500
+        }
+      ]
+    },
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "timer1.dn"
+        },
+        {
+          "kind": "step",
+          "op": "TON",
+          "tag": "timer2",
+          "arg": 500
+        }
+      ]
+    },
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "timer1.tt"
+        },
+        {
+          "kind": "step",
+          "op": "OTE",
+          "tag": "led_57"
+        }
+      ]
+    },
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "XIC",
+          "tag": "timer2.tt"
+        },
+        {
+          "kind": "step",
+          "op": "OTE",
+          "tag": "led_56"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "tag": "led_cmd",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "led_56",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "led_57",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "timer1",
+      "type": "timer",
+      "preset": 500
+    },
+    {
+      "tag": "timer2",
+      "type": "timer",
+      "preset": 500
+    }
+  ],
+  "bindings": [
+    {
+      "tag": "led_56",
+      "direction": "output",
+      "address": "56"
+    },
+    {
+      "tag": "led_57",
+      "direction": "output",
+      "address": 57
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 import unittest
 
-from plc_ascii.ide import first_step_path, normalize_nodes, offline_live_locked, populate_program_variables
+from plc_ascii.ide import (
+    first_step_path,
+    normalize_nodes,
+    offline_live_locked,
+    populate_program_variables,
+    stopped_runtime_writebacks,
+)
 from plc_ascii.model import Branch, Program, Rung, Step, Variable
 
 
@@ -71,6 +77,54 @@ class IdeHelperTests(unittest.TestCase):
         variables = {variable.tag: variable for variable in program.variables}
         self.assertEqual(variables["count"].initial, 12)
         self.assertTrue(variables["motor"].initial)
+
+    def test_populate_program_variables_preserves_current_timer_preset_for_save(self) -> None:
+        program = Program(
+            name="timer-save",
+            variables=[Variable(tag="timer1", data_type="timer", preset=1000)],
+            rungs=[Rung(elements=[Step("TON", "timer1", arg=1000)])],
+        )
+
+        populate_program_variables(program, current_values={"timer1.pre": 250})
+
+        variables = {variable.tag: variable for variable in program.variables}
+        self.assertEqual(variables["timer1"].preset, 250)
+        self.assertEqual(program.rungs[0].elements[0].arg, 250)
+
+    def test_populate_program_variables_preserves_current_counter_preset_for_save(self) -> None:
+        program = Program(
+            name="counter-save",
+            variables=[Variable(tag="counter1", data_type="counter", preset=4)],
+            rungs=[Rung(elements=[Step("CTU", "counter1", arg=4)])],
+        )
+
+        populate_program_variables(program, current_values={"counter1.pre": 9})
+
+        variables = {variable.tag: variable for variable in program.variables}
+        self.assertEqual(variables["counter1"].preset, 9)
+        self.assertEqual(program.rungs[0].elements[0].arg, 9)
+
+    def test_stopped_runtime_writebacks_include_counter_acc_but_not_counter_pre(self) -> None:
+        program = Program(
+            name="counter-live",
+            variables=[Variable(tag="counter1", data_type="counter", preset=4)],
+            rungs=[Rung(elements=[Step("CTU", "counter1", arg=4)])],
+        )
+
+        writebacks = stopped_runtime_writebacks(
+            program,
+            {
+                "counters": {
+                    "counter1": {"pre": 9, "acc": 3, "dn": False},
+                    "removed": {"pre": 1, "acc": 1, "dn": True},
+                }
+            },
+        )
+
+        self.assertEqual(writebacks["counter1.acc"], 3)
+        self.assertEqual(writebacks["counter1.dn"], False)
+        self.assertNotIn("counter1.pre", writebacks)
+        self.assertNotIn("removed.acc", writebacks)
 
 
 if __name__ == "__main__":

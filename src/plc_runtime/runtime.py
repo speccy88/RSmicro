@@ -107,10 +107,11 @@ class DeviceRuntime:
                 self.engine.clear_force(tag)
             return {"type": "ack", "request": "force", "tag": tag}
         if message_type == "bind":
+            raw_address = payload["address"]
             binding = Binding(
                 tag=str(payload["tag"]),
                 direction=str(payload["direction"]),
-                address=str(payload["address"]),
+                address=raw_address if isinstance(raw_address, int) else str(raw_address),
             )
             binding.validate()
             self.program.bindings = [current for current in self.program.bindings if current.tag != binding.tag]

@@ -1,0 +1,55 @@
+{
+  "name": "propeller2-led56",
+  "runtime_target": "propeller2",
+  "rungs": [
+    {
+      "comment": "",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "OTL",
+          "tag": "led_57"
+        }
+      ]
+    },
+    {
+      "comment": "led command drives onboard LED on P56",
+      "elements": [
+        {
+          "kind": "step",
+          "op": "OTU",
+          "tag": "led_56"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "tag": "led_cmd",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "led_56",
+      "type": "bool",
+      "initial": false
+    },
+    {
+      "tag": "led_57",
+      "type": "bool",
+      "initial": false
+    }
+  ],
+  "bindings": [
+    {
+      "tag": "led_56",
+      "direction": "output",
+      "address": "56"
+    },
+    {
+      "tag": "led_57",
+      "direction": "output",
+      "address": 57
+    }
+  ]
+}
