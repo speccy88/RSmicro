@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://schemas.rsmicro.dev/v1/tagd-config.schema.json","type":"object","required":["format","format_version","broker_id","controllers"]}
