@@ -3,7 +3,7 @@
   "display_name": "EQ",
   "opcode": 32,
   "category": "comparison",
-  "description": "EQ operation in the defined profile subset.",
+  "description": "Comparison contact; passes rung continuity when operand1 is equal operand2.",
   "source_syntax": "EQ(operand1, operand2)",
   "operands": [
     {
@@ -31,10 +31,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "EQ operation in the defined profile subset.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "When input power is true and operand1 == operand2, preserves rung continuity; does not write a destination or retain state.",
+  "false_behavior": "When operand1 is not equal operand2, blocks rung continuity; does not write a destination or retain state.",
+  "prescan": "EQ has no prescan action: it owns no retained execution state and does not perform an output lifecycle write.",
+  "postscan": "EQ has no postscan action: it owns no retained execution state and does not perform an output lifecycle write.",
   "state": "none",
   "affected_members": [],
   "faults": [

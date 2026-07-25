@@ -22,7 +22,7 @@ def inspect_image(raw):
  def section(name):
   s=next(x for x in sections if x['type']==name); return raw[s['offset']:s['offset']+s['length']]
  tags=json.loads(section('TAG_TABLE')); stream=section('INSTRUCTION_STREAM'); mem=json.loads(section('MEMORY_ESTIMATES'))
- return {'magic':'RSM1','image_format':'1.0','profile':'RSM-LOGIX-CORE-1','instruction_abi':abi,'controller_uuid':__import__('uuid').UUID(bytes=uid).hex,'size':len(raw),'crc':f'{crc:08x}','crc_valid':True,'sha256':hashlib.sha256(raw).hexdigest(),'sections':sections,'tag_count':len(tags),'instruction_count':sum(1 for _ in iter_stream(stream)),'memory_estimates':mem}
+ return {'magic':'RSM1','image_format':f'{major}.{minor}','profile':'RSM-LOGIX-CORE-1','instruction_abi':abi,'controller_uuid':__import__('uuid').UUID(bytes=uid).hex,'size':len(raw),'crc':f'{crc:08x}','crc_valid':True,'sha256':hashlib.sha256(raw).hexdigest(),'sections':sections,'tag_count':len(tags),'instruction_count':sum(1 for _ in iter_stream(stream)),'memory_estimates':mem}
 def iter_stream(b):
  p=0
  while p<len(b):

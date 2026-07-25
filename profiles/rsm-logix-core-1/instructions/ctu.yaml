@@ -3,7 +3,7 @@
   "display_name": "CTU",
   "opcode": 17,
   "category": "counter",
-  "description": "Counts false-to-true transitions without clamping ACC to PRE; wraps are faults with OV.",
+  "description": "Count-up instruction that counts false-to-true rung transitions; ACC is not clamped to PRE.",
   "source_syntax": "CTU(operand1)",
   "operands": [
     {
@@ -19,10 +19,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "Counts false-to-true transitions without clamping ACC to PRE; wraps are faults with OV.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, sets CU; on a false-to-true transition increments ACC, wrapping INT32_MAX to INT32_MIN and setting OV; DN is ACC >= PRE.",
+  "false_behavior": "Without rung continuity, clears CU and records a false edge baseline; ACC, DN, and OV retain their current values.",
+  "prescan": "Prescan clears CU and CD and initializes the transition baseline as true, suppressing a count when the rung is already true on the first active scan.",
+  "postscan": "Postscan clears CU and CD and resets the transition baseline; ACC, DN, OV, UN, and PRE are retained.",
   "state": "unique slot required",
   "affected_members": [
     "ACC",

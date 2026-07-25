@@ -1,0 +1,97 @@
+{
+  "id": "ton-pre0-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "TON",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {
+      "name": "timer",
+      "type": "TIMER",
+      "initial": {
+        "PRE": 0,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "out",
+      "type": "BOOL",
+      "initial": false
+    }
+  ],
+  "program": [
+    {
+      "mnemonic": "TON",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "TIMER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": false,
+          "member": "DN"
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true,
+          "member": "EN"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true,
+          "member": "DN"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": false,
+          "member": "TT"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

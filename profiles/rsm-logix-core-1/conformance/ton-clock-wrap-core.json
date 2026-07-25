@@ -1,0 +1,84 @@
+{
+  "id": "ton-clock-wrap-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "TON",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "allow_clock_wrap": true,
+  "tags": [
+    {
+      "name": "timer",
+      "type": "TIMER",
+      "initial": {
+        "PRE": 10,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "observed",
+      "type": "BOOL",
+      "initial": false
+    }
+  ],
+  "program": [
+    {
+      "mnemonic": "TON",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "TIMER"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        }
+      ],
+      "mode": "RUN",
+      "time_us": 18446744073709550615
+    },
+    {
+      "operation": "scan",
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true,
+          "member": "EN"
+        }
+      ],
+      "time_us": 18446744073709550616
+    },
+    {
+      "operation": "scan",
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 3,
+          "member": "ACC"
+        },
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true,
+          "member": "TT"
+        }
+      ],
+      "time_us": 2000
+    }
+  ]
+}

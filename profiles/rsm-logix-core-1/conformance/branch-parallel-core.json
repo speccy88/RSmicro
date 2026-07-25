@@ -1,0 +1,32 @@
+{
+  "id": "branch-parallel-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "BRANCH",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {"name":"pre","type":"BOOL","initial":true},
+    {"name":"a","type":"BOOL","initial":false},
+    {"name":"b","type":"BOOL","initial":true},
+    {"name":"post","type":"BOOL","initial":true},
+    {"name":"out","type":"BOOL","initial":false}
+  ],
+  "program": [
+    {"mnemonic":"XIC","operands":[{"tag":0,"type":"BOOL"}]},
+    {"mnemonic":"BRANCH_BEGIN"}, {"mnemonic":"BRANCH_LANE_BEGIN"},
+    {"mnemonic":"XIC","operands":[{"tag":1,"type":"BOOL"}]}, {"mnemonic":"BRANCH_LANE_END"},
+    {"mnemonic":"BRANCH_LANE_BEGIN"},
+    {"mnemonic":"XIC","operands":[{"tag":2,"type":"BOOL"}]}, {"mnemonic":"BRANCH_LANE_END"},
+    {"mnemonic":"BRANCH_LANE_BEGIN"},
+    {"mnemonic":"XIO","operands":[{"tag":1,"type":"BOOL"}]}, {"mnemonic":"XIC","operands":[{"tag":2,"type":"BOOL"}]}, {"mnemonic":"BRANCH_LANE_END"},
+    {"mnemonic":"BRANCH_END"}, {"mnemonic":"XIC","operands":[{"tag":3,"type":"BOOL"}]},
+    {"mnemonic":"OTE","operands":[{"tag":4,"type":"BOOL"}]}
+  ],
+  "steps": [
+    {"operation":"run","time_ms":0,"mode":"RUN","diagnostics":{"scan_count":0},"assert":[{"tag":0,"type":"BOOL","value":true},{"tag":1,"type":"BOOL","value":false},{"tag":4,"type":"BOOL","value":false}]},
+    {"operation":"scan","time_ms":1,"diagnostics":{"scan_count":1},"assert":[{"tag":1,"type":"BOOL","value":false},{"tag":2,"type":"BOOL","value":true},{"tag":3,"type":"BOOL","value":true},{"tag":4,"type":"BOOL","value":true}]},
+    {"operation":"write","time_ms":2,"write":{"tag":0,"type":"BOOL","value":false},"assert":[{"tag":0,"type":"BOOL","value":false},{"tag":2,"type":"BOOL","value":true},{"tag":4,"type":"BOOL","value":true}]},
+    {"operation":"scan","time_ms":3,"diagnostics":{"scan_count":2},"assert":[{"tag":0,"type":"BOOL","value":false},{"tag":4,"type":"BOOL","value":false}]},
+    {"operation":"postscan","time_ms":4,"assert":[{"tag":4,"type":"BOOL","value":false},{"tag":2,"type":"BOOL","value":true}]},
+    {"operation":"program","time_ms":5,"mode":"PROGRAM","assert":[{"tag":4,"type":"BOOL","value":false},{"tag":2,"type":"BOOL","value":true}]}
+  ]
+}

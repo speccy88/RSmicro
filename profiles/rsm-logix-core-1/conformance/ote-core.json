@@ -2,63 +2,186 @@
   "id": "ote-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "OTE",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {
+      "name": "gate",
+      "type": "BOOL",
+      "initial": true
+    },
+    {
+      "name": "out",
+      "type": "BOOL",
+      "initial": false
+    }
   ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
+  "program": [
+    {
+      "mnemonic": "XIC",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "XIO",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    }
   ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
   "steps": [
     {
       "operation": "prescan",
       "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ]
+    },
+    {
+      "operation": "run",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "RUN",
+      "diagnostics": {
+        "scan_count": 0
       }
     },
     {
       "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
+      "time_ms": 2,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "diagnostics": {
+        "scan_count": 1
+      },
+      "state": {
+        "forces": [{"tag": 1, "enabled": false, "type": "BOOL", "logical": false, "effective": false}],
+        "rung_powers": [{"rung": 0, "power": false}]
+      },
+      "write_trace": [
+        {"tag": 1, "type": "BOOL", "value": true},
+        {"tag": 1, "type": "BOOL", "value": false}
+      ]
+    },
+    {
+      "operation": "force",
+      "time_ms": 3,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "force": {
+        "tag": 1,
+        "type": "BOOL",
+        "value": true
+      },
+      "state": {
+        "forces": [{"tag": 1, "enabled": true, "type": "BOOL", "logical": false, "effective": true}]
       }
     },
     {
       "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "time_ms": 4,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "diagnostics": {
+        "scan_count": 2
+      },
+      "state": {
+        "forces": [{"tag": 1, "enabled": true, "type": "BOOL", "logical": false, "effective": true}],
+        "rung_powers": [{"rung": 0, "power": false}]
+      },
+      "write_trace": [
+        {"tag": 1, "type": "BOOL", "value": true},
+        {"tag": 1, "type": "BOOL", "value": false}
+      ]
+    },
+    {
+      "operation": "clear_force",
+      "time_ms": 5,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "tag": 1
     },
     {
       "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "time_ms": 6,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ]
+    },
+    {
+      "operation": "program",
+      "time_ms": 7,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "PROGRAM"
     }
-  ],
-  "expected_diagnostics": []
+  ]
 }

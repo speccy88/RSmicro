@@ -3,7 +3,7 @@
   "display_name": "OTU",
   "opcode": 5,
   "category": "bit",
-  "description": "OTU operation in the defined profile subset.",
+  "description": "Retentive output unlatch; clears its BOOL destination only while rung continuity is true.",
   "source_syntax": "OTU(operand1)",
   "operands": [
     {
@@ -19,10 +19,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "OTU operation in the defined profile subset.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, writes false to the BOOL destination and leaves it unlatched after the rung becomes false.",
+  "false_behavior": "Without rung continuity, performs no write; the BOOL destination retains its prior backing value.",
+  "prescan": "No instruction-specific prescan write; OTU does not alter its destination during lifecycle entry.",
+  "postscan": "No instruction-specific postscan write; OTU does not alter its destination during lifecycle exit.",
   "state": "none",
   "affected_members": [],
   "faults": [

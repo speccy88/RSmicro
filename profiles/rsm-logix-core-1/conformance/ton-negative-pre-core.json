@@ -1,0 +1,87 @@
+{
+  "id": "ton-negative-pre-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "TON",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {
+      "name": "timer",
+      "type": "TIMER",
+      "initial": {
+        "PRE": -1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "out",
+      "type": "BOOL",
+      "initial": false
+    }
+  ],
+  "program": [
+    {
+      "mnemonic": "TON",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "TIMER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": -1,
+          "member": "PRE"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "status": "FAULTED",
+      "mode": "FAULTED",
+      "fault": {
+        "category": "TIMER",
+        "code": 3
+      },
+      "diagnostics": {
+        "scan_count": 0
+      }
+    }
+  ]
+}

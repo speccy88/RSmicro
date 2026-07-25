@@ -2,63 +2,131 @@
   "id": "mov-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "MOV",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
-  ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
-  ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
-  "steps": [
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
     {
-      "operation": "prescan",
-      "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "gate",
+      "type": "BOOL",
+      "initial": true
     },
     {
-      "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "name": "source",
+      "type": "DINT",
+      "initial": 16777217
     },
     {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "name": "real",
+      "type": "REAL",
+      "initial": 0.0
     },
     {
-      "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "dint",
+      "type": "DINT",
+      "initial": 99
     }
   ],
-  "expected_diagnostics": []
+  "program": [
+    {
+      "mnemonic": "XIC",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "MOV",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "DINT"
+        },
+        {
+          "tag": 2,
+          "type": "REAL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "MOV",
+      "operands": [
+        {
+          "tag": 2,
+          "type": "REAL"
+        },
+        {
+          "tag": 3,
+          "type": "DINT"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 2,
+          "type": "REAL",
+          "value": 0.0
+        },
+        {
+          "tag": 3,
+          "type": "DINT",
+          "value": 99
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 2,
+          "type": "REAL",
+          "value": 16777216.0
+        },
+        {
+          "tag": 3,
+          "type": "DINT",
+          "value": 16777216
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 2,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": false
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 3,
+      "assert": [
+        {
+          "tag": 2,
+          "type": "REAL",
+          "value": 16777216.0
+        },
+        {
+          "tag": 3,
+          "type": "DINT",
+          "value": 16777216
+        }
+      ]
+    }
+  ]
 }

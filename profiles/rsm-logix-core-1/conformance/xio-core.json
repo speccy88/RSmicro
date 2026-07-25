@@ -2,63 +2,57 @@
   "id": "xio-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "XIO",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
-  ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
-  ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
-  "steps": [
+  "schema": "rsmicro-semantic-fixture-v1",
+  "tags": [
     {
-      "operation": "prescan",
-      "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "in",
+      "type": "BOOL",
+      "initial": false
     },
     {
-      "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "out",
+      "type": "BOOL",
+      "initial": false
     }
   ],
-  "expected_diagnostics": []
+  "program": [
+    {
+      "mnemonic": "XIO",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "expect": {
+        "tag": 1,
+        "type": "BOOL",
+        "value": false
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 10,
+      "expect": {
+        "tag": 1,
+        "type": "BOOL",
+        "value": true
+      }
+    }
+  ]
 }

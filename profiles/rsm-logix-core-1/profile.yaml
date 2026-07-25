@@ -1,7 +1,7 @@
 {
   "profile_id": "RSM-LOGIX-CORE-1",
-  "profile_version": "1.0.0",
-  "instruction_abi": 1,
+  "profile_version": "2.0.0",
+  "instruction_abi": 2,
   "description": "RSmicro instruction profile inspired by and designed to reproduce the documented behavior of the listed Logix instructions within the explicitly defined RSM-LOGIX-CORE-1 subset.",
   "data_types": {
     "BOOL": {

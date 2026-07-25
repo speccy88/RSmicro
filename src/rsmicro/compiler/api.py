@@ -4,8 +4,8 @@ from typing import Any
 from .diagnostics import CompilerDiagnostic as D
 from .validation import validate_controller
 from .lowering import lower
-from .image import build
-from .generated_opcodes import PROFILE_ID
+from .image import VERSION as IMAGE_FORMAT_VERSION,build
+from .generated_opcodes import INSTRUCTION_ABI,PROFILE_ID,PROFILE_VERSION
 @dataclass(frozen=True)
 class CompileOptions: warnings_as_errors:bool=False; strip_debug:bool=False
 @dataclass
@@ -23,5 +23,5 @@ def compile_project(project,controller_id,profile=PROFILE_ID,deployment_id=None,
  ir=lower(c,deps[0] if deps else None); image,dbg,mem,crc=build(ir,options.strip_debug); sha=hashlib.sha256(image).hexdigest()
  opcode_usage={}
  for i in ir.instructions: opcode_usage[i.mnemonic]=opcode_usage.get(i.mnemonic,0)+1
- manifest={'source_project_format':project.format,'source_project_format_version':project.format_version,'project_uuid':project.project_id,'controller_uuid':c.controller_id,'controller_name':c.name,'profile':PROFILE_ID,'profile_version':'1.0.0','instruction_abi':1,'image_format':'1.0','compiler_version':'0.1.0','image_size':len(image),'image_sha256':sha,'crc32':f'{crc:08x}','tag_count':len(ir.tags),'instruction_count':len(ir.instructions),'rung_count':len(ir.rungs),'routine_count':len(ir.routines),'state_slot_count':sum(i.state_slot is not None for i in ir.instructions),'required_capabilities':['SERIAL_LOGIC','PARALLEL_BRANCH','MONOTONIC_CLOCK','FORCES'],'required_data_types':sorted({t.type for t in ir.tags}),'opcode_usage':dict(sorted(opcode_usage.items())),'memory_estimates':mem,'warnings':[x.to_dict() for x in ds if x.severity=='WARNING'],'output_safe_state_validation':{'status':'not bound or validated by logical compiler'},'produced_tags':[],'consumed_tags':[]}
+ manifest={'source_project_format':project.format,'source_project_format_version':project.format_version,'project_uuid':project.project_id,'controller_uuid':c.controller_id,'controller_name':c.name,'profile':PROFILE_ID,'profile_version':PROFILE_VERSION,'instruction_abi':INSTRUCTION_ABI,'image_format':'.'.join(map(str,IMAGE_FORMAT_VERSION)),'compiler_version':'0.1.0','image_size':len(image),'image_sha256':sha,'crc32':f'{crc:08x}','tag_count':len(ir.tags),'instruction_count':len(ir.instructions),'rung_count':len(ir.rungs),'routine_count':len(ir.routines),'state_slot_count':sum(i.state_slot is not None for i in ir.instructions),'required_capabilities':['SERIAL_LOGIC','PARALLEL_BRANCH','MONOTONIC_CLOCK','FORCES'],'required_data_types':sorted({t.type for t in ir.tags}),'opcode_usage':dict(sorted(opcode_usage.items())),'memory_estimates':mem,'warnings':[x.to_dict() for x in ds if x.severity=='WARNING'],'output_safe_state_validation':{'status':'not bound or validated by logical compiler'},'produced_tags':[],'consumed_tags':[]}
  return CompileResult(True,ds,ir,image,manifest,dbg,{'sha256':sha,'crc32':f'{crc:08x}'},mem)

@@ -1,13 +1,18 @@
 {
-  "id": "neg-core-001",
+  "id": "div-fault-core-001",
   "profile": "RSM-LOGIX-CORE-1",
-  "instruction": "NEG",
+  "instruction": "DIV",
   "schema": "rsmicro-semantic-fixture-v2",
   "tags": [
     {
       "name": "a",
       "type": "DINT",
-      "initial": -2147483648
+      "initial": 1
+    },
+    {
+      "name": "b",
+      "type": "DINT",
+      "initial": 0
     },
     {
       "name": "dest",
@@ -17,7 +22,7 @@
   ],
   "program": [
     {
-      "mnemonic": "NEG",
+      "mnemonic": "DIV",
       "operands": [
         {
           "tag": 0,
@@ -25,6 +30,10 @@
         },
         {
           "tag": 1,
+          "type": "DINT"
+        },
+        {
+          "tag": 2,
           "type": "DINT"
         }
       ]
@@ -36,7 +45,7 @@
       "time_ms": 0,
       "assert": [
         {
-          "tag": 1,
+          "tag": 2,
           "type": "DINT",
           "value": 77
         }
@@ -48,7 +57,7 @@
       "time_ms": 1,
       "assert": [
         {
-          "tag": 1,
+          "tag": 2,
           "type": "DINT",
           "value": 77
         }
@@ -57,8 +66,9 @@
       "mode": "FAULTED",
       "fault": {
         "category": "NUMERIC",
-        "code": 3
-      }
+        "code": 2
+      },
+      "write_trace": []
     }
   ]
 }

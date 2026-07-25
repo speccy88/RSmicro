@@ -9,7 +9,7 @@ ROOT=Path(__file__).parents[1]; LIB=ROOT/'build/runtime/core/librsmcore.so'
 def compiled():
  p=load_project(ROOT/'examples/native_core_demo/project.rsmproj'); r=compile_project(p,p.controllers[0].controller_id); assert r.success; return r
 def test_binding_versions():
- b=NativeBinding(LIB); assert b.lib.rsm_runtime_abi_major()==1; assert b.lib.rsm_instruction_abi()==1
+ b=NativeBinding(LIB); assert b.lib.rsm_runtime_abi_major()==1; assert b.lib.rsm_runtime_abi_minor()==2; assert b.lib.rsm_instruction_abi()==2
 def test_runtime_lifecycle_values_snapshot(compiled):
  with NativeRuntime(LIB).load_image(compiled.image_bytes,compiled.manifest,compiled.debug_map) as r:
   assert r.mode==RuntimeMode.PROGRAM; assert r.read_tag('Count')==DintValue(1); assert r.read_tag('Gain')==RealValue(1.5)

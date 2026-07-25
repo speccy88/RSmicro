@@ -2,63 +2,150 @@
   "id": "ge-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "GE",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
-  ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
-  ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
-  "steps": [
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
     {
-      "operation": "prescan",
-      "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "a",
+      "type": "DINT",
+      "initial": 4
     },
     {
-      "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "name": "b",
+      "type": "DINT",
+      "initial": 4
     },
     {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "name": "ra",
+      "type": "REAL",
+      "initial": 1.5
     },
     {
-      "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "rb",
+      "type": "REAL",
+      "initial": 1.5
+    },
+    {
+      "name": "dout",
+      "type": "BOOL",
+      "initial": false
+    },
+    {
+      "name": "rout",
+      "type": "BOOL",
+      "initial": false
     }
   ],
-  "expected_diagnostics": []
+  "program": [
+    {
+      "mnemonic": "GE",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "DINT"
+        },
+        {
+          "tag": 1,
+          "type": "DINT"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 4,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "GE",
+      "operands": [
+        {
+          "tag": 2,
+          "type": "REAL"
+        },
+        {
+          "tag": 3,
+          "type": "REAL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 5,
+          "type": "BOOL"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 4,
+          "type": "BOOL",
+          "value": false
+        },
+        {
+          "tag": 5,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 4,
+          "type": "BOOL",
+          "value": true
+        },
+        {
+          "tag": 5,
+          "type": "BOOL",
+          "value": true
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 2,
+      "assert": [
+        {
+          "tag": 3,
+          "type": "REAL",
+          "value": 1.5
+        }
+      ],
+      "write": {
+        "tag": 3,
+        "type": "REAL",
+        "value": 1.5
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 3,
+      "assert": [
+        {
+          "tag": 4,
+          "type": "BOOL",
+          "value": true
+        },
+        {
+          "tag": 5,
+          "type": "BOOL",
+          "value": true
+        }
+      ]
+    }
+  ]
 }

@@ -22,7 +22,10 @@ def validate_controller(c):
      if m not in OPCODES: ds.append(D('ERROR','RSM-E101',f'unsupported instruction {m}',path)); continue
      from .profile import load_instruction
      spec=load_instruction(m)
-     if len(i.operands)!=len(spec['operands']): ds.append(D('ERROR','RSM-E102',f'{m} expects {len(spec["operands"])} operands, got {len(i.operands)}',path)); continue
+     # ABI 2 preserves canonical legacy ONS nodes: lowering supplies their
+     # deterministic hidden BOOL storage operand before image emission.
+     legacy_zero_ons=m=='ONS' and not i.operands
+     if len(i.operands)!=len(spec['operands']) and not legacy_zero_ons: ds.append(D('ERROR','RSM-E102',f'{m} expects {len(spec["operands"])} operands, got {len(i.operands)}',path)); continue
      for idx,(o,rule) in enumerate(zip(i.operands,spec['operands'])):
       if isinstance(o,TagOperand):
        t=tags.get(o.tag_id)

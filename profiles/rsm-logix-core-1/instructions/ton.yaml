@@ -3,7 +3,7 @@
   "display_name": "TON",
   "opcode": 16,
   "category": "timer",
-  "description": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
+  "description": "Non-retentive on-delay timer using monotonic elapsed milliseconds rather than nominal scan increments.",
   "source_syntax": "TON(operand1)",
   "operands": [
     {
@@ -19,10 +19,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, sets EN, accumulates monotonic elapsed milliseconds in ACC, sets DN when ACC >= PRE, and sets TT while not done.",
+  "false_behavior": "Without rung continuity, clears ACC, EN, TT, and DN and invalidates the elapsed-time baseline.",
+  "prescan": "Prescan clears ACC, EN, TT, and DN and invalidates the timer elapsed-time baseline before active execution.",
+  "postscan": "Postscan clears ACC, EN, TT, and DN and invalidates the timer elapsed-time baseline when active execution stops.",
   "state": "unique slot required",
   "affected_members": [
     "ACC",

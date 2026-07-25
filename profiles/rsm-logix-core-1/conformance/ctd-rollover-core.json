@@ -1,7 +1,7 @@
 {
-  "id": "res-core-001",
+  "id": "ctd-rollover-core-001",
   "profile": "RSM-LOGIX-CORE-1",
-  "instruction": "RES",
+  "instruction": "CTD",
   "schema": "rsmicro-semantic-fixture-v2",
   "tags": [
     {
@@ -13,8 +13,8 @@
       "name": "counter",
       "type": "COUNTER",
       "initial": {
-        "PRE": 9,
-        "ACC": 4
+        "PRE": 1,
+        "ACC": -2147483648
       }
     }
   ],
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "mnemonic": "RES",
+      "mnemonic": "CTD",
       "operands": [
         {
           "tag": 1,
@@ -46,14 +46,20 @@
         {
           "tag": 1,
           "type": "DINT",
-          "value": 9,
+          "value": 1,
           "member": "PRE"
         },
         {
           "tag": 1,
           "type": "DINT",
-          "value": 4,
+          "value": -2147483648,
           "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "CD"
         }
       ],
       "mode": "RUN"
@@ -65,14 +71,14 @@
         {
           "tag": 1,
           "type": "DINT",
-          "value": 4,
+          "value": -2147483648,
           "member": "ACC"
         },
         {
           "tag": 1,
-          "type": "DINT",
-          "value": 9,
-          "member": "PRE"
+          "type": "BOOL",
+          "value": false,
+          "member": "CD"
         }
       ]
     },
@@ -99,44 +105,100 @@
         {
           "tag": 1,
           "type": "DINT",
-          "value": 9,
-          "member": "PRE"
-        },
-        {
-          "tag": 1,
-          "type": "DINT",
-          "value": 0,
+          "value": 2147483647,
           "member": "ACC"
         },
         {
           "tag": 1,
           "type": "BOOL",
-          "value": false,
-          "member": "CU"
-        },
-        {
-          "tag": 1,
-          "type": "BOOL",
-          "value": false,
+          "value": true,
           "member": "CD"
         },
         {
           "tag": 1,
           "type": "BOOL",
-          "value": false,
+          "value": true,
           "member": "DN"
         },
         {
           "tag": 1,
           "type": "BOOL",
-          "value": false,
-          "member": "OV"
-        },
+          "value": true,
+          "member": "UN"
+        }
+      ]
+    },
+    {
+      "operation": "scan",
+      "time_ms": 4,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 2147483647,
+          "member": "ACC"
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 5,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": false
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 6,
+      "assert": [
         {
           "tag": 1,
           "type": "BOOL",
           "value": false,
-          "member": "UN"
+          "member": "CD"
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 7,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": true
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 8,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 2147483646,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "DN"
         }
       ]
     }

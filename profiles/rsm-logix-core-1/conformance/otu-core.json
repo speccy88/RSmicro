@@ -2,63 +2,105 @@
   "id": "otu-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "OTU",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {
+      "name": "gate",
+      "type": "BOOL",
+      "initial": false
+    },
+    {
+      "name": "out",
+      "type": "BOOL",
+      "initial": true
+    }
   ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
+  "program": [
+    {
+      "mnemonic": "XIC",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTU",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "BOOL"
+        }
+      ]
+    }
   ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
   "steps": [
     {
-      "operation": "prescan",
+      "operation": "run",
       "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 2,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": true
       }
     },
     {
       "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
+      "time_ms": 3,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ]
     },
     {
       "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "time_ms": 4,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ]
     }
-  ],
-  "expected_diagnostics": []
+  ]
 }

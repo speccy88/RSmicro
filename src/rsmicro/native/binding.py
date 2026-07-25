@@ -10,7 +10,9 @@ class NativeBinding:
   except OSError as e: raise NativeLibraryLoadError(str(e),library_path=self.path) from e
   self._declare()
   actual=(self.lib.rsm_runtime_abi_major(),self.lib.rsm_runtime_abi_minor())
-  if actual[0]!=1 or self.lib.rsm_instruction_abi()!=1 or self.lib.rsm_image_format_major()!=1 or self.lib.rsm_profile_id()!=1: raise NativeAbiMismatchError(f"incompatible native ABI: runtime={actual}, instruction={self.lib.rsm_instruction_abi()}",library_path=self.path)
+  # ABI 2 introduces structured branch records and explicit ONS storage; reject
+  # older/newer native libraries rather than reinterpreting images.
+  if actual[0]!=1 or actual[1]!=2 or self.lib.rsm_instruction_abi()!=2 or self.lib.rsm_image_format_major()!=2 or self.lib.rsm_profile_id()!=1: raise NativeAbiMismatchError(f"incompatible native ABI: runtime={actual}, instruction={self.lib.rsm_instruction_abi()}",library_path=self.path)
  def _declare(self):
   l=self.lib
   for n in ("rsm_runtime_abi_major","rsm_runtime_abi_minor","rsm_instruction_abi","rsm_image_format_major","rsm_image_format_minor","rsm_profile_id"): getattr(l,n).restype=C.c_uint32
@@ -26,6 +28,7 @@ class NativeBinding:
   l.rsm_runtime_read_member.argtypes=[C.c_void_p,C.c_uint32,C.c_uint8,C.POINTER(Value)]; l.rsm_runtime_read_member.restype=C.c_int
   l.rsm_runtime_clear_force.argtypes=[C.c_void_p,C.c_uint32]; l.rsm_runtime_clear_force.restype=C.c_int
   l.rsm_runtime_snapshot.argtypes=[C.c_void_p,C.POINTER(SnapshotWriter)]; l.rsm_runtime_snapshot.restype=C.c_int
+  l.rsm_runtime_snapshot_members.argtypes=[C.c_void_p,C.POINTER(SnapshotMemberWriter)]; l.rsm_runtime_snapshot_members.restype=C.c_int
   l.rsm_runtime_get_diagnostics.argtypes=[C.c_void_p,C.POINTER(Diagnostics)]; l.rsm_runtime_get_diagnostics.restype=C.c_int
   l.rsm_runtime_last_fault.argtypes=[C.c_void_p]; l.rsm_runtime_last_fault.restype=C.POINTER(Fault)
  def check(self,status,operation):

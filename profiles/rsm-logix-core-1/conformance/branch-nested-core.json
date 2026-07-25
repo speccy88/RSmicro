@@ -1,0 +1,15 @@
+{
+  "id": "branch-nested-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "BRANCH_NESTED",
+  "schema": "rsmicro-semantic-fixture-v1",
+  "tags": [{"name":"a","type":"BOOL","initial":false},{"name":"b","type":"BOOL","initial":true},{"name":"out","type":"BOOL","initial":false}],
+  "program": [
+    {"mnemonic":"BRANCH_BEGIN"},{"mnemonic":"BRANCH_LANE_BEGIN"},
+    {"mnemonic":"BRANCH_BEGIN"},{"mnemonic":"BRANCH_LANE_BEGIN"},{"mnemonic":"XIC","operands":[{"tag":0,"type":"BOOL"}]},{"mnemonic":"BRANCH_LANE_END"},
+    {"mnemonic":"BRANCH_LANE_BEGIN"},{"mnemonic":"XIC","operands":[{"tag":1,"type":"BOOL"}]},{"mnemonic":"BRANCH_LANE_END"},{"mnemonic":"BRANCH_END"},
+    {"mnemonic":"BRANCH_LANE_END"},{"mnemonic":"BRANCH_LANE_BEGIN"},{"mnemonic":"XIC","operands":[{"tag":0,"type":"BOOL"}]},{"mnemonic":"BRANCH_LANE_END"},{"mnemonic":"BRANCH_END"},
+    {"mnemonic":"OTE","operands":[{"tag":2,"type":"BOOL"}]}
+  ],
+  "steps":[{"operation":"run","time_ms":0,"expect":{"tag":2,"type":"BOOL","value":false}},{"operation":"scan","time_ms":1,"expect":{"tag":2,"type":"BOOL","value":true}}]
+}

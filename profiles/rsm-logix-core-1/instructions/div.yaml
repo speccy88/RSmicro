@@ -3,7 +3,7 @@
   "display_name": "DIV",
   "opcode": 53,
   "category": "numeric",
-  "description": "DIV operation in the defined profile subset.",
+  "description": "Divides operand1 by operand2 and writes the result to destination.",
   "source_syntax": "DIV(operand1, operand2, operand3)",
   "operands": [
     {
@@ -42,10 +42,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "DIV operation in the defined profile subset.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, divides operand1 by operand2 and writes the result to destination.",
+  "false_behavior": "Without rung continuity, performs no write; the destination retains its prior backing value.",
+  "prescan": "DIV has no prescan action: it owns no retained execution state and does not perform an output lifecycle write.",
+  "postscan": "DIV has no postscan action: it owns no retained execution state and does not perform an output lifecycle write.",
   "state": "none",
   "affected_members": [],
   "faults": [

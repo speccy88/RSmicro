@@ -3,7 +3,7 @@
   "display_name": "OTL",
   "opcode": 4,
   "category": "bit",
-  "description": "OTL operation in the defined profile subset.",
+  "description": "Retentive output latch; sets its BOOL destination only while rung continuity is true.",
   "source_syntax": "OTL(operand1)",
   "operands": [
     {
@@ -19,10 +19,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "OTL operation in the defined profile subset.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, writes true to the BOOL destination and leaves it latched after the rung becomes false.",
+  "false_behavior": "Without rung continuity, performs no write; the BOOL destination retains its prior backing value.",
+  "prescan": "No instruction-specific prescan write; OTL is retentive and its destination is not cleared by lifecycle entry.",
+  "postscan": "No instruction-specific postscan write; OTL is retentive and its destination is not cleared by lifecycle exit.",
   "state": "none",
   "affected_members": [],
   "faults": [

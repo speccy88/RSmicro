@@ -2,63 +2,282 @@
   "id": "ton-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "TON",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
-  ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
-  ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
-  "steps": [
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
     {
-      "operation": "prescan",
-      "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
+      "name": "gate",
+      "type": "BOOL",
+      "initial": true
+    },
+    {
+      "name": "timer",
+      "type": "TIMER",
+      "initial": {
+        "PRE": 10,
+        "ACC": 0
       }
     },
     {
-      "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "out",
+      "type": "BOOL",
+      "initial": false
     }
   ],
-  "expected_diagnostics": []
+  "program": [
+    {
+      "mnemonic": "XIC",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "TON",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "TIMER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "OTE",
+      "operands": [
+        {
+          "tag": 2,
+          "type": "BOOL"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 10,
+          "member": "PRE"
+        },
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "EN"
+        },
+        {
+          "tag": 2,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "EN"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "TT"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "DN"
+        },
+        {
+          "tag": 2,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "diagnostics": {
+        "scan_count": 1
+      },
+      "state": {
+        "instruction_states": [{"slot": 0, "edge": true, "valid": true, "time_us": 1000}],
+        "rung_powers": [{"rung": 0, "power": true}]
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 7,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 6,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "TT"
+        }
+      ]
+    },
+    {
+      "operation": "scan",
+      "time_ms": 15,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 14,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "DN"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "TT"
+        }
+      ]
+    },
+    {
+      "operation": "scan",
+      "time_ms": 40,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 39,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true,
+          "member": "DN"
+        }
+      ]
+    },
+    {
+      "operation": "write",
+      "time_ms": 41,
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": false
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 42,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "EN"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "TT"
+        },
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false,
+          "member": "DN"
+        },
+        {
+          "tag": 2,
+          "type": "BOOL",
+          "value": false
+        }
+      ]
+    },
+    {
+      "operation": "program",
+      "time_ms": 43,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 2,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "mode": "PROGRAM"
+    },
+    {
+      "operation": "run",
+      "time_ms": 100,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 105,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        }
+      ]
+    }
+  ]
 }

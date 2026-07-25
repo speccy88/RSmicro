@@ -15,12 +15,21 @@ def lower(controller,deployment=None):
   if b: storage=str(dirs.get((b.device_id,b.endpoint_id),'internal')).upper()
   tags.append(IRTag(n,t.tag_id,t.name,str(t.data_type),storage,t.initial_value if t.initial_value is not None else t.preset,t.retentive))
  ins=[]; routines=[]; rungs=[]; states=0; branches=0
+ def emit_control(name,path):
+  op={'BRANCH_BEGIN':240,'BRANCH_LANE_BEGIN':241,'BRANCH_LANE_END':242,'BRANCH_END':243}[name]
+  ins.append(IRInstruction(len(ins),f'__{name.lower()}_{len(ins)}',name,op,tuple(),None,path+'/'+name))
  def nodes(seq,path):
   nonlocal states,branches
   for node in seq:
    if isinstance(node,Branch):
     branches+=1
-    for k,lane in enumerate(node.lanes): nodes(lane,path+f'/branch/{branches}/lane/{k}')
+    branch_path=path+f'/branch/{branches}'
+    emit_control('BRANCH_BEGIN',branch_path)
+    for k,lane in enumerate(node.lanes):
+     emit_control('BRANCH_LANE_BEGIN',branch_path+f'/lane/{k}')
+     nodes(lane,branch_path+f'/lane/{k}')
+     emit_control('BRANCH_LANE_END',branch_path+f'/lane/{k}')
+    emit_control('BRANCH_END',branch_path)
    else:
     m=ALIASES.get(node.mnemonic.upper(),node.mnemonic.upper()); ops=[]
     for o in node.operands:
@@ -29,7 +38,14 @@ def lower(controller,deployment=None):
       if o.member: typ='DINT' if o.member.upper() in {'PRE','ACC'} else 'BOOL'
       ops.append(IROperand('tag',typ,tid[o.tag_id],o.member.upper() if o.member else None))
      else: ops.append(IROperand('literal','BOOL' if isinstance(o.value,bool) else 'DINT' if isinstance(o.value,int) else 'REAL',o.value))
-    slot=states if m in {'ONS','TON','CTU','CTD'} else None
+    # ABI 2 makes ONS state an explicit BOOL storage operand.  Legacy
+    # zero-operand projects get a deterministic compiler-generated hidden tag;
+    # they are never silently interpreted using an anonymous runtime slot.
+    if m=='ONS' and not ops:
+     hidden_id=len(tags)
+     tags.append(IRTag(hidden_id,f'__rsm_ons_storage_{node.instruction_id}',f'__rsm_ons_storage_{node.instruction_id}','BOOL','INTERNAL',False,False))
+     ops.append(IROperand('tag','BOOL',hidden_id,None))
+    slot=states if m in {'TON','CTU','CTD'} else None
     if slot is not None: states+=1
     ins.append(IRInstruction(len(ins),node.instruction_id,m,OPCODES[m],tuple(ops),slot,path+'/'+node.instruction_id))
  for p in controller.programs:

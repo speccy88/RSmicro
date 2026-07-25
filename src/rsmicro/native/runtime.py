@@ -43,7 +43,9 @@ class RuntimeFault:
 @dataclass(frozen=True)
 class SnapshotValue: runtime_id:int; logical:object; effective:object; forced:bool
 @dataclass(frozen=True)
-class RuntimeSnapshot: mode:RuntimeMode; scan_count:int; program_hash:str; values:tuple[SnapshotValue,...]; diagnostics:RuntimeDiagnostics; last_fault:RuntimeFault|None
+class SnapshotMember: runtime_id:int; member:int; value:object
+@dataclass(frozen=True)
+class RuntimeSnapshot: mode:RuntimeMode; scan_count:int; program_hash:str; values:tuple[SnapshotValue,...]; members:tuple[SnapshotMember,...]; diagnostics:RuntimeDiagnostics; last_fault:RuntimeFault|None
 
 def _to_c(v,out):
  if isinstance(v,BoolValue): out.type=1; out.value.boolean=v.value
@@ -108,7 +110,9 @@ class NativeRuntime:
   if not p or p.contents.category==0:return None
   f=p.contents; return RuntimeFault(self.binding.lib.rsm_fault_category_name(f.category).decode(),f.code,f.scan_number,f.timestamp_us,f.instruction_id,f.tag_id,f.opcode,bool(f.major),(f.message_id or b"").decode())
  def snapshot(self):
-  values=[]
+  values=[]; members=[]
   @SNAPSHOT_CB
   def cb(_,rid,logical,effective,forced): values.append(SnapshotValue(rid,_from_c(logical.contents),_from_c(effective.contents),bool(forced))); return 0
-  writer=SnapshotWriter(None,cb); before=self.diagnostics(); self.binding.check(self.binding.lib.rsm_runtime_snapshot(self._object,C.byref(writer)),"snapshot"); return RuntimeSnapshot(self.mode,before.scan_count,self.program_hash,tuple(values),before,self.last_fault())
+  @SNAPSHOT_MEMBER_CB
+  def member_cb(_,rid,member,value): members.append(SnapshotMember(rid,member,_from_c(value.contents))); return 0
+  writer=SnapshotWriter(None,cb); member_writer=SnapshotMemberWriter(None,member_cb); before=self.diagnostics(); self.binding.check(self.binding.lib.rsm_runtime_snapshot(self._object,C.byref(writer)),"snapshot"); self.binding.check(self.binding.lib.rsm_runtime_snapshot_members(self._object,C.byref(member_writer)),"snapshot members"); return RuntimeSnapshot(self.mode,before.scan_count,self.program_hash,tuple(values),tuple(members),before,self.last_fault())

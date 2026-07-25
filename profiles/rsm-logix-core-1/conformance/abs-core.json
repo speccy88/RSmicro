@@ -2,63 +2,63 @@
   "id": "abs-core-001",
   "profile": "RSM-LOGIX-CORE-1",
   "instruction": "ABS",
-  "coverage": [
-    "prescan",
-    "false_scan",
-    "true_scan",
-    "repeated_true",
-    "true_to_false",
-    "false_to_true",
-    "postscan",
-    "boundary",
-    "force",
-    "invalid_operand",
-    "multiple_instances",
-    "multiple_rungs"
-  ],
-  "data_types": [
-    "BOOL",
-    "DINT",
-    "REAL",
-    "TIMER",
-    "COUNTER"
-  ],
-  "tags": [],
-  "initial_state": {},
-  "force_state": {},
-  "steps": [
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
     {
-      "operation": "prescan",
-      "time_ms": 0,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "a",
+      "type": "DINT",
+      "initial": -2147483648
     },
     {
-      "operation": "scan",
-      "time_ms": 100,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "scan",
-      "time_ms": 600,
-      "rung_in": true,
-      "expect": {
-        "fault": null
-      }
-    },
-    {
-      "operation": "postscan",
-      "time_ms": 700,
-      "rung_in": false,
-      "expect": {
-        "fault": null
-      }
+      "name": "dest",
+      "type": "DINT",
+      "initial": 77
     }
   ],
-  "expected_diagnostics": []
+  "program": [
+    {
+      "mnemonic": "ABS",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "DINT"
+        },
+        {
+          "tag": 1,
+          "type": "DINT"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_ms": 0,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 77
+        }
+      ],
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_ms": 1,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 77
+        }
+      ],
+      "status": "FAULTED",
+      "mode": "FAULTED",
+      "fault": {
+        "category": "NUMERIC",
+        "code": 3
+      }
+    }
+  ]
 }

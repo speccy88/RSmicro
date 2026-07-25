@@ -3,16 +3,25 @@
   "display_name": "ONS",
   "opcode": 6,
   "category": "bit",
-  "description": "One scan pulse on false-to-true transition with instance-unique state.",
-  "source_syntax": "ONS()",
-  "operands": [],
+  "description": "One-shot rising instruction with an explicit, instruction-unique BOOL storage operand.",
+  "source_syntax": "ONS(storage_bool)",
+  "operands": [
+    {
+      "name": "storage",
+      "kind": "tag",
+      "types": [
+        "BOOL"
+      ],
+      "access": "read_write"
+    }
+  ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "One scan pulse on false-to-true transition with instance-unique state.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
-  "state": "unique slot required",
+  "true_behavior": "When input power is true and storage was false, passes one scan of rung continuity and writes storage true; when storage is already true, blocks continuity while retaining storage true.",
+  "false_behavior": "When input power is false, blocks rung continuity and writes the storage BOOL false, re-arming the next false-to-true transition.",
+  "prescan": "Prescan writes true to the ONS storage BOOL, suppressing a startup pulse if the rung is already true on the first active scan.",
+  "postscan": "Postscan does not write ONS storage; its current value is retained until normal scan execution changes it.",
+  "state": "explicit BOOL storage operand; legacy zero-operand projects receive a deterministic hidden BOOL tag during lowering",
   "affected_members": [],
   "faults": [
     "invalid operand",

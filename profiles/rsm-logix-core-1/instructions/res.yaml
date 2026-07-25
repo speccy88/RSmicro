@@ -3,7 +3,7 @@
   "display_name": "RES",
   "opcode": 19,
   "category": "timer_counter",
-  "description": "When powered clears ACC and status members, preserves PRE, and resets associated edge state.",
+  "description": "Reset for TIMER or COUNTER tags; preserves PRE and clears accumulated/status state when powered.",
   "source_syntax": "RES(operand1)",
   "operands": [
     {
@@ -20,10 +20,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "When powered clears ACC and status members, preserves PRE, and resets associated edge state.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, clears TIMER ACC/EN/TT/DN or COUNTER ACC/CU/CD/DN/OV/UN, preserves PRE, and clears associated TON/CTU/CTD execution state.",
+  "false_behavior": "Without rung continuity, performs no reset and does not change the target tag or associated execution state.",
+  "prescan": "RES does not execute a reset during prescan; lifecycle initialization of TIMER/COUNTER fields is performed independently of RES rung power.",
+  "postscan": "RES does not execute a reset during postscan; lifecycle cleanup of TIMER/COUNTER fields is performed independently of RES rung power.",
   "state": "none",
   "affected_members": [
     "ACC",

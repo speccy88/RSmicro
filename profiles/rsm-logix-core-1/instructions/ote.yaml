@@ -3,7 +3,7 @@
   "display_name": "OTE",
   "opcode": 3,
   "category": "bit",
-  "description": "OTE operation in the defined profile subset.",
+  "description": "Non-retentive output energize; writes its BOOL destination from rung continuity each scan.",
   "source_syntax": "OTE(operand1)",
   "operands": [
     {
@@ -19,10 +19,10 @@
   ],
   "rung_condition_in": "consumed",
   "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
-  "true_behavior": "OTE operation in the defined profile subset.",
-  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
-  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
-  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "true_behavior": "With rung continuity, writes true to the BOOL destination.",
+  "false_behavior": "Without rung continuity, writes false to the BOOL destination.",
+  "prescan": "Prescan writes false to this OTE BOOL destination, de-energizing the non-retentive output before the first active scan.",
+  "postscan": "Postscan writes false to this OTE BOOL destination, de-energizing the non-retentive output when active execution stops.",
   "state": "none",
   "affected_members": [],
   "faults": [
