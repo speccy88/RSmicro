@@ -14,11 +14,12 @@ dependencies = [
   "tkinterweb>=4.2.0",
   "jsonschema>=4.18",
   "websockets>=12",
+  "PySide6>=6.7",
 ]
 
 [project.optional-dependencies]
 serial = []
-dev = ["pytest>=7.4"]
+dev = ["pytest>=7.4", "pytest-qt>=4.4"]
 
 [project.scripts]
 plc-ascii = "plc_ascii.ide:main"
@@ -26,6 +27,8 @@ plc-ascii-cli = "plc_ascii.app:main"
 plc-runtime = "plc_runtime.runtime:main"
 rsmicro = "rsmicro.cli:main"
 rsmicro-tagd = "rsmicro.scada.cli:main"
+rsmicro-studio = "rsmicro.studio.main:main"
+rsmicro-scada = "rsmicro.scada_runtime.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

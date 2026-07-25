@@ -1,5 +1,18 @@
 # PLC ASCII
 
+## RSmicro desktop applications
+
+Task 7 adds the PySide6 `rsmicro-studio` engineering application and standalone
+`rsmicro-scada` operator runtime. Studio uses the canonical compiler, native C
+runtime binding for simulation, and RSM Link for controller engineering. The
+operator runtime obtains process data only through loopback `rsmicro-tagd`.
+The original Tkinter `plc-ascii` application and all hardware runtimes remain.
+
+The canonical model, compiler, portable runtime, protocol/node and SCADA services
+are complete through Task 7. Physical hardware remains unverified; Task 8 owns
+final integrated validation. These applications are not safety certified and
+RSM Link 1.0 is not a secure remote-access protocol.
+
 `PLC ASCII` is a Python-first ladder logic workbench inspired by LDmicro's text
 presentation and the general workflow of PLC software such as RSLogix 5000.
 This first version focuses on a practical MVP:

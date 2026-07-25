@@ -1,3 +1,3 @@
 # SCADA security
 
-The local API has no secure authentication or encryption. Client-selected roles are policy hints, not identity. Keep it loopback-only or behind a future authenticated secure layer. Operator writes and engineering forces carry different risk. Requests cannot choose files or execute shells. RSmicro is not safety-rated.
+The operator runtime defaults to viewer and loopback rsmicro-tagd, never rsm-node. Role names are policy, not authentication. RSM Link and the local API are unencrypted and intended for trusted loopback use. Declarative actions are allow-listed; arbitrary Python, JavaScript and shell execution are prohibited. HMI momentary controls are not hardware safety controls.

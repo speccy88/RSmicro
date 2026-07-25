@@ -1,0 +1,109 @@
+{
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
+  "screen_id": "a08cea90-5c37-5475-b96b-3ec3a79f8990",
+  "name": "overview",
+  "description": "Task 7 integrated demonstration screen",
+  "width": 1024,
+  "height": 640,
+  "background": "#f0f0f0",
+  "scaling_policy": "fit",
+  "objects": [
+    {
+      "object_id": "ce03e4df-da09-4b50-b9dd-9d164c1a60f5",
+      "type": "label",
+      "geometry": {
+        "x": 30,
+        "y": 25,
+        "width": 400,
+        "height": 45
+      },
+      "properties": {
+        "text": "Overview"
+      },
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "4bc981e7-0504-4675-b032-0d9ab7b3f1d0",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 30,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "a275017e-0fc2-4eed-aa18-4042e6cdb780",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 240,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "06438ea8-257f-4931-a20d-c3283234be0a",
+      "type": "force_indicator",
+      "geometry": {
+        "x": 450,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "e0e6c6ad-8e33-4116-9261-4203f8f774e7",
+      "type": "alarm_banner",
+      "geometry": {
+        "x": 30,
+        "y": 170,
+        "width": 600,
+        "height": 80
+      },
+      "properties": {},
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    }
+  ],
+  "layers": [],
+  "metadata": {}
+}
