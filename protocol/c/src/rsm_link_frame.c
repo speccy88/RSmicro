@@ -1,0 +1,9 @@
+#include "rsmicro/rsm_link_frame.h"
+#include <string.h>
+static uint16_t u16(const uint8_t*p){return (uint16_t)(p[0]|((uint16_t)p[1]<<8));}
+static uint32_t u32(const uint8_t*p){return (uint32_t)p[0]|((uint32_t)p[1]<<8)|((uint32_t)p[2]<<16)|((uint32_t)p[3]<<24);}
+static void p16(uint8_t*p,uint16_t v){p[0]=(uint8_t)v;p[1]=(uint8_t)(v>>8);}
+static void p32(uint8_t*p,uint32_t v){p[0]=(uint8_t)v;p[1]=(uint8_t)(v>>8);p[2]=(uint8_t)(v>>16);p[3]=(uint8_t)(v>>24);}
+uint32_t rsm_link_crc32c(const uint8_t*d,size_t n){uint32_t c=~0u;size_t i;unsigned b;for(i=0;i<n;i++){c^=d[i];for(b=0;b<8;b++)c=(c>>1)^(0x82f63b78u&(0u-(c&1u)));}return ~c;}
+rsm_link_status_t rsm_link_frame_encode(const rsm_link_frame_t*f,uint8_t*out,size_t cap,size_t*written){size_t total;if(!f||!out||!written||f->payload_length>RSM_LINK_MAX_PAYLOAD_SIZE)return RSM_LINK_LIMIT;total=RSM_LINK_MIN_FRAME_SIZE+f->payload_length;if(total>cap)return RSM_LINK_LIMIT;memcpy(out,"RSML",4);out[4]=1;out[5]=1;out[6]=0;out[7]=f->header_flags;p16(out+8,f->message_type);p16(out+10,f->message_flags);p32(out+12,f->request_id);p32(out+16,f->sequence);p32(out+20,f->payload_length);if(f->payload_length)memcpy(out+24,f->payload,f->payload_length);p32(out+24+f->payload_length,rsm_link_crc32c(out,24+f->payload_length));*written=total;return RSM_LINK_OK;}
+rsm_link_status_t rsm_link_frame_decode(const uint8_t*in,size_t n,rsm_link_frame_t*f){uint32_t len;if(!in||!f||n<RSM_LINK_MIN_FRAME_SIZE)return RSM_LINK_INCOMPLETE;if(memcmp(in,"RSML",4)!=0||in[7]&~1u)return RSM_LINK_BAD_FRAME;if(in[4]!=1||in[5]!=1)return RSM_LINK_VERSION;len=u32(in+20);if(len>RSM_LINK_MAX_PAYLOAD_SIZE||n!=RSM_LINK_MIN_FRAME_SIZE+len)return RSM_LINK_BAD_FRAME;if(u32(in+24+len)!=rsm_link_crc32c(in,24+len))return RSM_LINK_BAD_CRC;f->header_flags=in[7];f->message_type=u16(in+8);f->message_flags=u16(in+10);f->request_id=u32(in+12);f->sequence=u32(in+16);f->payload_length=len;f->payload=in+24;return RSM_LINK_OK;}
