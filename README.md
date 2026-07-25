@@ -1,4 +1,19 @@
-# PLC ASCII
+# RSmicro / PLC ASCII
+
+> **Safety and security:** RSmicro is experimental and is not safety-certified. It must not replace emergency stops, overload protection, guards, or safety-rated controls. Forces can create hazardous operation. RSM Link is unauthenticated and unencrypted; keep services on loopback or an isolated trusted network.
+
+RSmicro has four cooperating pieces: **Studio** (planned; not present in this revision), the deterministic **Compiler** (canonical project to `.rsm`), portable C99 **Core** (the sole canonical instruction engine, native simulator, and node), and **SCADA** (tag broker, quality, historian, alarms, and produced/consumed routing).
+
+```text
+Studio -> Compiler -> .rsm -> rsmcore / rsm-node
+SCADA operator -> tagd -> RSM Link -> native nodes
+```
+
+Run the integrated two-controller example with `PYTHONPATH=src QT_QPA_PLATFORM=offscreen python tools/run_integrated_demo.py --headless`. The native stack is suitable for experimentation. CircuitPython, MicroPython, and Propeller 2/TAQOZ targets remain preserved but physically **UNVERIFIED**. RSM-LOGIX-CORE-1 is an RSmicro-defined documented subset, not a complete compatibility or certification claim. RSmicro is not affiliated with Rockwell Automation.
+
+---
+
+## Legacy PLC ASCII workbench
 
 `PLC ASCII` is a Python-first ladder logic workbench inspired by LDmicro's text
 presentation and the general workflow of PLC software such as RSLogix 5000.

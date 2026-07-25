@@ -1,0 +1,45 @@
+{
+  "format": "rsmicro-screen",
+  "version": 1,
+  "screen_id": "3dd47fe3-0739-58f0-824c-c2c1a471cfee",
+  "name": "trends",
+  "widgets": [
+    {
+      "widget_id": "1ec58ab7-7f8a-5ec3-a76c-06df3bb82163",
+      "type": "tag_value",
+      "label": "TemperaturePV",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a"
+      }
+    },
+    {
+      "widget_id": "d87bf8ce-9374-5c1e-aa36-3adab4eecdb5",
+      "type": "tag_value",
+      "label": "TemperatureSP",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
+      }
+    },
+    {
+      "widget_id": "bcc2be31-23d6-5a37-8fa3-5ae7202a3236",
+      "type": "tag_value",
+      "label": "MotorRun",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093"
+      }
+    },
+    {
+      "widget_id": "cdea02c6-a994-515e-96cc-8304f686c036",
+      "type": "tag_value",
+      "label": "RemotePermitProduced",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
+      }
+    }
+  ],
+  "executable_code": false
+}

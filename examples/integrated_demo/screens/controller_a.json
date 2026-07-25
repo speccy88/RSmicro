@@ -1,0 +1,108 @@
+{
+  "format": "rsmicro-screen",
+  "version": 1,
+  "screen_id": "7a98e9be-90f0-5d4b-86f7-f97033ef571f",
+  "name": "controller_a",
+  "widgets": [
+    {
+      "widget_id": "fc0d9b7d-4ddf-573a-9f78-2f2aad084311",
+      "type": "tag_value",
+      "label": "StartPB",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "00ee0c42-e2c2-5088-8ab8-d8e6b55e1140"
+      }
+    },
+    {
+      "widget_id": "15c3a4a7-2065-5ee2-b51c-0fd3a2eb7f8d",
+      "type": "tag_value",
+      "label": "StopPB",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "08791959-91f2-547f-8802-8146ebd3ead9"
+      }
+    },
+    {
+      "widget_id": "c967342a-ca26-542a-ae91-65d768c04f2b",
+      "type": "tag_value",
+      "label": "ResetPB",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "3c3596af-3edd-5aac-9d1f-845768da7fdc"
+      }
+    },
+    {
+      "widget_id": "40a796e1-64a9-5f14-9cbe-d0447ad061a5",
+      "type": "tag_value",
+      "label": "MotorRun",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093"
+      }
+    },
+    {
+      "widget_id": "e00e7536-9145-5bcb-af1d-10b67718b45c",
+      "type": "tag_value",
+      "label": "StartDelay",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561"
+      }
+    },
+    {
+      "widget_id": "39bde0c8-977b-59fd-b36f-f6796586ea0e",
+      "type": "tag_value",
+      "label": "StartCounter",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2e6f3f27-d6f3-5320-95cb-c76799c32a64"
+      }
+    },
+    {
+      "widget_id": "9d269797-a588-5648-9376-1253a56c6650",
+      "type": "tag_value",
+      "label": "TemperaturePV",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a"
+      }
+    },
+    {
+      "widget_id": "0d12a479-d33c-560d-b18c-a32522f5f670",
+      "type": "tag_value",
+      "label": "TemperatureSP",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
+      }
+    },
+    {
+      "widget_id": "9c6ca93e-1e7c-560d-abcb-6167ef382792",
+      "type": "tag_value",
+      "label": "TemperatureError",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2830da4d-a69b-5953-99b2-5d21ce51c019"
+      }
+    },
+    {
+      "widget_id": "84588601-43c1-5bf8-9997-c26eb7066cce",
+      "type": "tag_value",
+      "label": "MaintenanceMode",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "d96d6808-15e5-54cc-a5ec-a83e87315e0a"
+      }
+    },
+    {
+      "widget_id": "b65c36d1-ec2d-5ef2-9fd1-89516ffe7b9a",
+      "type": "tag_value",
+      "label": "RemotePermitProduced",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
+      }
+    }
+  ],
+  "executable_code": false
+}
