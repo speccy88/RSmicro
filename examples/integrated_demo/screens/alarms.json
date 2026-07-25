@@ -1,0 +1,21 @@
+{
+  "format": "rsmicro-screen",
+  "version": 1,
+  "screen_id": "b91d57b5-533c-5ed2-ab68-989031ef10d0",
+  "name": "alarms",
+  "widgets": [
+    {
+      "widget_id": "42d089e2-a7eb-59ca-bae7-d99162926b4a",
+      "type": "alarm_list",
+      "columns": [
+        "priority",
+        "state",
+        "message",
+        "source",
+        "acknowledgement",
+        "comment"
+      ]
+    }
+  ],
+  "executable_code": false
+}

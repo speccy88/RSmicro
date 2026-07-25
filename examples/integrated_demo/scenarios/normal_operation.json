@@ -1,0 +1,5 @@
+{
+  "scenario": "normal_operation",
+  "bounded_timeout_s": 10,
+  "expected_safe_outputs": true
+}

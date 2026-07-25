@@ -1,0 +1,15 @@
+name: macOS portability CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: macos-latest
+    env: {QT_QPA_PLATFORM: offscreen}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12', cache: pip}
+      - run: python -m pip install -e '.[dev]'
+      - run: cmake -S . -B build -DRSM_BUILD_TESTS=ON -DRSM_BUILD_SHARED=ON -DRSM_ENABLE_STRICT_WARNINGS=ON
+      - run: cmake --build build --parallel && ctest --test-dir build --output-on-failure
+      - run: pytest -q tests/test_compiler_task2.py tests/test_native_task4.py tests/test_rsm_link.py
+      - run: python -c "import rsmicro.compiler, rsmicro.scada"

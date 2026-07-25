@@ -19,7 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 serial = []
-dev = ["pytest>=7.4", "pytest-qt>=4.4"]
+dev = ["pytest>=7.4", "pytest-qt>=4.4", "ruff>=0.5", "mypy>=1.10", "build>=1.2"]
 
 [project.scripts]
 plc-ascii = "plc_ascii.ide:main"
@@ -29,6 +29,31 @@ rsmicro = "rsmicro.cli:main"
 rsmicro-tagd = "rsmicro.scada.cli:main"
 rsmicro-studio = "rsmicro.studio.main:main"
 rsmicro-scada = "rsmicro.scada_runtime.main:main"
+
+[tool.pytest.ini_options]
+markers = [
+  "unit: isolated unit tests",
+  "integration: tests joining two or more components",
+  "end_to_end: complete application workflows",
+  "gui: tests requiring a Qt application",
+  "network: tests using loopback sockets",
+  "slow: tests that normally take more than one second",
+  "hardware: tests requiring explicitly selected physical hardware",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 140
+
+[tool.ruff.lint]
+# The preserved legacy code predates formatter adoption. Keep CI focused on
+# correctness-class errors until it can be reformatted in a dedicated change.
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true
 
 [tool.setuptools]
 package-dir = {"" = "src"}

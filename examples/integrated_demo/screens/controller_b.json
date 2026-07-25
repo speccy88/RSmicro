@@ -1,0 +1,72 @@
+{
+  "format": "rsmicro-screen",
+  "version": 1,
+  "screen_id": "f096d042-a9c6-5184-bab1-3ef80cc5d400",
+  "name": "controller_b",
+  "widgets": [
+    {
+      "widget_id": "ded5d40f-162d-5ea1-b688-88a6eec69012",
+      "type": "tag_value",
+      "label": "RemotePermitConsumed",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "c86db121-1e39-54a8-9632-1d679f73f8f7"
+      }
+    },
+    {
+      "widget_id": "c8fd7305-1111-54c1-a313-7a865e32a25d",
+      "type": "tag_value",
+      "label": "RemotePermitQualityGood",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "16fafe85-83dc-5417-ac67-7646a3549fae"
+      }
+    },
+    {
+      "widget_id": "c64779a7-95f5-5e8d-938b-5e3c3d18d90d",
+      "type": "tag_value",
+      "label": "RemotePermitStale",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "d0d96d13-bc61-5eb8-a3c1-885cb2858879"
+      }
+    },
+    {
+      "widget_id": "79e6c26b-9e97-529d-bfac-6c8184976352",
+      "type": "tag_value",
+      "label": "RemotePermitBad",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "62118396-6bcd-5821-a4a1-bb65bfd88783"
+      }
+    },
+    {
+      "widget_id": "e2f7c53c-509b-5446-b626-f17dfb2bc721",
+      "type": "tag_value",
+      "label": "RouteHealthy",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "e5b4a045-1f99-5644-a1b8-099a4d131db4"
+      }
+    },
+    {
+      "widget_id": "4310ff07-2ea3-5470-9f56-b4c9d9f632cf",
+      "type": "tag_value",
+      "label": "RouteFault",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "cd43d26c-7144-5271-bee9-98b6bc9ba831"
+      }
+    },
+    {
+      "widget_id": "33693e52-f99b-52a5-97da-7cf59d503ff7",
+      "type": "tag_value",
+      "label": "RemoteLamp",
+      "binding": {
+        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
+        "tag_uuid": "4868156c-7d78-58e1-af1f-4676a0b0ba39"
+      }
+    }
+  ],
+  "executable_code": false
+}

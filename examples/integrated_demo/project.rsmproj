@@ -1,0 +1,1471 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "d275a00f-3680-59a4-9190-cfcec16aca0e",
+  "name": "RSmicro Integrated Demo",
+  "description": "Two native controllers with fail-safe routing, alarms, historian, and SCADA.",
+  "controllers": [
+    {
+      "controller_id": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+      "name": "controller-a",
+      "description": "Native integrated demonstration controller",
+      "compatibility_profile": "RSM-LOGIX-CORE-1",
+      "tags": [
+        {
+          "tag_id": "00ee0c42-e2c2-5088-8ab8-d8e6b55e1140",
+          "name": "StartPB",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": true
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "08791959-91f2-547f-8802-8146ebd3ead9",
+          "name": "StopPB",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "3c3596af-3edd-5aac-9d1f-845768da7fdc",
+          "name": "ResetPB",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "54d88922-5626-5c2e-ba41-2e7133876093",
+          "name": "MotorRun",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {
+            "safe_value": false
+          }
+        },
+        {
+          "tag_id": "71df51f5-def7-5531-bdb4-a2d771867ca4",
+          "name": "MotorLatched",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "cf123bda-2fc2-5c7c-b400-121710cd5d40",
+          "name": "StartOneShot",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561",
+          "name": "StartDelay",
+          "description": "Integrated demonstration tag",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 100,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "2e6f3f27-d6f3-5320-95cb-c76799c32a64",
+          "name": "StartCounter",
+          "description": "Integrated demonstration tag",
+          "data_type": "COUNTER",
+          "initial_value": null,
+          "preset": 3,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "381264e0-45bf-51f2-94ab-184679b4d50a",
+          "name": "TemperaturePV",
+          "description": "Integrated demonstration tag",
+          "data_type": "REAL",
+          "initial_value": 20.0,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": "degC",
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "56d8f4ab-7d96-53d7-bed4-096eab40be5f",
+          "name": "TemperatureSP",
+          "description": "Integrated demonstration tag",
+          "data_type": "REAL",
+          "initial_value": 60.0,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": "degC",
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "2830da4d-a69b-5953-99b2-5d21ce51c019",
+          "name": "TemperatureError",
+          "description": "Integrated demonstration tag",
+          "data_type": "REAL",
+          "initial_value": 0.0,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "347fc585-9f83-5574-9b51-dd902c5005b7",
+          "name": "HighTemperature",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "22000a6d-81ac-5265-bbea-0c173f55a6d0",
+          "name": "HighHighTemperature",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "2bceaa61-5827-50aa-b0e8-c8ab452366ed",
+          "name": "RemotePermitProduced",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "d96d6808-15e5-54cc-a5ec-a83e87315e0a",
+          "name": "MaintenanceMode",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110",
+          "name": "DemoDintA",
+          "description": "Integrated demonstration tag",
+          "data_type": "DINT",
+          "initial_value": 12,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3",
+          "name": "DemoDintB",
+          "description": "Integrated demonstration tag",
+          "data_type": "DINT",
+          "initial_value": 3,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41",
+          "name": "DemoDintResult",
+          "description": "Integrated demonstration tag",
+          "data_type": "DINT",
+          "initial_value": 0,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "59714b2a-83e1-5bcb-a8b5-b2879a2589ce",
+          "name": "DemoRealResult",
+          "description": "Integrated demonstration tag",
+          "data_type": "REAL",
+          "initial_value": 0.0,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "8ba6ec07-6b45-5e10-8829-077fe0773bd8",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "667ee3f3-3035-5738-a98b-0d323163dc2f",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "99dc06dc-9850-5961-a0a7-33935005b2f1",
+                  "comment": "Start latch",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "461ed43d-2ebc-5a44-aed8-a0c99472775b",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "00ee0c42-e2c2-5088-8ab8-d8e6b55e1140"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "c7a1e602-5067-5454-a120-35e33f268050",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "08791959-91f2-547f-8802-8146ebd3ead9"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "4902e18f-aaf0-5acf-8485-01ccc8be9f6e",
+                      "mnemonic": "OTL",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "71df51f5-def7-5531-bdb4-a2d771867ca4"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "629be7d2-e440-5919-9500-24d85324d96c",
+                  "comment": "Stop safely unlatches",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "3031bab2-9630-59d5-b1ae-1aa6eb5584ad",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "08791959-91f2-547f-8802-8146ebd3ead9"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "dc66e9d1-5609-5556-81ea-bfbcff42db8d",
+                      "mnemonic": "OTU",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "71df51f5-def7-5531-bdb4-a2d771867ca4"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "458cf960-4c4c-52d9-a512-f6f1b39e9c56",
+                  "comment": "Motor output safe-state logic",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "c04aabff-907e-5b87-9695-08d283f5d3ae",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "71df51f5-def7-5531-bdb4-a2d771867ca4"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "bc0ef174-35d9-5ed3-91dc-01d5327cd972",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "d96d6808-15e5-54cc-a5ec-a83e87315e0a"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "f70b7ed4-3182-5c85-b9fb-f840ad09fece",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "54d88922-5626-5c2e-ba41-2e7133876093"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "e5d8aba3-722a-5055-bca2-49b4274c95a8",
+                  "comment": "One-shot start counter",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "7f719768-604d-54fd-86de-e9e633aae4b1",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "00ee0c42-e2c2-5088-8ab8-d8e6b55e1140"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "8c796615-0d4b-5d43-bfcb-4687e2d37420",
+                      "mnemonic": "ONS",
+                      "operands": [],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "44a47d1e-7ff5-5372-890a-41159af0af50",
+                      "mnemonic": "CTU",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "2e6f3f27-d6f3-5320-95cb-c76799c32a64"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "45a16c35-9158-5972-a284-9498cc6e36bd",
+                  "comment": "Start delay",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "d775c9d2-36ae-5b49-812d-c6b7ad4a6d4e",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "54d88922-5626-5c2e-ba41-2e7133876093"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "70ee23ad-abc6-5b0b-97c9-13b261e651cd",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "a55d271f-c07e-5b2b-9058-fe85a59662d0",
+                  "comment": "Reset timer and counter",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "00e45ec6-e813-5f67-91c1-a2425a2f735e",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "3c3596af-3edd-5aac-9d1f-845768da7fdc"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "e55d200d-38c0-5768-b616-31f29a4b6ccd",
+                      "mnemonic": "RES",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "48ff42d8-3321-50ae-99ae-e3150a35a75f",
+                      "mnemonic": "RES",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "2e6f3f27-d6f3-5320-95cb-c76799c32a64"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "1fbe3bc7-2c0a-5715-81f1-c6615cbb04e7",
+                  "comment": "Temperature error",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "dafb675d-4aa2-5f40-b86f-8451795b6d90",
+                      "mnemonic": "SUB",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "381264e0-45bf-51f2-94ab-184679b4d50a"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "2830da4d-a69b-5953-99b2-5d21ce51c019"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "cd1c6cd4-e153-5823-9519-dc33824a980f",
+                  "comment": "High comparison",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "72d9fddd-9a14-53bf-90d7-710beb640172",
+                      "mnemonic": "GT",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "381264e0-45bf-51f2-94ab-184679b4d50a"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 60.0
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "859b7630-67d1-5def-aec3-41949e460c50",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "347fc585-9f83-5574-9b51-dd902c5005b7"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "314a35d0-0e7a-57a0-b53f-b275b2857ada",
+                  "comment": "High-high comparison",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "6a136264-2ee9-5b91-be9e-7ce2cc527079",
+                      "mnemonic": "GE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "381264e0-45bf-51f2-94ab-184679b4d50a"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 80.0
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "4d4a92ab-e085-5491-9d78-a9610e65b4e1",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "22000a6d-81ac-5265-bbea-0c173f55a6d0"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "3ccbe263-d6d2-57f0-b282-5219a15f144c",
+                  "comment": "Produced permit",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "0bada990-70d6-5163-896e-6a429b883b3a",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "54d88922-5626-5c2e-ba41-2e7133876093"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "e59c6622-d399-5bd5-87bc-9d79ddfacabf",
+                      "mnemonic": "LE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "381264e0-45bf-51f2-94ab-184679b4d50a"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 80.0
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "68f62645-1c97-5bc6-b602-bf0335c7fad6",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "b2ffa26d-2c58-5900-afc9-bd28d9ee0d6a",
+                  "comment": "Comparison coverage: EQ",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "af2f0834-0069-5eed-91a2-6bc65d314ef9",
+                      "mnemonic": "EQ",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 12
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "201f986b-8f79-5a39-8f2e-cb706b81069e",
+                      "mnemonic": "MOV",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "edff6b8b-dc4d-5a14-a836-f78736fbb510",
+                  "comment": "Comparison coverage: NE",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "7d0effff-0ea7-5843-a5a8-a12103856bef",
+                      "mnemonic": "NE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "fd96e51a-3139-53a4-a712-53401bb68d41",
+                      "mnemonic": "ADD",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "03235211-96a0-549e-b1d4-1a3311a0efda",
+                  "comment": "Comparison coverage: LT",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "131afb19-c4ab-5682-8760-4b31ff0ad076",
+                      "mnemonic": "LT",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "4bc3e25c-6dd3-535c-a5cf-2dd165e8f352",
+                      "mnemonic": "SUB",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "1dbee4b3-5a4c-5339-8ebf-02bb45214dc1",
+                  "comment": "Arithmetic coverage: MUL",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "ab058d15-b22f-5847-8e24-5c74f27dd794",
+                      "mnemonic": "MUL",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "9175fbef-8d3e-5809-baa3-8cf4726b4eb5",
+                  "comment": "Arithmetic coverage: DIV",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "6ffa6f06-6924-5386-8690-1b5d503eb370",
+                      "mnemonic": "DIV",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "b39add03-c956-5790-a464-3b4b7c75a110"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "43d450c5-d2f1-5eb8-9c9d-a22b8b8b39d6",
+                  "comment": "Arithmetic coverage: NEG",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "79a714fb-e0fd-505c-84a3-21e1deaf478c",
+                      "mnemonic": "NEG",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "0111234b-f26d-56f3-addf-3f5e47417fd3"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "33868dda-82ff-5cc4-a1b6-9d99ba5fd416",
+                  "comment": "Arithmetic coverage: ABS",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "38ef92b0-9ca0-5cc7-9358-1811cca699eb",
+                      "mnemonic": "ABS",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        },
+                        {
+                          "kind": "tag",
+                          "tag_id": "1d030fdc-7bcb-5c43-8fee-8ac04c879f41"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "7b5a6140-7509-5106-bb99-0f5e513de92f",
+                  "comment": "Arithmetic coverage: CLR",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "661d3c5b-d02a-59da-8b0c-3adfa4bae408",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "3c3596af-3edd-5aac-9d1f-845768da7fdc"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "9f7bee33-23c5-5901-864a-e2d120dfae2c",
+                      "mnemonic": "CLR",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "59714b2a-83e1-5bcb-a8b5-b2879a2589ce"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "8ba6ec07-6b45-5e10-8829-077fe0773bd8"
+        ]
+      },
+      "produced_tags": [
+        {
+          "produced_tag_id": "bdea99de-c790-52b1-b58f-5117431dd291",
+          "source_tag_id": "2bceaa61-5827-50aa-b0e8-c8ab452366ed",
+          "publish_name": "RemotePermit",
+          "update_policy": {
+            "mode": "ON_CHANGE_WITH_HEARTBEAT",
+            "heartbeat_ms": 250
+          },
+          "description": "Fail-safe remote permission"
+        }
+      ],
+      "consumed_tags": [],
+      "metadata": {}
+    },
+    {
+      "controller_id": "1c479764-d825-5c32-a104-87d304ed619d",
+      "name": "controller-b",
+      "description": "Native integrated demonstration controller",
+      "compatibility_profile": "RSM-LOGIX-CORE-1",
+      "tags": [
+        {
+          "tag_id": "c86db121-1e39-54a8-9632-1d679f73f8f7",
+          "name": "RemotePermitConsumed",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "16fafe85-83dc-5417-ac67-7646a3549fae",
+          "name": "RemotePermitQualityGood",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "d0d96d13-bc61-5eb8-a3c1-885cb2858879",
+          "name": "RemotePermitStale",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "62118396-6bcd-5821-a4a1-bb65bfd88783",
+          "name": "RemotePermitBad",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "4868156c-7d78-58e1-af1f-4676a0b0ba39",
+          "name": "RemoteLamp",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {
+            "safe_value": false
+          }
+        },
+        {
+          "tag_id": "105c2eb5-5f6b-5434-bc02-ceadc46a16df",
+          "name": "LocalEnable",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "e5b4a045-1f99-5644-a1b8-099a4d131db4",
+          "name": "RouteHealthy",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "cd43d26c-7144-5271-bee9-98b6bc9ba831",
+          "name": "RouteFault",
+          "description": "Integrated demonstration tag",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {
+            "forceable": false
+          },
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "7e686245-4e11-5c45-9867-d08f4c989242",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "b41d6371-8998-5c16-9f88-dccea0cf0b5c",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "5b7367ac-f6bb-5ddc-a7a2-d8bbf801cb1a",
+                  "comment": "Fail-safe remote lamp: every value and companion quality condition is required",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "a5d6474f-b598-5d05-93dc-daff1fb6a2ef",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "c86db121-1e39-54a8-9632-1d679f73f8f7"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "f315e5cb-bb92-5f7c-aec4-b036a60c122a",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "16fafe85-83dc-5417-ac67-7646a3549fae"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "82182833-940b-5137-bfce-5ca3d86ebc54",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "d0d96d13-bc61-5eb8-a3c1-885cb2858879"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "2534e710-2191-505d-a86d-6c1f51fb69f5",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "62118396-6bcd-5821-a4a1-bb65bfd88783"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "96be98e2-1755-56a5-9b8f-bbce06fd5c44",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "105c2eb5-5f6b-5434-bc02-ceadc46a16df"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "56e0ca6e-20a9-53e2-8445-b41c33acb1d3",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "4868156c-7d78-58e1-af1f-4676a0b0ba39"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "2b65267c-6e16-53ef-a65d-8322bd93305f",
+                  "comment": "Route healthy",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "44d3a1d8-1de3-583e-bc5a-2e2e78f3754c",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "16fafe85-83dc-5417-ac67-7646a3549fae"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "836163a8-9e48-5ece-986d-9c1a4424f802",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "d0d96d13-bc61-5eb8-a3c1-885cb2858879"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "5282e6f7-1171-56b6-a25b-649d996b494c",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "62118396-6bcd-5821-a4a1-bb65bfd88783"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "71630833-bdbf-515d-a45a-41da2a7f4848",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "e5b4a045-1f99-5644-a1b8-099a4d131db4"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                },
+                {
+                  "rung_id": "532b7c37-69ea-5de0-89a7-89711fa12ea2",
+                  "comment": "Route fault",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "e98b91f8-e1c2-5935-82fc-1bb605bb8919",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "e5b4a045-1f99-5644-a1b8-099a4d131db4"
+                        }
+                      ],
+                      "metadata": {}
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "5c8d99e8-c7d4-5db4-b20d-28ce26575d25",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "cd43d26c-7144-5271-bee9-98b6bc9ba831"
+                        }
+                      ],
+                      "metadata": {}
+                    }
+                  ],
+                  "metadata": {}
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "7e686245-4e11-5c45-9867-d08f4c989242"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [
+        {
+          "consumed_tag_id": "9dcb3815-93e3-544e-996b-56f6acc26968",
+          "destination_tag_id": "c86db121-1e39-54a8-9632-1d679f73f8f7",
+          "source_controller_id": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+          "source_produced_tag_id": "bdea99de-c790-52b1-b58f-5117431dd291",
+          "expected_update_interval_ms": 250,
+          "timeout_ms": 750,
+          "stale_behavior": "substitute",
+          "hold_last_value": false,
+          "substitute_value": false,
+          "quality_handling": {
+            "good_tag_id": "16fafe85-83dc-5417-ac67-7646a3549fae",
+            "stale_tag_id": "d0d96d13-bc61-5eb8-a3c1-885cb2858879",
+            "bad_tag_id": "62118396-6bcd-5821-a4a1-bb65bfd88783",
+            "safe_write_order": [
+              "value",
+              "good",
+              "bad",
+              "stale"
+            ]
+          }
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "dce36909-776e-541e-961d-bf2b9c3000a3",
+      "name": "controller-a native",
+      "controller_id": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+      "target_platform": "native",
+      "board_identifier": null,
+      "connection": {
+        "host": "127.0.0.1",
+        "port": 0
+      },
+      "devices": [],
+      "bindings": [],
+      "driver_configuration": {
+        "outputs_default_safe": true
+      },
+      "metadata": {}
+    },
+    {
+      "deployment_id": "e8d849a0-5a6d-510c-90b3-287a50aa27f9",
+      "name": "controller-b native",
+      "controller_id": "1c479764-d825-5c32-a104-87d304ed619d",
+      "target_platform": "native",
+      "board_identifier": null,
+      "connection": {
+        "host": "127.0.0.1",
+        "port": 0
+      },
+      "devices": [],
+      "bindings": [],
+      "driver_configuration": {
+        "outputs_default_safe": true
+      },
+      "metadata": {}
+    }
+  ],
+  "scada": {
+    "screens": [
+      {
+        "screen_id": "7ccedcd3-0b5c-5f2e-bc4c-113c3cb7132d",
+        "name": "overview",
+        "path": "screens/overview.json"
+      },
+      {
+        "screen_id": "7a98e9be-90f0-5d4b-86f7-f97033ef571f",
+        "name": "controller_a",
+        "path": "screens/controller_a.json"
+      },
+      {
+        "screen_id": "f096d042-a9c6-5184-bab1-3ef80cc5d400",
+        "name": "controller_b",
+        "path": "screens/controller_b.json"
+      },
+      {
+        "screen_id": "b91d57b5-533c-5ed2-ab68-989031ef10d0",
+        "name": "alarms",
+        "path": "screens/alarms.json"
+      },
+      {
+        "screen_id": "3dd47fe3-0739-58f0-824c-c2c1a471cfee",
+        "name": "trends",
+        "path": "screens/trends.json"
+      }
+    ],
+    "alarms": [],
+    "historian": {
+      "definitions": []
+    },
+    "metadata": {}
+  },
+  "metadata": {
+    "release_status": "native-software-experimentation",
+    "hardware_validated": false
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "format": "rsmicro-screen",
+  "version": 1,
+  "screen_id": "7ccedcd3-0b5c-5f2e-bc4c-113c3cb7132d",
+  "name": "overview",
+  "widgets": [
+    {
+      "widget_id": "9461e665-a574-515f-9337-107d40005bb3",
+      "type": "tag_value",
+      "label": "MotorRun",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093"
+      }
+    },
+    {
+      "widget_id": "0a91834d-18fd-5d09-9153-3dd183e2473c",
+      "type": "tag_value",
+      "label": "StartDelay",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561"
+      }
+    },
+    {
+      "widget_id": "0a4086eb-0e2b-558d-8958-030871d23ed3",
+      "type": "tag_value",
+      "label": "StartCounter",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2e6f3f27-d6f3-5320-95cb-c76799c32a64"
+      }
+    },
+    {
+      "widget_id": "601b6b17-de33-556e-bc73-963e788db1bd",
+      "type": "tag_value",
+      "label": "TemperaturePV",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a"
+      }
+    },
+    {
+      "widget_id": "5e48b546-19da-5b0a-aeb1-6a6a1978e657",
+      "type": "tag_value",
+      "label": "TemperatureSP",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
+      }
+    },
+    {
+      "widget_id": "37795c70-0a20-5c57-a7d0-f39575c5e036",
+      "type": "tag_value",
+      "label": "HighTemperature",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "347fc585-9f83-5574-9b51-dd902c5005b7"
+      }
+    },
+    {
+      "widget_id": "c0d0544c-30a8-58b3-b0b2-3ad13affcac4",
+      "type": "tag_value",
+      "label": "HighHighTemperature",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "22000a6d-81ac-5265-bbea-0c173f55a6d0"
+      }
+    },
+    {
+      "widget_id": "1f8aa7ad-2abb-54a9-991c-5a2867abe6bd",
+      "type": "tag_value",
+      "label": "RemotePermitProduced",
+      "binding": {
+        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
+        "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
+      }
+    }
+  ],
+  "executable_code": false
+}
