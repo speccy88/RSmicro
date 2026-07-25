@@ -1,0 +1,421 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "a892668a-a26c-5e54-b944-3594fc7a2fa6",
+  "name": "demo_start_stop",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "5e996341-bdac-59d1-b9fc-47eb2723929f",
+      "name": "demo_start_stop",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5",
+          "name": "start_pb",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "2ebfa69b-0e49-5289-8c05-e5d35c6772af",
+          "name": "stop_pb",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "9fc04ae6-3022-58f9-9c8a-c397f5bc386e",
+          "name": "motor_latched",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "6fc8f51b-e52b-52c8-89f2-9777b9777820",
+          "name": "fault",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "f4f38d74-2070-5d60-acdb-4fdefcc1ad87",
+          "name": "motor_cmd",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "f1198a5b-4347-5610-808c-97d092bd7dd2",
+          "name": "motor_run_timer",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 0,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "269b8196-b3eb-5162-898b-3bc249f20440",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "1cb01c16-9275-52d2-92bf-af096094f11c",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "24afeba2-e737-5ebb-9607-18f77412095f",
+                  "comment": "Press start, release with stop",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "a0cc5f99-e717-54f6-96ea-a07144003ddc",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "3aed734c-0fda-5cbe-b706-1286d6e386ba",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "2ebfa69b-0e49-5289-8c05-e5d35c6772af"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "2013e068-44fb-5881-8d46-f11e60df07a3",
+                      "mnemonic": "OTL",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "9fc04ae6-3022-58f9-9c8a-c397f5bc386e"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": "seal_in"
+                  }
+                },
+                {
+                  "rung_id": "b1a343d5-7218-5baa-9010-81e89d76ec33",
+                  "comment": "Unlatch on stop",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "03375d8f-66f7-5df3-90fc-8a2ac755c096",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "2ebfa69b-0e49-5289-8c05-e5d35c6772af"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "2b1ac39e-80af-5e17-b256-555e506edc33",
+                      "mnemonic": "OTU",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "9fc04ae6-3022-58f9-9c8a-c397f5bc386e"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": "stop_reset"
+                  }
+                },
+                {
+                  "rung_id": "a7608371-2a52-59fc-ba19-b99382c841e9",
+                  "comment": "Drive output when latched and healthy",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "33207269-051a-5445-84e0-c0b32bc546b1",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "9fc04ae6-3022-58f9-9c8a-c397f5bc386e"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "4f7e3d01-e3fa-5d29-94e0-48361977aab8",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "6fc8f51b-e52b-52c8-89f2-9777b9777820"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "ed9ac709-930f-5880-a671-5673a8812f89",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "f4f38d74-2070-5d60-acdb-4fdefcc1ad87"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": "motor_output"
+                  }
+                },
+                {
+                  "rung_id": "bf594269-d7f1-58c0-b72d-c0b3c88423f4",
+                  "comment": "Timer after motor starts",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "d8944fd3-5c9e-5add-bfc7-d34cb1a11f13",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "f4f38d74-2070-5d60-acdb-4fdefcc1ad87"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "9b067af2-301e-5871-b10d-f922df9adefa",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "f1198a5b-4347-5610-808c-97d092bd7dd2"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 1500
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": "run_timer"
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "269b8196-b3eb-5162-898b-3bc249f20440"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "4dd1d522-dac9-578b-9112-f82331999333",
+      "name": "demo_start_stop deployment",
+      "controller_id": "5e996341-bdac-59d1-b9fc-47eb2723929f",
+      "target_platform": "circuitpython",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "ab94c020-126e-5225-93a8-69ec0bccc1a9",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "input",
+              "data_type": "BOOL",
+              "address": "D5",
+              "readable": true,
+              "writable": false,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            },
+            {
+              "endpoint_id": "endpoint-1",
+              "direction": "input",
+              "data_type": "BOOL",
+              "address": "D6",
+              "readable": true,
+              "writable": false,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            },
+            {
+              "endpoint_id": "endpoint-2",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": "D17",
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "636b16c7-6043-572f-a0b9-2112ecdd8689",
+          "tag_id": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5",
+          "device_id": "ab94c020-126e-5225-93a8-69ec0bccc1a9",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "input"
+          }
+        },
+        {
+          "binding_id": "4de8dc56-4172-57f6-a4e2-fd127dc91a2d",
+          "tag_id": "2ebfa69b-0e49-5289-8c05-e5d35c6772af",
+          "device_id": "ab94c020-126e-5225-93a8-69ec0bccc1a9",
+          "endpoint_id": "endpoint-1",
+          "metadata": {
+            "legacy_direction": "input"
+          }
+        },
+        {
+          "binding_id": "49cff3f5-0b71-547f-821d-b44aef295697",
+          "tag_id": "f4f38d74-2070-5d60-acdb-4fdefcc1ad87",
+          "device_id": "ab94c020-126e-5225-93a8-69ec0bccc1a9",
+          "endpoint_id": "endpoint-2",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "circuitpython"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}

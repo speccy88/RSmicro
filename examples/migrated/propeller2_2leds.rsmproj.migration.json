@@ -1,0 +1,42 @@
+{
+  "source_file": "examples/propeller2_2leds.json",
+  "output_file": "examples/migrated/propeller2_2leds.rsmproj",
+  "source_format": "plc-ascii-v1",
+  "destination_format": "rsmicro-project-v1",
+  "objects_migrated": {
+    "controllers": 1,
+    "tags": 3,
+    "rungs": 2,
+    "bindings": 2
+  },
+  "uuid_mapping_summary": {
+    "project": "a284502a-639c-56af-a528-c982564ecdb5",
+    "controller": "49253462-97c7-5b1d-ac88-e89ec57b6680"
+  },
+  "aliases_normalized": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/propeller2_2leds.json",
+      "path": "/deployments/0/devices",
+      "project_id": "a284502a-639c-56af-a528-c982564ecdb5"
+    },
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/propeller2_2leds.json",
+      "path": "/deployments/0/devices",
+      "project_id": "a284502a-639c-56af-a528-c982564ecdb5"
+    }
+  ],
+  "errors": [],
+  "deployment_information": {
+    "target_platform": "propeller2",
+    "bindings": 2
+  },
+  "unsupported_fields": [],
+  "semantic_differences": []
+}

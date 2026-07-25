@@ -12,15 +12,18 @@ dependencies = [
   "Markdown>=3.6",
   "pyserial>=3.5",
   "tkinterweb>=4.2.0",
+  "jsonschema>=4.18",
 ]
 
 [project.optional-dependencies]
 serial = []
+dev = ["pytest>=7.4"]
 
 [project.scripts]
 plc-ascii = "plc_ascii.ide:main"
 plc-ascii-cli = "plc_ascii.app:main"
 plc-runtime = "plc_runtime.runtime:main"
+rsmicro = "rsmicro.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -30,3 +33,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "plc_runtime.propeller2" = ["runtime.fth"]
+"rsmicro.schemas" = ["*.json"]

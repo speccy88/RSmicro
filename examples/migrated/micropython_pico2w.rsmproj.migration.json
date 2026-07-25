@@ -1,0 +1,34 @@
+{
+  "source_file": "examples/micropython_pico2w.json",
+  "output_file": "examples/migrated/micropython_pico2w.rsmproj",
+  "source_format": "plc-ascii-v1",
+  "destination_format": "rsmicro-project-v1",
+  "objects_migrated": {
+    "controllers": 1,
+    "tags": 3,
+    "rungs": 3,
+    "bindings": 1
+  },
+  "uuid_mapping_summary": {
+    "project": "c2231e95-20e6-5c8d-b5af-6b2a1c2d01df",
+    "controller": "66d63cea-e2ed-5304-a2b3-db0bff548af6"
+  },
+  "aliases_normalized": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/micropython_pico2w.json",
+      "path": "/deployments/0/devices",
+      "project_id": "c2231e95-20e6-5c8d-b5af-6b2a1c2d01df"
+    }
+  ],
+  "errors": [],
+  "deployment_information": {
+    "target_platform": "micropython",
+    "bindings": 1
+  },
+  "unsupported_fields": [],
+  "semantic_differences": []
+}

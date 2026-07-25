@@ -1,0 +1,58 @@
+{
+  "source_file": "examples/demo_program.json",
+  "output_file": "examples/migrated/demo_program.rsmproj",
+  "source_format": "plc-ascii-v1",
+  "destination_format": "rsmicro-project-v1",
+  "objects_migrated": {
+    "controllers": 1,
+    "tags": 6,
+    "rungs": 4,
+    "bindings": 3
+  },
+  "uuid_mapping_summary": {
+    "project": "a892668a-a26c-5e54-b944-3594fc7a2fa6",
+    "controller": "5e996341-bdac-59d1-b9fc-47eb2723929f"
+  },
+  "aliases_normalized": [],
+  "warnings": [
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag start_pb"
+    },
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag stop_pb"
+    },
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag motor_latched"
+    },
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag fault"
+    },
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag motor_cmd"
+    },
+    {
+      "code": "TAG_INFERRED",
+      "message": "Inferred undeclared tag motor_run_timer"
+    },
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/demo_program.json",
+      "path": "/deployments/0/devices",
+      "project_id": "a892668a-a26c-5e54-b944-3594fc7a2fa6"
+    }
+  ],
+  "errors": [],
+  "deployment_information": {
+    "target_platform": "circuitpython",
+    "bindings": 3
+  },
+  "unsupported_fields": [],
+  "semantic_differences": []
+}

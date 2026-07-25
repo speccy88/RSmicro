@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$id": "https://schemas.rsmicro.dev/v1/logic.schema.json",
+  "$defs": {
+    "operand": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "tag",
+            "tag_member",
+            "literal"
+          ]
+        },
+        "tag_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "member": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "boolean",
+            "integer",
+            "number"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "instruction": {
+      "type": "object",
+      "required": [
+        "node_type",
+        "instruction_id",
+        "mnemonic",
+        "operands",
+        "metadata"
+      ],
+      "properties": {
+        "node_type": {
+          "const": "instruction"
+        },
+        "instruction_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "mnemonic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operands": {
+          "type": "array"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "branch": {
+      "type": "object",
+      "required": [
+        "node_type",
+        "lanes",
+        "metadata"
+      ],
+      "properties": {
+        "node_type": {
+          "const": "branch"
+        },
+        "lanes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "array",
+            "minItems": 1
+          }
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

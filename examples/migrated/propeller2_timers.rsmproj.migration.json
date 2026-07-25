@@ -1,0 +1,42 @@
+{
+  "source_file": "examples/propeller2_timers.json",
+  "output_file": "examples/migrated/propeller2_timers.rsmproj",
+  "source_format": "plc-ascii-v1",
+  "destination_format": "rsmicro-project-v1",
+  "objects_migrated": {
+    "controllers": 1,
+    "tags": 5,
+    "rungs": 4,
+    "bindings": 2
+  },
+  "uuid_mapping_summary": {
+    "project": "cede7b46-65ae-5bf5-a271-d5a42f72902a",
+    "controller": "3285e888-754b-5a77-b4fc-568a97c317ed"
+  },
+  "aliases_normalized": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/propeller2_timers.json",
+      "path": "/deployments/0/devices",
+      "project_id": "cede7b46-65ae-5bf5-a271-d5a42f72902a"
+    },
+    {
+      "severity": "WARNING",
+      "code": "OUTPUT_SAFE_STATE_MISSING",
+      "message": "Hardware output has no safe state",
+      "source_file": "examples/propeller2_timers.json",
+      "path": "/deployments/0/devices",
+      "project_id": "cede7b46-65ae-5bf5-a271-d5a42f72902a"
+    }
+  ],
+  "errors": [],
+  "deployment_information": {
+    "target_platform": "propeller2",
+    "bindings": 2
+  },
+  "unsupported_fields": [],
+  "semantic_differences": []
+}
