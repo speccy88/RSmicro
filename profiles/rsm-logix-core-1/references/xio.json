@@ -1,0 +1,10 @@
+{
+  "instruction": "XIO",
+  "document_title": "Logix 5000 Controllers General Instructions Reference Manual",
+  "document_number": "1756-RM003",
+  "url": "https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1756-rm003_-en-p.pdf",
+  "accessed": "2026-07-25",
+  "section": "XIO",
+  "summary": "Primary official reference for XIO; profile wording is original and subset-specific.",
+  "interpretation": "Versioned profile selects explicit finite numeric, lifecycle, force, and fault rules; no claim of complete product compatibility."
+}

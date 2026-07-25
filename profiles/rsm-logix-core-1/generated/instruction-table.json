@@ -1,0 +1,1303 @@
+{
+  "instruction_abi": 1,
+  "instructions": [
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "XIC operation in the defined profile subset.",
+      "display_name": "XIC",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/xic-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "XIC",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 1,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "read_bool",
+          "types": [
+            "BOOL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/xic.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "XIC(operand1)",
+      "state": "none",
+      "true_behavior": "XIC operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "XIO operation in the defined profile subset.",
+      "display_name": "XIO",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/xio-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "XIO",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 2,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "read_bool",
+          "types": [
+            "BOOL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/xio.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "XIO(operand1)",
+      "state": "none",
+      "true_behavior": "XIO operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "OTE operation in the defined profile subset.",
+      "display_name": "OTE",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ote-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "OTE",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 3,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_bool",
+          "types": [
+            "BOOL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ote.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "OTE(operand1)",
+      "state": "none",
+      "true_behavior": "OTE operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "OTL operation in the defined profile subset.",
+      "display_name": "OTL",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/otl-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "OTL",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 4,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_bool",
+          "types": [
+            "BOOL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/otl.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "OTL(operand1)",
+      "state": "none",
+      "true_behavior": "OTL operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "OTU operation in the defined profile subset.",
+      "display_name": "OTU",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/otu-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "OTU",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 5,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_bool",
+          "types": [
+            "BOOL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/otu.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "OTU(operand1)",
+      "state": "none",
+      "true_behavior": "OTU operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "bit",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "One scan pulse on false-to-true transition with instance-unique state.",
+      "display_name": "ONS",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ons-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "ONS",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 6,
+      "operands": [],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ons.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "ONS()",
+      "state": "unique slot required",
+      "true_behavior": "One scan pulse on false-to-true transition with instance-unique state.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [
+        "ACC",
+        "EN",
+        "TT",
+        "DN"
+      ],
+      "category": "timer",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
+      "display_name": "TON",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ton-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "TON",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 16,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": true,
+          "role": "timer",
+          "types": [
+            "TIMER"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ton.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "TON(operand1)",
+      "state": "unique slot required",
+      "true_behavior": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [
+        "ACC",
+        "CU",
+        "DN",
+        "OV"
+      ],
+      "category": "counter",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "Counts false-to-true transitions without clamping ACC to PRE; wraps are faults with OV.",
+      "display_name": "CTU",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ctu-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "CTU",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 17,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": true,
+          "role": "counter",
+          "types": [
+            "COUNTER"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ctu.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "CTU(operand1)",
+      "state": "unique slot required",
+      "true_behavior": "Counts false-to-true transitions without clamping ACC to PRE; wraps are faults with OV.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [
+        "ACC",
+        "CD",
+        "DN",
+        "UN"
+      ],
+      "category": "counter",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "Counts false-to-true transitions down; underflow is indicated by UN.",
+      "display_name": "CTD",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ctd-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "CTD",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 18,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": true,
+          "role": "counter",
+          "types": [
+            "COUNTER"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ctd.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "CTD(operand1)",
+      "state": "unique slot required",
+      "true_behavior": "Counts false-to-true transitions down; underflow is indicated by UN.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [
+        "ACC",
+        "EN",
+        "TT",
+        "DN",
+        "CU",
+        "CD",
+        "OV",
+        "UN"
+      ],
+      "category": "timer_counter",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "When powered clears ACC and status members, preserves PRE, and resets associated edge state.",
+      "display_name": "RES",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/res-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "RES",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 19,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": true,
+          "role": "composite",
+          "types": [
+            "TIMER",
+            "COUNTER"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/res.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "RES(operand1)",
+      "state": "none",
+      "true_behavior": "When powered clears ACC and status members, preserves PRE, and resets associated edge state.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "EQ operation in the defined profile subset.",
+      "display_name": "EQ",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/eq-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "EQ",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 32,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/eq.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "EQ(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "EQ operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "NE operation in the defined profile subset.",
+      "display_name": "NE",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ne-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "NE",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 33,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ne.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "NE(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "NE operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "GT operation in the defined profile subset.",
+      "display_name": "GT",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/gt-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "GT",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 34,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/gt.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "GT(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "GT operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "GE operation in the defined profile subset.",
+      "display_name": "GE",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/ge-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "GE",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 35,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/ge.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "GE(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "GE operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "LT operation in the defined profile subset.",
+      "display_name": "LT",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/lt-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "LT",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 36,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/lt.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "LT(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "LT operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "comparison",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "LE operation in the defined profile subset.",
+      "display_name": "LE",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/le-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "LE",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 37,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/le.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "LE(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "LE operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "MOV operation in the defined profile subset.",
+      "display_name": "MOV",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/mov-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "MOV",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 48,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/mov.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "MOV(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "MOV operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "Writes scalar zero only; TIMER and COUNTER require RES.",
+      "display_name": "CLR",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/clr-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "CLR",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 49,
+      "operands": [
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_scalar",
+          "types": [
+            "BOOL",
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/clr.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "CLR(operand1)",
+      "state": "none",
+      "true_behavior": "Writes scalar zero only; TIMER and COUNTER require RES.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "ADD operation in the defined profile subset.",
+      "display_name": "ADD",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/add-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "ADD",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 50,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/add.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "ADD(operand1, operand2, operand3)",
+      "state": "none",
+      "true_behavior": "ADD operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "SUB operation in the defined profile subset.",
+      "display_name": "SUB",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/sub-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "SUB",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 51,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/sub.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "SUB(operand1, operand2, operand3)",
+      "state": "none",
+      "true_behavior": "SUB operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "MUL operation in the defined profile subset.",
+      "display_name": "MUL",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/mul-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "MUL",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 52,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/mul.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "MUL(operand1, operand2, operand3)",
+      "state": "none",
+      "true_behavior": "MUL operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "DIV operation in the defined profile subset.",
+      "display_name": "DIV",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/div-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "DIV",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 53,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/div.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "DIV(operand1, operand2, operand3)",
+      "state": "none",
+      "true_behavior": "DIV operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "NEG operation in the defined profile subset.",
+      "display_name": "NEG",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/neg-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "NEG",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 54,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/neg.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "NEG(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "NEG operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    },
+    {
+      "affected_members": [],
+      "category": "numeric",
+      "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+      "description": "ABS operation in the defined profile subset.",
+      "display_name": "ABS",
+      "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+      "faults": [
+        "invalid operand",
+        "invalid state",
+        "overflow or conversion where applicable"
+      ],
+      "fixtures": [
+        "conformance/abs-core.json"
+      ],
+      "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+      "mnemonic": "ABS",
+      "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+      "opcode": 55,
+      "operands": [
+        {
+          "literal": true,
+          "members": true,
+          "readable": true,
+          "role": "numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": false
+        },
+        {
+          "literal": false,
+          "members": false,
+          "readable": false,
+          "role": "write_numeric",
+          "types": [
+            "DINT",
+            "REAL"
+          ],
+          "writable": true
+        }
+      ],
+      "overflow": "DINT and non-finite REAL fault with destination unchanged",
+      "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+      "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+      "references": [
+        "references/abs.json"
+      ],
+      "rung_condition_in": "consumed",
+      "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+      "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented.",
+      "source_syntax": "ABS(operand1, operand2)",
+      "state": "none",
+      "true_behavior": "ABS operation in the defined profile subset.",
+      "validation": "exact operand count/types; instruction-owned status members are not general destinations"
+    }
+  ],
+  "profile_id": "RSM-LOGIX-CORE-1",
+  "profile_version": "1.0.0"
+}

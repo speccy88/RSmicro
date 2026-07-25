@@ -7,3 +7,7 @@ Controllers contain typed tags (`BOOL`, `DINT`, `REAL`, `TIMER`, `COUNTER`), pro
 Deployments identify a target platform and controller and contain drivers/devices, typed directional endpoints, addresses, safe values, polarity and quality placeholders, and UUID tag-to-endpoint bindings. Thus logical source contains no board pins or serial paths.
 
 Serialization has fixed field order, two-space indentation, a final newline, no generated timestamps, and atomic replacement. Semantic list order is preserved. Schemas using JSON Schema draft 2020-12 live in `schemas/*.schema.json`; installed copies are resources in `rsmicro.schemas`.
+
+## Compilation profile
+
+Controllers may select `RSM-LOGIX-CORE-1`. Compiler operands resolve tag UUIDs, composite members serialize uppercase, and aliases are diagnosed before canonical GE/LE lowering. The source project remains JSON; deployed execution input is the bounded binary RSM1 image.

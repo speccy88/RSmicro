@@ -1,0 +1,45 @@
+{
+  "mnemonic": "XIO",
+  "display_name": "XIO",
+  "opcode": 2,
+  "category": "bit",
+  "description": "XIO operation in the defined profile subset.",
+  "source_syntax": "XIO(operand1)",
+  "operands": [
+    {
+      "role": "read_bool",
+      "readable": true,
+      "writable": false,
+      "types": [
+        "BOOL"
+      ],
+      "literal": true,
+      "members": true
+    }
+  ],
+  "rung_condition_in": "consumed",
+  "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+  "true_behavior": "XIO operation in the defined profile subset.",
+  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "state": "none",
+  "affected_members": [],
+  "faults": [
+    "invalid operand",
+    "invalid state",
+    "overflow or conversion where applicable"
+  ],
+  "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+  "overflow": "DINT and non-finite REAL fault with destination unchanged",
+  "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+  "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+  "validation": "exact operand count/types; instruction-owned status members are not general destinations",
+  "references": [
+    "references/xio.json"
+  ],
+  "fixtures": [
+    "conformance/xio-core.json"
+  ],
+  "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented."
+}

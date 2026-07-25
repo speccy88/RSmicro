@@ -1,0 +1,64 @@
+{
+  "id": "ge-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "GE",
+  "coverage": [
+    "prescan",
+    "false_scan",
+    "true_scan",
+    "repeated_true",
+    "true_to_false",
+    "false_to_true",
+    "postscan",
+    "boundary",
+    "force",
+    "invalid_operand",
+    "multiple_instances",
+    "multiple_rungs"
+  ],
+  "data_types": [
+    "BOOL",
+    "DINT",
+    "REAL",
+    "TIMER",
+    "COUNTER"
+  ],
+  "tags": [],
+  "initial_state": {},
+  "force_state": {},
+  "steps": [
+    {
+      "operation": "prescan",
+      "time_ms": 0,
+      "rung_in": false,
+      "expect": {
+        "fault": null
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 100,
+      "rung_in": true,
+      "expect": {
+        "fault": null
+      }
+    },
+    {
+      "operation": "scan",
+      "time_ms": 600,
+      "rung_in": true,
+      "expect": {
+        "fault": null
+      }
+    },
+    {
+      "operation": "postscan",
+      "time_ms": 700,
+      "rung_in": false,
+      "expect": {
+        "fault": null
+      }
+    }
+  ],
+  "expected_diagnostics": []
+}

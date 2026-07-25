@@ -1,0 +1,50 @@
+{
+  "mnemonic": "TON",
+  "display_name": "TON",
+  "opcode": 16,
+  "category": "timer",
+  "description": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
+  "source_syntax": "TON(operand1)",
+  "operands": [
+    {
+      "role": "timer",
+      "readable": true,
+      "writable": true,
+      "types": [
+        "TIMER"
+      ],
+      "literal": false,
+      "members": false
+    }
+  ],
+  "rung_condition_in": "consumed",
+  "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+  "true_behavior": "Non-retentive on-delay timer using monotonic elapsed milliseconds; false resets ACC and status.",
+  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "state": "unique slot required",
+  "affected_members": [
+    "ACC",
+    "EN",
+    "TT",
+    "DN"
+  ],
+  "faults": [
+    "invalid operand",
+    "invalid state",
+    "overflow or conversion where applicable"
+  ],
+  "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+  "overflow": "DINT and non-finite REAL fault with destination unchanged",
+  "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+  "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+  "validation": "exact operand count/types; instruction-owned status members are not general destinations",
+  "references": [
+    "references/ton.json"
+  ],
+  "fixtures": [
+    "conformance/ton-core.json"
+  ],
+  "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented."
+}
