@@ -1,0 +1,73 @@
+{
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
+  "screen_id": "9fdcb90c-3e2b-5dbe-a897-aee6c03aa781",
+  "name": "controller_b",
+  "description": "Task 7 integrated demonstration screen",
+  "width": 1024,
+  "height": 640,
+  "background": "#f0f0f0",
+  "scaling_policy": "fit",
+  "objects": [
+    {
+      "object_id": "f8a9f2be-ce60-4eea-b689-7bd4cce3f6e0",
+      "type": "label",
+      "geometry": {
+        "x": 30,
+        "y": 25,
+        "width": 400,
+        "height": 45
+      },
+      "properties": {
+        "text": "Controller B"
+      },
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "90269215-8e26-45fd-a98f-6e7e0100f073",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 30,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "0d5bfe91-6607-4583-92b4-3fb4e3cab74f",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 240,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    }
+  ],
+  "layers": [],
+  "metadata": {}
+}

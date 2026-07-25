@@ -1,0 +1,57 @@
+{
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
+  "screen_id": "43686f53-ad19-5d58-a572-3c7118124e10",
+  "name": "trends",
+  "description": "Task 7 integrated demonstration screen",
+  "width": 1024,
+  "height": 640,
+  "background": "#f0f0f0",
+  "scaling_policy": "fit",
+  "objects": [
+    {
+      "object_id": "4b62b83f-29ca-4cc5-b933-0d6abe00e491",
+      "type": "label",
+      "geometry": {
+        "x": 30,
+        "y": 25,
+        "width": 400,
+        "height": 45
+      },
+      "properties": {
+        "text": "Trends"
+      },
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "edef538c-b11c-4e9c-bfab-c05c8cf4d061",
+      "type": "trend",
+      "geometry": {
+        "x": 30,
+        "y": 90,
+        "width": 800,
+        "height": 400
+      },
+      "properties": {
+        "maximum_points": 1000
+      },
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    }
+  ],
+  "layers": [],
+  "metadata": {}
+}

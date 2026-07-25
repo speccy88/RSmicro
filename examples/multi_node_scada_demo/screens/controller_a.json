@@ -1,0 +1,101 @@
+{
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
+  "screen_id": "58de08e8-aca4-5d31-80d5-85cc26b806b9",
+  "name": "controller_a",
+  "description": "Task 7 integrated demonstration screen",
+  "width": 1024,
+  "height": 640,
+  "background": "#f0f0f0",
+  "scaling_policy": "fit",
+  "objects": [
+    {
+      "object_id": "2bd15e50-57d1-4e14-ada9-be6a7ccba17f",
+      "type": "label",
+      "geometry": {
+        "x": 30,
+        "y": 25,
+        "width": 400,
+        "height": 45
+      },
+      "properties": {
+        "text": "Controller A"
+      },
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "09278360-0110-4068-b90d-fc7f14a08ed9",
+      "type": "pushbutton",
+      "geometry": {
+        "x": 30,
+        "y": 90,
+        "width": 140,
+        "height": 50
+      },
+      "properties": {
+        "text": "Start"
+      },
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {
+        "type": "WRITE_TRUE"
+      },
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "6318f9a4-69b7-416e-a567-696c968e15af",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 200,
+        "y": 90,
+        "width": 180,
+        "height": 55
+      },
+      "properties": {},
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "7a3a4c26-8e49-44b5-9ee3-0056efcc9241",
+      "type": "trend",
+      "geometry": {
+        "x": 30,
+        "y": 170,
+        "width": 700,
+        "height": 300
+      },
+      "properties": {
+        "maximum_points": 500
+      },
+      "binding": {
+        "tag_uuid": "bfeb8e18-cd58-5ead-bfb3-3659092ee1a5"
+      },
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    }
+  ],
+  "layers": [],
+  "metadata": {}
+}

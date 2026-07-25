@@ -1,0 +1,53 @@
+{
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
+  "screen_id": "518791ac-e389-55d9-b523-2aae44c2a634",
+  "name": "alarms",
+  "description": "Task 7 integrated demonstration screen",
+  "width": 1024,
+  "height": 640,
+  "background": "#f0f0f0",
+  "scaling_policy": "fit",
+  "objects": [
+    {
+      "object_id": "9b3337fc-a02a-47f5-99c9-7ecec430682d",
+      "type": "label",
+      "geometry": {
+        "x": 30,
+        "y": 25,
+        "width": 400,
+        "height": 45
+      },
+      "properties": {
+        "text": "Alarms"
+      },
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "274bb518-d52d-4bda-bf26-4e68ec385b6f",
+      "type": "alarm_banner",
+      "geometry": {
+        "x": 30,
+        "y": 90,
+        "width": 800,
+        "height": 300
+      },
+      "properties": {},
+      "binding": {},
+      "style": {},
+      "action": {},
+      "visible": true,
+      "locked": false,
+      "z_order": 0,
+      "metadata": {}
+    }
+  ],
+  "layers": [],
+  "metadata": {}
+}
