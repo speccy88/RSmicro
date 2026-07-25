@@ -1,0 +1,5 @@
+add_subdirectory(core)
+add_library(rsm_native_test STATIC ports/native_test/src/rsm_test_hal.c)
+target_include_directories(rsm_native_test PUBLIC ports/native_test/include core/include)
+add_executable(rsmcore_demo ports/native_test/src/rsmcore_demo.c)
+target_link_libraries(rsmcore_demo PRIVATE rsmcore rsm_native_test)
