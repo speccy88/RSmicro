@@ -1,0 +1,192 @@
+{
+  "profile_id": "RSM-LOGIX-CORE-1",
+  "profile_version": "1.0.0",
+  "instruction_abi": 1,
+  "description": "RSmicro instruction profile inspired by and designed to reproduce the documented behavior of the listed Logix instructions within the explicitly defined RSM-LOGIX-CORE-1 subset.",
+  "data_types": {
+    "BOOL": {
+      "size": 1,
+      "encoding": "0x00 false, 0x01 true"
+    },
+    "DINT": {
+      "size": 4,
+      "range": [
+        -2147483648,
+        2147483647
+      ]
+    },
+    "REAL": {
+      "size": 4,
+      "encoding": "IEEE-754 binary32 little-endian; finite values only"
+    },
+    "TIMER": {
+      "size": 16,
+      "members": [
+        "PRE",
+        "ACC",
+        "EN",
+        "TT",
+        "DN"
+      ],
+      "owned": [
+        "ACC",
+        "EN",
+        "TT",
+        "DN"
+      ]
+    },
+    "COUNTER": {
+      "size": 20,
+      "members": [
+        "PRE",
+        "ACC",
+        "CU",
+        "CD",
+        "DN",
+        "OV",
+        "UN"
+      ],
+      "owned": [
+        "CU",
+        "CD",
+        "DN",
+        "OV",
+        "UN"
+      ]
+    }
+  },
+  "timer_time_base": "milliseconds from monotonic elapsed time; never nominal scan increments",
+  "counter_width": 32,
+  "lifecycle": [
+    "prescan",
+    "scan",
+    "postscan"
+  ],
+  "aliases": {
+    "GTE": "GE",
+    "GEQ": "GE",
+    "LTE": "LE",
+    "LEQ": "LE"
+  },
+  "numeric": {
+    "byte_order": "little",
+    "dint_overflow": "fault; destination unchanged",
+    "real_non_finite": "rejected/fault",
+    "mixed": "DINT converted to REAL"
+  },
+  "fault_categories": [
+    "INVALID_STATE",
+    "OVERFLOW",
+    "DIVIDE_BY_ZERO",
+    "CONVERSION",
+    "INVALID_PRESET"
+  ],
+  "capabilities": [
+    "SERIAL_LOGIC",
+    "PARALLEL_BRANCH",
+    "MONOTONIC_CLOCK",
+    "FORCES"
+  ],
+  "serialization": {
+    "canonical_mnemonics": true,
+    "member_case": "upper"
+  },
+  "instructions": [
+    {
+      "mnemonic": "XIC",
+      "opcode": 1
+    },
+    {
+      "mnemonic": "XIO",
+      "opcode": 2
+    },
+    {
+      "mnemonic": "OTE",
+      "opcode": 3
+    },
+    {
+      "mnemonic": "OTL",
+      "opcode": 4
+    },
+    {
+      "mnemonic": "OTU",
+      "opcode": 5
+    },
+    {
+      "mnemonic": "ONS",
+      "opcode": 6
+    },
+    {
+      "mnemonic": "TON",
+      "opcode": 16
+    },
+    {
+      "mnemonic": "CTU",
+      "opcode": 17
+    },
+    {
+      "mnemonic": "CTD",
+      "opcode": 18
+    },
+    {
+      "mnemonic": "RES",
+      "opcode": 19
+    },
+    {
+      "mnemonic": "EQ",
+      "opcode": 32
+    },
+    {
+      "mnemonic": "NE",
+      "opcode": 33
+    },
+    {
+      "mnemonic": "GT",
+      "opcode": 34
+    },
+    {
+      "mnemonic": "GE",
+      "opcode": 35
+    },
+    {
+      "mnemonic": "LT",
+      "opcode": 36
+    },
+    {
+      "mnemonic": "LE",
+      "opcode": 37
+    },
+    {
+      "mnemonic": "MOV",
+      "opcode": 48
+    },
+    {
+      "mnemonic": "CLR",
+      "opcode": 49
+    },
+    {
+      "mnemonic": "ADD",
+      "opcode": 50
+    },
+    {
+      "mnemonic": "SUB",
+      "opcode": 51
+    },
+    {
+      "mnemonic": "MUL",
+      "opcode": 52
+    },
+    {
+      "mnemonic": "DIV",
+      "opcode": 53
+    },
+    {
+      "mnemonic": "NEG",
+      "opcode": 54
+    },
+    {
+      "mnemonic": "ABS",
+      "opcode": 55
+    }
+  ]
+}

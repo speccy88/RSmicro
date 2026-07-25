@@ -1,0 +1,50 @@
+{
+  "mnemonic": "CTD",
+  "display_name": "CTD",
+  "opcode": 18,
+  "category": "counter",
+  "description": "Counts false-to-true transitions down; underflow is indicated by UN.",
+  "source_syntax": "CTD(operand1)",
+  "operands": [
+    {
+      "role": "counter",
+      "readable": true,
+      "writable": true,
+      "types": [
+        "COUNTER"
+      ],
+      "literal": false,
+      "members": false
+    }
+  ],
+  "rung_condition_in": "consumed",
+  "rung_condition_out": "input power AND instruction predicate for contacts/comparisons; otherwise input power",
+  "true_behavior": "Counts false-to-true transitions down; underflow is indicated by UN.",
+  "false_behavior": "No destructive write except OTE writes false; TON resets; counter control input clears.",
+  "prescan": "OTE destination false; ONS state true; timer/counter control state initialized; others no action.",
+  "postscan": "OTE destination false; timer enable/timing cleared; others no action.",
+  "state": "unique slot required",
+  "affected_members": [
+    "ACC",
+    "CD",
+    "DN",
+    "UN"
+  ],
+  "faults": [
+    "invalid operand",
+    "invalid state",
+    "overflow or conversion where applicable"
+  ],
+  "conversion": "mixed numeric promotes DINT to binary32 REAL; destination conversion is range checked",
+  "overflow": "DINT and non-finite REAL fault with destination unchanged",
+  "force": "reads observe force overlay; writes update backing value while effective forced value remains overlaid",
+  "multiple_writer": "source scan order; compiler warns for multiple destructive destinations",
+  "validation": "exact operand count/types; instruction-owned status members are not general destinations",
+  "references": [
+    "references/ctd.json"
+  ],
+  "fixtures": [
+    "conformance/ctd-core.json"
+  ],
+  "runtime_notes": "Decode explicit operands; no native struct casts; lifecycle and faults must be implemented."
+}

@@ -1,0 +1,5 @@
+# Legacy semantic differences
+
+The preserved Python engine is not the RSM-LOGIX-CORE-1 semantic authority. Its TON advances by nominal `scan_ms`, does not implement the profile's monotonic elapsed-time/wrap policy, and has weaker preset/state validation. CTU clamps at preset and has a simplified done rule/status model. ONS, RES, explicit prescan/postscan, complete counter CU/CD/OV/UN behavior, and owned-member protections are absent or incomplete (CLR must not substitute for RES).
+
+Legacy arithmetic inherits unlimited Python integers and double precision rather than checked DINT and binary32. Snapshot/live-value upload may couple observation, scan/I/O side effects, and source initial values. Structural state paths may collide. Force overlays and multiple destructive writes lack the profile's explicit scan-order/backing-value rules. Migration therefore emits alias warnings today; behavior-change warnings are reserved where exact affected legacy provenance can be established without false positives.

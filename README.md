@@ -175,3 +175,7 @@ The runtime responds with acknowledgements and snapshots:
 RSmicro is being refactored toward an integrated PLC/SCADA engineering environment comprising **RSmicro Studio**, **RSmicro Compiler**, the portable-C **RSmicro Core**, and **RSmicro SCADA**. This task introduces the versioned, UUID-based `rsmicro-project` model shared by those future components.
 
 The canonical model separates target-neutral controller logic from deployments that contain platforms, devices, endpoints, and bindings. Use `rsmicro migrate-v1`, `rsmicro validate`, and `rsmicro show-project` for legacy conversion and inspection. The existing Tkinter IDE, Python execution engine, protocol, native runtime, and CircuitPython, MicroPython, and Propeller 2/TAQOZ implementations remain intact and supported; this foundation does **not** replace the GUI or runtime yet.
+
+## RSM-LOGIX-CORE-1 compiler
+
+The repository includes a deterministic compiler for the defined RSM-LOGIX-CORE-1 subset. Compile with `rsmicro compile examples/compiler_demo/project.rsmproj --controller controller-a --output controller-a.rsm`, inspect using `rsmicro inspect-image controller-a.rsm`, and explore specifications using `rsmicro profile instructions RSM-LOGIX-CORE-1`. This does not implement the Task 3 C runtime or claim full vendor-product compatibility.
