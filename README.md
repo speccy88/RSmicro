@@ -183,3 +183,7 @@ The repository includes a deterministic compiler for the defined RSM-LOGIX-CORE-
 ## Portable C runtime core
 
 The `runtime/core` C99 library is the canonical instruction engine for compiled `.rsm` images. It is platform independent, caller-arena based, and has a deterministic native test HAL. Existing Python, CircuitPython, MicroPython, and Propeller 2 paths are preserved as legacy/experimental integrations; Task 4 will connect Python simulation to the shared C ABI. No networking, GUI replacement, or physical-board port is included yet.
+
+## Refactor status
+
+The canonical project model, deterministic compiler, program image and portable C runtime now feed a Python native simulator (`rsmicro native info`, `rsmicro run-native`). Python schedules and supplies virtual HAL I/O; C executes ladder logic. Legacy Python, CircuitPython, MicroPython, Propeller 2/TAQOZ and Tkinter entry points remain preserved. Networking/RSM Link, SCADA, the new GUI, and validated hardware migration are not implemented; native simulation is not a safety or hard-real-time controller.
