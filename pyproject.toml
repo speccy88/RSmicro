@@ -13,6 +13,7 @@ dependencies = [
   "pyserial>=3.5",
   "tkinterweb>=4.2.0",
   "jsonschema>=4.18",
+  "websockets>=12",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +25,7 @@ plc-ascii = "plc_ascii.ide:main"
 plc-ascii-cli = "plc_ascii.app:main"
 plc-runtime = "plc_runtime.runtime:main"
 rsmicro = "rsmicro.cli:main"
+rsmicro-tagd = "rsmicro.scada.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

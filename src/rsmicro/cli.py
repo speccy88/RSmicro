@@ -31,7 +31,47 @@ def main(argv=None):
  for command in ("show","instructions","instruction"):
   q=prs.add_parser(command); q.add_argument("profile");
   if command=="instruction": q.add_argument("mnemonic")
+ sc=sp.add_parser("scada",help="query a running local tag broker"); scs=sc.add_subparsers(dest="scada_command",required=True)
+ for command in ("info","controllers","tags","read","write","force","unforce","clear-forces","monitor","alarms","acknowledge","history","routes","diagnostics"):
+  q=scs.add_parser(command); q.add_argument("arguments",nargs="*"); q.add_argument("--host",default="127.0.0.1"); q.add_argument("--port",type=int,default=7590); q.add_argument("--timeout",type=float,default=5); q.add_argument("--format",choices=("text","json"),default="text"); q.add_argument("--role",choices=("viewer","operator","engineering"),default="viewer")
+ hi=sp.add_parser("history",help="inspect a SQLite historian"); his=hi.add_subparsers(dest="history_command",required=True)
+ for command in ("info","tags","query","prune","verify","migrate"):
+  q=his.add_parser(command); q.add_argument("tag",nargs="?"); q.add_argument("--database",required=True); q.add_argument("--from",dest="start"); q.add_argument("--to",dest="end"); q.add_argument("--before"); q.add_argument("--format",choices=("text","json"),default="text")
+ al=sp.add_parser("alarms",help="operate alarms through the broker"); als=al.add_subparsers(dest="alarms_command",required=True)
+ for command in ("list","active","acknowledge","history"):
+  q=als.add_parser(command); q.add_argument("alarm_id",nargs="?"); q.add_argument("--host",default="127.0.0.1"); q.add_argument("--port",type=int,default=7590); q.add_argument("--user",default="cli"); q.add_argument("--comment",default="")
  a=ap.parse_args(argv)
+ if a.command=="history":
+  from .scada.historian import Historian
+  try:
+   h=Historian(a.database).open()
+   if a.history_command in ("info","verify","migrate"): payload={"database":str(h.path),"schema_version":h._conn.execute("PRAGMA user_version").fetchone()[0],"journal_mode":h._conn.execute("PRAGMA journal_mode").fetchone()[0],"integrity":h._conn.execute("PRAGMA quick_check").fetchone()[0]}
+   elif a.history_command=="tags": payload=[dict(zip(("tag_uuid","controller_uuid","qualified_name","data_type"),x)) for x in h._conn.execute("SELECT tag_uuid,controller_uuid,qualified_name,data_type FROM tags")]
+   elif a.history_command=="query": payload=h.query(a.tag,a.start,a.end)
+   else: payload={"pruned":h.prune(a.before)}
+   h._conn.close(); print(json.dumps(payload,indent=2,default=str)); return 0
+  except Exception as e: print(f"error: {e}",file=sys.stderr); return 1
+ if a.command in ("scada","alarms"):
+  from .scada.client import ScadaClient
+  async def invoke():
+   role=getattr(a,"role","operator").upper()
+   async with ScadaClient(a.host,a.port,getattr(a,"timeout",5),role) as client:
+    cmd=a.scada_command if a.command=="scada" else a.alarms_command
+    if cmd=="info":return await client.service_info()
+    if cmd=="controllers":return await client.controllers()
+    if cmd=="tags":return await client.tags()
+    if cmd=="routes":return await client.routes()
+    if cmd=="diagnostics":return await client.diagnostics()
+    if cmd in ("alarms","list","active"):return await client.alarms()
+    if cmd=="read":return await client.read(a.arguments[0])
+    if cmd=="write":return await client.write(a.arguments[0],json.loads(a.arguments[1]))
+    if cmd=="force":return await client.force(a.arguments[0],json.loads(a.arguments[1]))
+    if cmd=="unforce":return await client.unforce(a.arguments[0])
+    if cmd=="acknowledge":return await client.acknowledge(a.alarm_id if a.command=="alarms" else a.arguments[0],getattr(a,"user","cli"),getattr(a,"comment",""))
+    raise ValueError(f"{cmd} requires streaming or additional arguments")
+  import asyncio
+  try: print(json.dumps(asyncio.run(invoke()),indent=2)); return 0
+  except Exception as e: print(f"error: {e}",file=sys.stderr); return 1
  if a.command=="native":
   if a.native_command=="build":
    from .native.build import build_native
