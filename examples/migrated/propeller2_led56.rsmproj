@@ -1,0 +1,172 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "cb7132f5-e745-5a27-abb1-ce0dd624cc70",
+  "name": "propeller2-led56",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "c7fdf7fd-3425-51b6-bb6a-61159a3c6494",
+      "name": "propeller2-led56",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "099f3089-338c-5b64-a7df-3220e579810f",
+          "name": "led_cmd",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "58ae6fa6-9ad2-507b-9c17-743248f67766",
+          "name": "led_56",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "c2c6b967-b920-5ea3-8e42-8545807e072e",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "5983d193-b4c2-5685-93b4-26e320b2e303",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "a7d60cde-1623-5b9f-91b0-23c841e8ed70",
+                  "comment": "led command drives onboard LED on P56",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "030fa7b5-bb04-5cb8-ad83-2cee93714c91",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "099f3089-338c-5b64-a7df-3220e579810f"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "8b70332b-4f69-5a0b-9ef5-67e5c29d41d7",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "58ae6fa6-9ad2-507b-9c17-743248f67766"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "c2c6b967-b920-5ea3-8e42-8545807e072e"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "323bb3cf-a35d-51d5-aad4-7ab3e785518f",
+      "name": "propeller2-led56 deployment",
+      "controller_id": "c7fdf7fd-3425-51b6-bb6a-61159a3c6494",
+      "target_platform": "propeller2",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "75ca5a10-5a96-5339-9e4c-20c2dbd7d08c",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": "56",
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "ec9742ba-1364-5bef-9c8c-af606b58bfff",
+          "tag_id": "58ae6fa6-9ad2-507b-9c17-743248f67766",
+          "device_id": "75ca5a10-5a96-5339-9e4c-20c2dbd7d08c",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "propeller2"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}

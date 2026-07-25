@@ -1,0 +1,7 @@
+# Legacy v1 migration
+
+Run `rsmicro migrate-v1 examples/demo_program.json --output demo.rsmproj`. Existing outputs are protected unless `--force` is used, input bytes are never changed, and an adjacent `.migration.json` report records counts, UUID mappings, aliases, diagnostics, extracted deployment details, unsupported fields, and review items.
+
+The migrator supports the repository's `name/runtime_target/rungs/variables/bindings` format and its older conditions/actions rungs. Types map `bool/int/float/timer/counter` to `BOOL/DINT/REAL/TIMER/COUNTER`. It preserves ordering, comments, branches and nested lanes. Names in operands become UUID references; lowercase composite members become uppercase. `GTE` normalizes to canonical `GE` with a warning. Unknown instructions are preserved by mnemonic and reported as errors rather than discarded.
+
+UUIDv5 values use a fixed RSmicro namespace and stable source identity (source filename, project name, and complete object/node path). Repeating migration of the same source is byte-identical. `runtime_target` becomes deployment platform/metadata and each legacy binding becomes an endpoint and UUID binding; unspecified board, polarity, and safe-state details are not guessed. Undeclared legacy tags are explicitly inferred with warnings. Original projects remain the authority for current legacy runtimes, and migrated hardware mappings still require target hardware validation.

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$id": "https://schemas.rsmicro.dev/v1/deployment.schema.json",
+  "$defs": {
+    "endpoint": {
+      "type": "object",
+      "required": [
+        "endpoint_id",
+        "direction",
+        "data_type",
+        "address"
+      ],
+      "properties": {
+        "endpoint_id": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "input",
+            "output",
+            "bidirectional"
+          ]
+        },
+        "data_type": {
+          "type": "string"
+        },
+        "address": {
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "readable": {
+          "type": "boolean"
+        },
+        "writable": {
+          "type": "boolean"
+        },
+        "safe_value": {},
+        "active_low": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "quality": {
+          "type": "object"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

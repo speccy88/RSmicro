@@ -1,0 +1,364 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "cede7b46-65ae-5bf5-a271-d5a42f72902a",
+  "name": "propeller2-led56",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "3285e888-754b-5a77-b4fc-568a97c317ed",
+      "name": "propeller2-led56",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "8487f981-425c-5b58-9ff4-0ef6d61c6c4a",
+          "name": "led_cmd",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "ea2bf736-e2c8-592d-88f3-31c10fe4b12c",
+          "name": "led_56",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "c8043b37-0375-5e63-bba9-4835b72aa18b",
+          "name": "led_57",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "bcb63ab8-b608-557f-bad3-669e8658e4b7",
+          "name": "timer1",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 500,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "e0cf1eb9-333f-5449-a3fa-1cd9ed54f120",
+          "name": "timer2",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 500,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "e7edf541-130c-5306-aba3-b58921b7cf09",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "6a767318-f661-5b29-9f65-927abdd5ee30",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "797708c5-2f49-5615-b33a-d13104ffdc2e",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "f7d4fbab-4018-5ada-aefe-d56a14a53be4",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "e0cf1eb9-333f-5449-a3fa-1cd9ed54f120",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "e2f47121-2e9b-5077-8588-0796a6d05849",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "bcb63ab8-b608-557f-bad3-669e8658e4b7"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 500
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "9c05b729-187c-54fb-99c0-be7fea799659",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "244193ba-fdd7-51c6-9ecf-cf2096131f52",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "bcb63ab8-b608-557f-bad3-669e8658e4b7",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "df9380af-4a44-5042-b535-d30fc1c007fb",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "e0cf1eb9-333f-5449-a3fa-1cd9ed54f120"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 500
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "1a20fb59-2b9a-5861-bd18-b26cd9b6789e",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "ab0c1dc2-dbd2-5d75-975b-6bbbacaa707f",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "bcb63ab8-b608-557f-bad3-669e8658e4b7",
+                          "member": "TT"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "45a6f2d8-91a9-5cf5-9789-10cfbfe3193b",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "c8043b37-0375-5e63-bba9-4835b72aa18b"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "e101c705-21bf-57ed-acdb-31971bef9c17",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "b4be41c8-f666-5f0a-b48e-93dadac456fd",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "e0cf1eb9-333f-5449-a3fa-1cd9ed54f120",
+                          "member": "TT"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "3007e8c8-d3f9-51cb-b595-273214a75d62",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "ea2bf736-e2c8-592d-88f3-31c10fe4b12c"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "e7edf541-130c-5306-aba3-b58921b7cf09"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "c786c360-aeb2-528b-a501-9a7649784da3",
+      "name": "propeller2-led56 deployment",
+      "controller_id": "3285e888-754b-5a77-b4fc-568a97c317ed",
+      "target_platform": "propeller2",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "db5db7c2-80e2-5f9a-82e5-5915da21388f",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": "56",
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            },
+            {
+              "endpoint_id": "endpoint-1",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": 57,
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "92f44895-1444-5928-88ae-f884412481c5",
+          "tag_id": "ea2bf736-e2c8-592d-88f3-31c10fe4b12c",
+          "device_id": "db5db7c2-80e2-5f9a-82e5-5915da21388f",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        },
+        {
+          "binding_id": "8f9d164a-0ddb-5b32-ab63-54c25639d766",
+          "tag_id": "c8043b37-0375-5e63-bba9-4835b72aa18b",
+          "device_id": "db5db7c2-80e2-5f9a-82e5-5915da21388f",
+          "endpoint_id": "endpoint-1",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "propeller2"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "51597251-38cd-5ea8-b6f3-bb7b9d8527e7",
+  "name": "circuitpython_button_led",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "cdd0375b-d330-5257-ab2e-ee7cffe0a8e0",
+      "name": "circuitpython_button_led",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "464723c8-73cd-5b51-be78-cb0685a72570",
+          "name": "LED",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": true,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "c5fb820d-5df5-5f22-8e51-8838d66564d3",
+          "name": "timer1",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 1000,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "c1385f19-95e1-5a0b-a88c-2198a001f91e",
+          "name": "timer2",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 1000,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "1c1b48ca-260c-5403-8e4a-77056611050f",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "5c6e3a5c-54f0-5025-9bd4-95ad35a975f8",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "ed5a186e-7021-5551-8db5-07376e955514",
+                  "comment": "Blink 1s on LED pin",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "6477b094-c2d5-5bc7-8017-a6b99cc04cd0",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "c1385f19-95e1-5a0b-a88c-2198a001f91e",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "5ea3e543-b9ab-5870-aab4-9fcc5bb9c7c7",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "c5fb820d-5df5-5f22-8e51-8838d66564d3"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 1000
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "f9ffa4cf-d71b-5049-afa5-9cf2186e553a",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "bc935fd1-59dd-57d1-aad3-acca340e2e9c",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "c5fb820d-5df5-5f22-8e51-8838d66564d3",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "fe27b162-b5e6-5bc7-b5c0-f00115a89102",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "c1385f19-95e1-5a0b-a88c-2198a001f91e"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 1000
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "30dbb6c2-c1a5-55dc-a8e7-2089a72ac0db",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "fb1fb996-faeb-55dc-8449-ad5e3c30b383",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "c1385f19-95e1-5a0b-a88c-2198a001f91e",
+                          "member": "TT"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "4b077804-a446-57c5-a1ee-b5c79aeb6949",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "464723c8-73cd-5b51-be78-cb0685a72570"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "1c1b48ca-260c-5403-8e4a-77056611050f"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "f6395212-242e-54d1-82ab-0916bdc7fc86",
+      "name": "circuitpython_button_led deployment",
+      "controller_id": "cdd0375b-d330-5257-ab2e-ee7cffe0a8e0",
+      "target_platform": "circuitpython",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "0ab07e0c-210f-5f69-9177-d60babe4851f",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": "LED",
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "d88ff6c3-197f-5a62-9c42-209b84ee3974",
+          "tag_id": "464723c8-73cd-5b51-be78-cb0685a72570",
+          "device_id": "0ab07e0c-210f-5f69-9177-d60babe4851f",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "circuitpython"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}

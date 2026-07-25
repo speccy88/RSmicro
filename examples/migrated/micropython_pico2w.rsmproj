@@ -1,0 +1,273 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "c2231e95-20e6-5c8d-b5af-6b2a1c2d01df",
+  "name": "micropython_pico2w",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "66d63cea-e2ed-5304-a2b3-db0bff548af6",
+      "name": "micropython_pico2w",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "44af539b-819c-5bee-8a45-db53979ce6d6",
+          "name": "LED",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": true,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "4ba6022c-3312-5236-9eda-92b7efbce2ff",
+          "name": "timer1",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 1000,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "c3be2015-930b-5a41-8796-ffaae7174435",
+          "name": "timer2",
+          "description": "",
+          "data_type": "TIMER",
+          "initial_value": null,
+          "preset": 1000,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "c9936379-fc21-5a9f-872e-725cfc6b1fc8",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "274de34c-9cc4-52cd-8923-178c8e610c03",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "bdfc95d1-68a2-52c2-a492-654bd27027aa",
+                  "comment": "Blink 1s on LED pin",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "21b588cd-447f-5681-98da-368d5a3a7180",
+                      "mnemonic": "XIO",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "c3be2015-930b-5a41-8796-ffaae7174435",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "6712c53b-80c6-5f62-92c5-270faaf4d306",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "4ba6022c-3312-5236-9eda-92b7efbce2ff"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 1000
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "8da4feda-431d-5306-ab74-d309086835ce",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "dfa90f16-d27b-53a3-9e69-8d106c732b00",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "4ba6022c-3312-5236-9eda-92b7efbce2ff",
+                          "member": "DN"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "b6028c8e-5346-528c-8250-ac088ea2fa5e",
+                      "mnemonic": "TON",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "c3be2015-930b-5a41-8796-ffaae7174435"
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 1000
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                },
+                {
+                  "rung_id": "88f977aa-db6a-5142-92f6-4bcac217367d",
+                  "comment": "",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "1ed6db14-d11c-5e9a-b52a-e93a2b5afacd",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag_member",
+                          "tag_id": "c3be2015-930b-5a41-8796-ffaae7174435",
+                          "member": "TT"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "8b31670f-6fc0-5796-a29e-31666448d986",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "44af539b-819c-5bee-8a45-db53979ce6d6"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "c9936379-fc21-5a9f-872e-725cfc6b1fc8"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "6b4589a6-d47b-51d7-83ce-58b8da2ff54f",
+      "name": "micropython_pico2w deployment",
+      "controller_id": "66d63cea-e2ed-5304-a2b3-db0bff548af6",
+      "target_platform": "micropython",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "21565d12-6901-5cb4-a460-aa224cfaf4ae",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": 0,
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "d3125d0d-868e-5e48-b9dc-8bdaf85f38af",
+          "tag_id": "44af539b-819c-5bee-8a45-db53979ce6d6",
+          "device_id": "21565d12-6901-5cb4-a460-aa224cfaf4ae",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "micropython"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}

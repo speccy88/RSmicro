@@ -1,0 +1,193 @@
+{
+  "format": "rsmicro-project",
+  "format_version": 1,
+  "project_id": "bd8c0525-0fa9-58cd-a15d-8b9887bf7eca",
+  "name": "circuitpython_button_led",
+  "description": "",
+  "controllers": [
+    {
+      "controller_id": "54c677a7-4de4-56e5-b975-6c668e2064c7",
+      "name": "circuitpython_button_led",
+      "description": "",
+      "compatibility_profile": null,
+      "tags": [
+        {
+          "tag_id": "e7df0c64-8adb-5b28-8684-eb4e8160318d",
+          "name": "PB",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        },
+        {
+          "tag_id": "01581347-209f-508e-815b-f1e5a752b6fc",
+          "name": "LED",
+          "description": "",
+          "data_type": "BOOL",
+          "initial_value": false,
+          "preset": null,
+          "retentive": false,
+          "writable": true,
+          "access": {},
+          "engineering_unit": null,
+          "minimum": null,
+          "maximum": null,
+          "scada_visible": true,
+          "metadata": {}
+        }
+      ],
+      "programs": [
+        {
+          "program_id": "f2f3a980-daa5-54bd-ac27-0b988b5a1447",
+          "name": "MainProgram",
+          "description": "",
+          "routines": [
+            {
+              "routine_id": "0c5ccfd6-f32e-5971-8179-7cb0b3009a88",
+              "name": "MainRoutine",
+              "description": "",
+              "rungs": [
+                {
+                  "rung_id": "c0b9df87-a738-501c-94f2-b887296fb11d",
+                  "comment": "Turn the onboard LED on while the pushbutton is pressed",
+                  "nodes": [
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "586e5349-d98f-528e-a110-f834f8f49dda",
+                      "mnemonic": "XIC",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "e7df0c64-8adb-5b28-8684-eb4e8160318d"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    },
+                    {
+                      "node_type": "instruction",
+                      "instruction_id": "8445edc1-5a5a-57e4-a77d-7df5a805cfbd",
+                      "mnemonic": "OTE",
+                      "operands": [
+                        {
+                          "kind": "tag",
+                          "tag_id": "01581347-209f-508e-815b-f1e5a752b6fc"
+                        }
+                      ],
+                      "metadata": {
+                        "legacy": {}
+                      }
+                    }
+                  ],
+                  "metadata": {
+                    "legacy_name": ""
+                  }
+                }
+              ],
+              "metadata": {}
+            }
+          ],
+          "metadata": {}
+        }
+      ],
+      "cyclic_task": {
+        "name": "MainTask",
+        "program_order": [
+          "f2f3a980-daa5-54bd-ac27-0b988b5a1447"
+        ]
+      },
+      "produced_tags": [],
+      "consumed_tags": [],
+      "metadata": {}
+    }
+  ],
+  "deployments": [
+    {
+      "deployment_id": "c38f4a4b-4d54-5843-86b5-48ea7dec73cf",
+      "name": "circuitpython_button_led deployment",
+      "controller_id": "54c677a7-4de4-56e5-b975-6c668e2064c7",
+      "target_platform": "circuitpython",
+      "board_identifier": null,
+      "connection": {},
+      "devices": [
+        {
+          "device_id": "ac554c82-7f3f-5eed-9a64-340938e58f37",
+          "driver_type": "legacy-io",
+          "description": "",
+          "properties": {},
+          "endpoints": [
+            {
+              "endpoint_id": "endpoint-0",
+              "direction": "input",
+              "data_type": "BOOL",
+              "address": "IO0",
+              "readable": true,
+              "writable": false,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            },
+            {
+              "endpoint_id": "endpoint-1",
+              "direction": "output",
+              "data_type": "BOOL",
+              "address": "IO2",
+              "readable": false,
+              "writable": true,
+              "safe_value": null,
+              "active_low": null,
+              "quality": {},
+              "metadata": {}
+            }
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "fc304d5c-944b-51f3-b27f-5893955cc49b",
+          "tag_id": "e7df0c64-8adb-5b28-8684-eb4e8160318d",
+          "device_id": "ac554c82-7f3f-5eed-9a64-340938e58f37",
+          "endpoint_id": "endpoint-0",
+          "metadata": {
+            "legacy_direction": "input"
+          }
+        },
+        {
+          "binding_id": "e5d10d1a-41fb-59e1-8578-a034f73c297d",
+          "tag_id": "01581347-209f-508e-815b-f1e5a752b6fc",
+          "device_id": "ac554c82-7f3f-5eed-9a64-340938e58f37",
+          "endpoint_id": "endpoint-1",
+          "metadata": {
+            "legacy_direction": "output"
+          }
+        }
+      ],
+      "driver_configuration": {},
+      "metadata": {
+        "legacy_runtime_target": "circuitpython"
+      }
+    }
+  ],
+  "scada": {
+    "screens": [],
+    "alarms": [],
+    "historian": {},
+    "metadata": {}
+  },
+  "metadata": {
+    "migration": {
+      "source_format": "plc-ascii-v1",
+      "unsupported_fields": []
+    }
+  }
+}
