@@ -1,16 +1,27 @@
-name: Windows portability CI
+name: Windows CI
 on: [push, pull_request]
+
 jobs:
   test:
     runs-on: windows-latest
-    env: {QT_QPA_PLATFORM: offscreen}
+    env:
+      QT_QPA_PLATFORM: offscreen
+      # Visual Studio generators put the shared target below Release; discovery
+      # is intentionally exercised through this public override.
+      RSMICRO_CORE_LIBRARY: ${{ github.workspace }}\build\runtime\core\Release\rsmcore.dll
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12', cache: pip}
       - run: python -m pip install -e ".[dev]"
-      - run: cmake -S . -B build -DRSM_BUILD_TESTS=ON -DRSM_BUILD_SHARED=ON -DRSM_ENABLE_STRICT_WARNINGS=ON
+      - run: python --version; cmake --version
+      - run: python tools/generate_instruction_registry.py --check; python tools/generate_c_conformance_fixtures.py --check; python tools/generate_rsm_link_registry.py --check
+      - run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DRSM_BUILD_TESTS=ON -DRSM_BUILD_SHARED=ON -DRSM_ENABLE_STRICT_WARNINGS=ON
       - run: cmake --build build --config Release --parallel
       - run: ctest --test-dir build -C Release --output-on-failure
-      - run: pytest -q tests/test_compiler_task2.py tests/test_native_task4.py tests/test_rsm_link.py
-      - run: python -c "import rsmicro.compiler, rsmicro.scada"
+      - run: ruff check .
+      - run: mypy src/rsmicro
+      - run: pytest -q --junitxml=build/pytest.xml
+      - run: python tools/validate_repository.py
+      - run: python -m build
+      - run: python tools/run_integrated_demo.py --headless --format json --artifacts-dir build/integrated-demo

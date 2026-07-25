@@ -10,7 +10,7 @@ class Route:
 class RoutingEngine:
  def __init__(self,writer): self.writer=writer;self.routes={};self.diagnostics={}
  def configure(self,routes):
-  graph={}
+  graph: dict[tuple[str, str], list[tuple[str, str]]] = {}
   for r in routes:
    if r.destination_tag_id==r.source_tag_id and r.destination_controller_id==r.source_controller_id: raise ValueError("route cycle")
    graph.setdefault((r.source_controller_id,r.source_tag_id),[]).append((r.destination_controller_id,r.destination_tag_id)); self.routes[r.route_id]=r; self.diagnostics[r.route_id]={"route_sequence":0,"stale_count":0,"write_failure_count":0,"last_source_time":None,"quality":"UNCERTAIN"}

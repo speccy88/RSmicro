@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Deque
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPainter,QPen
 from PySide6.QtWidgets import QLabel,QPushButton,QDoubleSpinBox,QProgressBar,QWidget
@@ -20,7 +21,7 @@ class NumericInput(QDoubleSpinBox):
  writeRequested=Signal(object)
  def commit(self): self.writeRequested.emit(self.value())
 class TrendWidget(QWidget):
- def __init__(self,parent=None,maximum_points=1000): super().__init__(parent); self.points=deque(maxlen=maximum_points)
+ def __init__(self,parent=None,maximum_points=1000): super().__init__(parent); self.points: Deque[tuple[object, float, str, bool]] = deque(maxlen=maximum_points)
  def add_point(self,timestamp,value,quality="GOOD",forced=False): self.points.append((timestamp,float(value),quality,forced)); self.update()
  def paintEvent(self,event):
   p=QPainter(self); p.drawText(8,18,"Trend — bounded samples")

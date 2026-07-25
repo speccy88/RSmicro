@@ -16,7 +16,7 @@ KNOWN={"XIC","XIO","CMP","EQ","GT","GTE","GE","LT","LE","NE","OTE","OTL","OTU","
 def sid(root,path): return str(uuid5(NS,f"{root}:{path}"))
 def migrate_legacy(source,output=None):
  src=Path(source); raw=src.read_bytes(); data=json.loads(raw); root=f"{src.name}:{data.get('name','project')}"; report=MigrationReport(str(src),str(output or "")); name=str(data.get("name") or src.stem)
- varsrc=list(data.get("variables",[])); inferred={}
+ varsrc=list(data.get("variables",[])); inferred: dict[str, str] = {}
  def scan(nodes):
   for n in nodes:
    if n.get("kind")=="branch":

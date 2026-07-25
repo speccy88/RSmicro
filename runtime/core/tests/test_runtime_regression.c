@@ -9,7 +9,7 @@
 #define NONE UINT32_MAX
 
 typedef struct { uint64_t now, reads, writes, watchdogs; } hal_counts_t;
-typedef struct { unsigned values, members, states, rungs; rsm_runtime_diagnostics_t diag; rsm_fault_t fault; } snapshot_t;
+typedef struct { unsigned values, members, states, rungs; uint32_t last_slot; rsm_runtime_diagnostics_t diag; rsm_fault_t fault; } snapshot_t;
 
 static uint16_t get16(const uint8_t *p) { return (uint16_t)(p[0] | ((uint16_t)p[1] << 8)); }
 static uint32_t get32(const uint8_t *p) { return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24); }
@@ -105,7 +105,7 @@ static int malformed_matrix(void) {
     BAD("stream record truncation",d=desc(image,7u),put32(d+8u,get32(d+8u)-1u));
 #undef BAD
     /* Stateful records are mutated on a canonical TON image. */
-    memcpy(image,ton->image,ton->image_size); n=ton->image_size; code=section(image,8u); instruction(code,1u)[8u]=0xffu;instruction(code,1u)[9u]=0xffu;instruction(code,1u)[10u]=0xffu;instruction(code,1u)[11u]=0x7fu;seal(image,n);failures+=reject_atomic("state slot range",ton,image,n);passed++;
+    memcpy(image,ton->image,ton->image_size); n=ton->image_size; code=section(image,8u); instruction(code,1u)[8u]=0xfeu;instruction(code,1u)[9u]=0xffu;instruction(code,1u)[10u]=0xffu;instruction(code,1u)[11u]=0xffu;seal(image,n);failures+=reject_atomic("negative state slot",ton,image,n);passed++;
     memcpy(image,ton->image,ton->image_size); n=ton->image_size; code=section(image,8u); instruction(code,1u)[12u]=2u;seal(image,n);failures+=reject_atomic("state operand kind",ton,image,n);passed++;
     memcpy(image,fixture("ctu-core-001")->image,fixture("ctu-core-001")->image_size); n=fixture("ctu-core-001")->image_size; code=section(image,8u); instruction(code,0u)[0u]=RSM_OP_CTU;instruction(code,0u)[8u]=0u;instruction(code,0u)[9u]=0u;instruction(code,0u)[10u]=0u;instruction(code,0u)[11u]=0u;instruction(code,0u)[13u]=RSM_TYPE_COUNTER;put32(instruction(code,0u)+16u,1u);seal(image,n);failures+=reject_atomic("state slot duplicate",fixture("ctu-core-001"),image,n);passed++;
     /* Branch structural, escape and depth cases; each mutation remains CRC valid. */
@@ -131,15 +131,16 @@ static int malformed_matrix(void) {
 
 static rsm_status_t snap_value(void *p,rsm_tag_id_t id,const rsm_value_t *logical,const rsm_value_t *effective,rsm_bool_t forced) { snapshot_t *s=p;(void)id;(void)logical;(void)effective;(void)forced;s->values++;return RSM_STATUS_OK; }
 static rsm_status_t snap_member(void *p,rsm_tag_id_t id,rsm_member_id_t m,const rsm_value_t *v) { snapshot_t *s=p;(void)id;(void)m;(void)v;s->members++;return RSM_STATUS_OK; }
-static rsm_status_t snap_state(void *p,uint8_t mode,const rsm_runtime_diagnostics_t *d,const rsm_fault_t *f,uint32_t slot,uint8_t edge,uint8_t valid,uint64_t time) { snapshot_t*s=p;(void)mode;(void)slot;(void)edge;(void)valid;(void)time;s->states++;s->diag=*d;s->fault=*f;return RSM_STATUS_OK; }
+static rsm_status_t snap_state(void *p,uint8_t mode,const rsm_runtime_diagnostics_t *d,const rsm_fault_t *f,uint32_t slot,uint8_t edge,uint8_t valid,uint64_t time) { snapshot_t*s=p;(void)mode;(void)edge;(void)valid;(void)time;s->states++;s->last_slot=slot;s->diag=*d;s->fault=*f;return RSM_STATUS_OK; }
 static rsm_status_t snap_rung(void *p,uint32_t rung,rsm_bool_t power) { snapshot_t*s=p;(void)rung;(void)power;s->rungs++;return RSM_STATUS_OK; }
 static int snapshots_are_immutable(void) {
     const rsm_conformance_fixture_t *f=fixture("ton-core-001"),*fault=fixture("div-fault-core-001"); rsm_runtime_t a,b; uint8_t aa[65536],bb[65536]; hal_counts_t ha={0},hb={0}; rsm_hal_t h=counted_hal(); rsm_snapshot_writer_t w; snapshot_t s; rsm_runtime_diagnostics_t before,after; int failures=0; unsigned mode; uint64_t reads,writes,watchdogs;
-    if(!f||!fault)return 1; memset(&w,0,sizeof w);w.value=snap_value;w.member=snap_member;w.state=snap_state;w.rung_power=snap_rung;
+    if(!f||!fault)return 1;
+    memset(&w,0,sizeof w);w.value=snap_value;w.member=snap_member;w.state=snap_state;w.rung_power=snap_rung;
     if(check(rsm_runtime_init(&a,aa,sizeof aa,&h,&ha),RSM_STATUS_OK,"snapshot init a")||check(rsm_runtime_init(&b,bb,sizeof bb,&h,&hb),RSM_STATUS_OK,"snapshot init b")||check(rsm_runtime_load_image(&a,f->image,f->image_size),RSM_STATUS_OK,"snapshot load a")||check(rsm_runtime_load_image(&b,f->image,f->image_size),RSM_STATUS_OK,"snapshot load b"))return 1;
     for(mode=0;mode<3u;mode++){if(mode==1u)check(rsm_runtime_set_mode(&a,RSM_MODE_RUN),RSM_STATUS_OK,"snapshot RUN");if(mode==2u){check(rsm_runtime_set_mode(&a,RSM_MODE_PROGRAM),RSM_STATUS_OK,"snapshot PROGRAM");check(rsm_runtime_set_mode(&a,RSM_MODE_TEST),RSM_STATUS_OK,"snapshot TEST");}if(mode)check(rsm_runtime_scan(&a),RSM_STATUS_OK,"snapshot scan");if(check(rsm_runtime_get_diagnostics(&a,&before),RSM_STATUS_OK,"snapshot diagnostics"))return 1;reads=ha.reads;writes=ha.writes;watchdogs=ha.watchdogs;memset(&s,0,sizeof s);w.context=&s;if(check(rsm_runtime_snapshot(&a,&w),RSM_STATUS_OK,"snapshot full")||check(rsm_runtime_snapshot(&a,&w),RSM_STATUS_OK,"snapshot repeat")||check(rsm_runtime_get_diagnostics(&a,&after),RSM_STATUS_OK,"snapshot after"))return 1;if(memcmp(&before,&after,sizeof before)||!s.values||!s.members||!s.states||!s.rungs||reads!=ha.reads||writes!=ha.writes||watchdogs!=ha.watchdogs){fprintf(stderr,"snapshot did not preserve or expose complete state in mode %u\n",mode);failures++;}}
     /* A faulted runtime still offers an observational snapshot and cannot affect peer B. */
-    rsm_runtime_deinit(&a);check(rsm_runtime_init(&a,aa,sizeof aa,&h,&ha),RSM_STATUS_OK,"fault init");check(rsm_runtime_load_image(&a,fault->image,fault->image_size),RSM_STATUS_OK,"fault load");check(rsm_runtime_set_mode(&a,RSM_MODE_RUN),RSM_STATUS_OK,"fault run");check(rsm_runtime_scan(&a),RSM_STATUS_FAULTED,"fault scan");memset(&s,0,sizeof s);w.context=&s;if(check(rsm_runtime_snapshot(&a,&w),RSM_STATUS_OK,"fault snapshot")||rsm_runtime_get_mode(&a)!=RSM_MODE_FAULTED||!s.states){fputs("fault snapshot failure\n",stderr);failures++;}
+    rsm_runtime_deinit(&a);check(rsm_runtime_init(&a,aa,sizeof aa,&h,&ha),RSM_STATUS_OK,"fault init");check(rsm_runtime_load_image(&a,fault->image,fault->image_size),RSM_STATUS_OK,"fault load");check(rsm_runtime_set_mode(&a,RSM_MODE_RUN),RSM_STATUS_OK,"fault run");check(rsm_runtime_scan(&a),RSM_STATUS_FAULTED,"fault scan");memset(&s,0,sizeof s);w.context=&s;if(check(rsm_runtime_snapshot(&a,&w),RSM_STATUS_OK,"fault snapshot")||rsm_runtime_get_mode(&a)!=RSM_MODE_FAULTED||s.states){fputs("fault snapshot phantom state\n",stderr);failures++;}
     rsm_runtime_deinit(&a);rsm_runtime_deinit(&b);printf("snapshot immutability: PROGRAM/RUN/TEST/FAULT × two instances passed\n");return failures;
 }
 
@@ -149,4 +150,106 @@ static int lifecycle_matrix(void) {
     printf("lifecycle matrix: PROGRAM→RUN→PROGRAM→TEST→PROGRAM for OTE/TON/CTU/CTD/ONS passed\n");return failures;
 }
 
-int main(void) { int failures=0; failures+=malformed_matrix();failures+=lifecycle_matrix();failures+=snapshots_are_immutable();if(failures){fprintf(stderr,"runtime regressions: %d failures\n",failures);return 1;}puts("runtime validator, lifecycle and snapshot regressions passed");return 0;}
+/* The source fixture is compiled by the Python image builder, then this native
+ * test validates, sizes, loads, snapshots and independently scans it twice. */
+static int high_state_contract(void) {
+    const rsm_conformance_fixture_t *f=fixture("high-state-core-001");
+    rsm_image_info_t info; rsm_runtime_t a,b,short_arena; rsm_hal_t h=counted_hal();
+    static uint8_t aa[65536],bb[65536],too_small[65536]; hal_counts_t ha={0},hb={0};
+    rsm_runtime_diagnostics_t da,db; rsm_snapshot_writer_t w; snapshot_t sa,sb;
+    rsm_value_t va,vb; size_t need; int failures=0;
+    if(!f)return 1;
+    if(check(rsm_runtime_validate_image(f->image,f->image_size,&info),RSM_STATUS_OK,"high-state validate")||
+       check(rsm_runtime_required_memory(f->image,f->image_size,&need),RSM_STATUS_OK,"high-state required memory"))return 1;
+    if(info.instruction_count<300u||need==0u||need>sizeof aa){fputs("high-state fixture is not scalable\n",stderr);return 1;}
+    if(check(rsm_runtime_init(&short_arena,too_small,need-1u,&h,NULL),RSM_STATUS_OK,"high-state short init")||
+       check(rsm_runtime_load_image(&short_arena,f->image,f->image_size),RSM_STATUS_BUFFER_TOO_SMALL,"high-state exact memory boundary"))return 1;
+    if(check(rsm_runtime_init(&a,aa,need,&h,&ha),RSM_STATUS_OK,"high-state init a")||
+       check(rsm_runtime_init(&b,bb,need,&h,&hb),RSM_STATUS_OK,"high-state init b")||
+       check(rsm_runtime_load_image(&a,f->image,f->image_size),RSM_STATUS_OK,"high-state load a")||
+       check(rsm_runtime_load_image(&b,f->image,f->image_size),RSM_STATUS_OK,"high-state load b")||
+       check(rsm_runtime_get_diagnostics(&a,&da),RSM_STATUS_OK,"high-state diagnostics a")||
+       check(rsm_runtime_get_diagnostics(&b,&db),RSM_STATUS_OK,"high-state diagnostics b"))return 1;
+    if(da.state_slot_count!=300u||db.state_slot_count!=300u){fputs("high-state state_slot_count is not exact\n",stderr);failures++;}
+    check(rsm_runtime_set_mode(&a,RSM_MODE_RUN),RSM_STATUS_OK,"high-state run a");
+    check(rsm_runtime_set_mode(&b,RSM_MODE_RUN),RSM_STATUS_OK,"high-state run b");
+    ha.now=1000u; hb.now=1000u;
+    check(rsm_runtime_scan(&a),RSM_STATUS_OK,"high-state scan a");
+    check(rsm_runtime_scan(&b),RSM_STATUS_OK,"high-state scan b");
+    va.type=RSM_TYPE_BOOL;va.value.boolean=RSM_TRUE;
+    check(rsm_runtime_write_tag(&a,0u,&va),RSM_STATUS_OK,"high-state gate a");
+    check(rsm_runtime_write_tag(&b,0u,&va),RSM_STATUS_OK,"high-state gate b");
+    ha.now=2000u; hb.now=2000u;
+    check(rsm_runtime_scan(&a),RSM_STATUS_OK,"high-state second scan a");
+    check(rsm_runtime_scan(&b),RSM_STATUS_OK,"high-state second scan b");
+    if(check(rsm_runtime_read_member(&a,1u,2u,&va),RSM_STATUS_OK,"high-state read a")||
+       check(rsm_runtime_read_member(&b,300u,2u,&vb),RSM_STATUS_OK,"high-state read b")||
+       va.value.dint!=1||vb.value.dint!=1){fprintf(stderr,"high-state independent scan values wrong: %d %d\n",va.value.dint,vb.value.dint);failures++;}
+    memset(&w,0,sizeof w);w.value=snap_value;w.member=snap_member;w.state=snap_state;w.rung_power=snap_rung;
+    memset(&sa,0,sizeof sa);memset(&sb,0,sizeof sb);w.context=&sa;
+    if(check(rsm_runtime_snapshot(&a,&w),RSM_STATUS_OK,"high-state snapshot a"))return 1;
+    w.context=&sb;if(check(rsm_runtime_snapshot(&b,&w),RSM_STATUS_OK,"high-state snapshot b"))return 1;
+    if(sa.states!=300u||sb.states!=300u||sa.last_slot!=299u||sb.last_slot!=299u){fputs("high-state exact snapshot state count wrong\n",stderr);failures++;}
+    if(check(rsm_runtime_get_diagnostics(&a,&da),RSM_STATUS_OK,"high-state post diagnostics a")||
+       check(rsm_runtime_get_diagnostics(&b,&db),RSM_STATUS_OK,"high-state post diagnostics b")||da.scan_count!=2u||db.scan_count!=2u){fputs("high-state peer scan isolation failed\n",stderr);failures++;}
+    rsm_runtime_deinit(&a);rsm_runtime_deinit(&b);rsm_runtime_deinit(&short_arena);
+    printf("high-state generated image: 300 slots, exact memory, snapshots and two runtimes passed\n");
+    return failures;
+}
+
+/* Slot identities are image IDs, not arena offsets: RES must find sparse slots. */
+static int sparse_res_contract(void) {
+    const rsm_conformance_fixture_t *f=fixture("ctu-core-001"); uint8_t image[65536],*code;
+    rsm_runtime_t r; rsm_hal_t h=counted_hal(); hal_counts_t hc={0}; uint8_t arena[65536]; rsm_snapshot_writer_t w; snapshot_t s; rsm_value_t value; size_t n;
+    if(!f)return 1;
+    n=f->image_size;memcpy(image,f->image,n);code=section(image,8u);
+    code[0]=RSM_OP_CTU;put32(code+8u,299u);code[13u]=RSM_TYPE_COUNTER;put32(code+16u,1u);
+    instruction(code,1u)[0]=RSM_OP_RES;put32(instruction(code,1u)+8u,NONE);seal(image,n);
+    if(check(rsm_runtime_validate_image(image,n,&(rsm_image_info_t){0}),RSM_STATUS_OK,"sparse RES validate")||
+       check(rsm_runtime_init(&r,arena,sizeof arena,&h,&hc),RSM_STATUS_OK,"sparse RES init")||
+       check(rsm_runtime_load_image(&r,image,n),RSM_STATUS_OK,"sparse RES load")||
+       check(rsm_runtime_set_mode(&r,RSM_MODE_RUN),RSM_STATUS_OK,"sparse RES run")||
+       check(rsm_runtime_scan(&r),RSM_STATUS_OK,"sparse RES scan")||
+       check(rsm_runtime_read_member(&r,1u,2u,&value),RSM_STATUS_OK,"sparse RES counter"))return 1;
+    memset(&w,0,sizeof w);memset(&s,0,sizeof s);w.context=&s;w.value=snap_value;w.member=snap_member;w.state=snap_state;
+    if(check(rsm_runtime_snapshot(&r,&w),RSM_STATUS_OK,"sparse RES snapshot")||value.value.dint!=0||s.states!=1u||s.last_slot!=299u){fprintf(stderr,"sparse RES mapping failed: acc=%d states=%u slot=%u\n",value.value.dint,s.states,s.last_slot);rsm_runtime_deinit(&r);return 1;}
+    rsm_runtime_deinit(&r);puts("sparse RES slot mapping passed");return 0;
+}
+
+/* Failed RUN/TEST unloads must retain their active image; PROGRAM unload is
+ * followed by real invalid-state calls, a fresh reload, and a live peer. */
+static int unload_reload_contract(void) {
+    const rsm_conformance_fixture_t *f=fixture("unload-reload-core-001");
+    rsm_runtime_t a,b; rsm_hal_t h=counted_hal(); uint8_t aa[65536],bb[65536];
+    rsm_value_t value,peer_before,peer_after; rsm_runtime_diagnostics_t diagnostics;
+    int failures=0;
+    if(!f)return 1;
+    if(check(rsm_runtime_init(&a,aa,sizeof aa,&h,NULL),RSM_STATUS_OK,"unload init a")||
+       check(rsm_runtime_init(&b,bb,sizeof bb,&h,NULL),RSM_STATUS_OK,"unload init b")||
+       check(rsm_runtime_load_image(&a,f->image,f->image_size),RSM_STATUS_OK,"unload load a")||
+       check(rsm_runtime_load_image(&b,f->image,f->image_size),RSM_STATUS_OK,"unload load b")||
+       check(rsm_runtime_read_tag(&b,1u,&peer_before),RSM_STATUS_OK,"unload peer before"))return 1;
+    if(check(rsm_runtime_set_mode(&a,RSM_MODE_RUN),RSM_STATUS_OK,"unload RUN")||
+       check(rsm_runtime_unload_program(&a),RSM_STATUS_INVALID_STATE,"unload in RUN")||
+       check(rsm_runtime_read_tag(&a,1u,&value),RSM_STATUS_OK,"RUN unload retained image"))failures++;
+    if(check(rsm_runtime_set_mode(&a,RSM_MODE_PROGRAM),RSM_STATUS_OK,"unload PROGRAM")||
+       check(rsm_runtime_set_mode(&a,RSM_MODE_TEST),RSM_STATUS_OK,"unload TEST")||
+       check(rsm_runtime_unload_program(&a),RSM_STATUS_INVALID_STATE,"unload in TEST")||
+       check(rsm_runtime_read_tag(&a,1u,&value),RSM_STATUS_OK,"TEST unload retained image"))failures++;
+    if(check(rsm_runtime_set_mode(&a,RSM_MODE_PROGRAM),RSM_STATUS_OK,"unload final PROGRAM")||
+       check(rsm_runtime_unload_program(&a),RSM_STATUS_OK,"unload in PROGRAM")||
+       check(rsm_runtime_read_tag(&a,0u,&value),RSM_STATUS_INVALID_STATE,"unload read")||
+       check(rsm_runtime_scan(&a),RSM_STATUS_INVALID_STATE,"unload scan")||
+       check(rsm_runtime_get_diagnostics(&a,&diagnostics),RSM_STATUS_INVALID_STATE,"unload diagnostics")||
+       check(rsm_runtime_read_tag(&b,1u,&peer_after),RSM_STATUS_OK,"unload peer after"))failures++;
+    if(peer_before.type!=peer_after.type||peer_before.value.dint!=peer_after.value.dint){fputs("unload changed peer runtime\n",stderr);failures++;}
+    if(check(rsm_runtime_load_image(&a,f->image,f->image_size),RSM_STATUS_OK,"unload reload")||
+       check(rsm_runtime_get_diagnostics(&a,&diagnostics),RSM_STATUS_OK,"unload reload diagnostics")||
+       check(rsm_runtime_read_tag(&a,1u,&value),RSM_STATUS_OK,"unload reload read"))failures++;
+    if(diagnostics.scan_count!=0u||value.type!=RSM_TYPE_DINT||value.value.dint!=7){fputs("unload reload did not restore fresh fixture state\n",stderr);failures++;}
+    rsm_runtime_deinit(&a);rsm_runtime_deinit(&b);
+    puts("unload lifecycle: RUN/TEST refusal, PROGRAM detach, reload and peer isolation passed");
+    return failures;
+}
+
+int main(void) { int failures=0; failures+=malformed_matrix();failures+=lifecycle_matrix();failures+=snapshots_are_immutable();failures+=high_state_contract();failures+=sparse_res_contract();failures+=unload_reload_contract();if(failures){fprintf(stderr,"runtime regressions: %d failures\n",failures);return 1;}puts("runtime validator, lifecycle and snapshot regressions passed");return 0;}

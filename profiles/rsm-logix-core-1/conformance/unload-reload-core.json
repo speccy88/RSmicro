@@ -1,0 +1,29 @@
+{
+  "id": "unload-reload-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "LIFECYCLE",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {"name": "gate", "type": "BOOL", "initial": false},
+    {"name": "value", "type": "DINT", "initial": 7}
+  ],
+  "program": [
+    {"mnemonic": "XIC", "operands": [{"tag": 0, "type": "BOOL"}]}
+  ],
+  "steps": [
+    {"operation": "run", "time_us": 0, "status": "OK", "mode": "RUN", "diagnostics": {"scan_count": 0}},
+    {"operation": "unload", "time_us": 1, "status": "INVALID_STATE", "mode": "RUN",
+     "assert": [{"tag": 1, "type": "DINT", "value": 7}]},
+    {"operation": "program", "time_us": 2, "status": "OK", "mode": "PROGRAM"},
+    {"operation": "test", "time_us": 3, "status": "OK", "mode": "TEST", "diagnostics": {"scan_count": 0}},
+    {"operation": "unload", "time_us": 4, "status": "INVALID_STATE", "mode": "TEST",
+     "assert": [{"tag": 1, "type": "DINT", "value": 7}]},
+    {"operation": "program", "time_us": 5, "status": "OK", "mode": "PROGRAM"},
+    {"operation": "unload", "time_us": 6, "status": "OK", "mode": "PROGRAM"},
+    {"operation": "read", "time_us": 7, "tag": 0, "status": "INVALID_STATE", "mode": "PROGRAM"},
+    {"operation": "scan", "time_us": 8, "status": "INVALID_STATE", "mode": "PROGRAM"},
+    {"operation": "load", "time_us": 9, "status": "OK", "mode": "PROGRAM",
+     "assert": [{"tag": 1, "type": "DINT", "value": 7}],
+     "diagnostics": {"scan_count": 0}}
+  ]
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse,json,sys
 from pathlib import Path
 from dataclasses import asdict
+from typing import Any
 from .diagnostics import Severity
 from .migration import migrate_legacy
 from .model import load_project,validate_project
@@ -45,11 +46,12 @@ def main(argv=None):
   from .scada.historian import Historian
   try:
    h=Historian(a.database).open()
-   if a.history_command in ("info","verify","migrate"): payload={"database":str(h.path),"schema_version":h._conn.execute("PRAGMA user_version").fetchone()[0],"journal_mode":h._conn.execute("PRAGMA journal_mode").fetchone()[0],"integrity":h._conn.execute("PRAGMA quick_check").fetchone()[0]}
-   elif a.history_command=="tags": payload=[dict(zip(("tag_uuid","controller_uuid","qualified_name","data_type"),x)) for x in h._conn.execute("SELECT tag_uuid,controller_uuid,qualified_name,data_type FROM tags")]
-   elif a.history_command=="query": payload=h.query(a.tag,a.start,a.end)
-   else: payload={"pruned":h.prune(a.before)}
-   h._conn.close(); print(json.dumps(payload,indent=2,default=str)); return 0
+   history_payload: Any
+   if a.history_command in ("info","verify","migrate"): history_payload={"database":str(h.path),"schema_version":h._conn.execute("PRAGMA user_version").fetchone()[0],"journal_mode":h._conn.execute("PRAGMA journal_mode").fetchone()[0],"integrity":h._conn.execute("PRAGMA quick_check").fetchone()[0]}
+   elif a.history_command=="tags": history_payload=[dict(zip(("tag_uuid","controller_uuid","qualified_name","data_type"),x)) for x in h._conn.execute("SELECT tag_uuid,controller_uuid,qualified_name,data_type FROM tags")]
+   elif a.history_command=="query": history_payload=h.query(a.tag,a.start,a.end)
+   else: history_payload={"pruned":h.prune(a.before)}
+   h._conn.close(); print(json.dumps(history_payload,indent=2,default=str)); return 0
   except Exception as e: print(f"error: {e}",file=sys.stderr); return 1
  if a.command in ("scada","alarms"):
   from .scada.client import ScadaClient
@@ -123,13 +125,16 @@ def main(argv=None):
   print(json.dumps(info,indent=2,sort_keys=True) if a.format=="json" else "\n".join(f"{k}: {v}" for k,v in info.items()))
   return 0
  if a.command=="compile":
-  p,base=diagnostics(a.project)
-  if p is None or any(x['severity']=='ERROR' for x in base):
-   print(json.dumps(base,indent=2) if a.format=='json' else "\n".join(f"{x['severity']} {x['code']}: {x['message']}" for x in base)); return 1
+  # Compilation owns admission.  Do not pre-empt it with editor/schema
+  # validation, which has a different diagnostic contract.
+  try: p=load_project(a.project)
+  except Exception as e:
+   base=[{'severity':'ERROR','code':'MODEL_INVALID','message':str(e)}]
+   print(json.dumps(base,indent=2) if a.format=='json' else f"ERROR MODEL_INVALID: {e}"); return 1
   result=compile_project(p,a.controller,a.profile,a.deployment,CompileOptions(a.warnings_as_errors,a.strip_debug))
-  payload=[x.to_dict() for x in result.diagnostics]
+  diagnostic_payload: list[dict[str, Any]]=[x.to_dict() for x in result.diagnostics]
   if not result.success:
-   print(json.dumps(payload,indent=2) if a.format=='json' else "\n".join(f"{x['severity']} {x['code']}: {x['message']}" for x in payload)); return 1
+   print(json.dumps(diagnostic_payload,indent=2) if a.format=='json' else "\n".join(f"{x['severity']} {x['code']}: {x['message']}" for x in diagnostic_payload)); return 1
   out=Path(a.output); mp=Path(a.manifest or str(out)+'.manifest.json'); dp=Path(a.debug_map or str(out)+'.map.json')
   import os,tempfile
   def atomic(path,data,binary=False):
@@ -138,7 +143,7 @@ def main(argv=None):
    finally:
     if Path(tmp).exists(): Path(tmp).unlink()
   atomic(out,result.image_bytes,True); atomic(mp,json.dumps(result.manifest,indent=2,sort_keys=True)+'\n'); atomic(dp,json.dumps(result.debug_map,indent=2,sort_keys=True)+'\n')
-  print(json.dumps({'success':True,'image':str(out),'manifest':str(mp),'debug_map':str(dp),'hashes':result.hashes,'diagnostics':payload},indent=2) if a.format=='json' else f"Compiled {out} ({result.hashes['sha256']})")
+  print(json.dumps({'success':True,'image':str(out),'manifest':str(mp),'debug_map':str(dp),'hashes':result.hashes,'diagnostics':diagnostic_payload},indent=2) if a.format=='json' else f"Compiled {out} ({result.hashes['sha256']})")
   return 0
  if a.command=="validate":
   _,ds=diagnostics(a.project)

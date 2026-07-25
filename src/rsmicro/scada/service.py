@@ -29,10 +29,12 @@ class TagBrokerService:
   if sup.state.value!="ONLINE":raise RuntimeError("controller is not online")
   if not tag.writable:raise RuntimeError("tag is read-only")
   if tag.minimum is not None and value<tag.minimum or tag.maximum is not None and value>tag.maximum:raise ValueError("value outside engineering range")
+  if sup.client is None: raise RuntimeError("controller client is unavailable")
   command=str(uuid.uuid4());result=await sup.client.request(MessageType.WRITE_TAG,{"runtime_id":tag.runtime_id,"program_hash":tag.program_hash,"value":value,"command_uuid":command});return {"command_uuid":command,"controller_result":result}
  async def force(self,operation,message):
   tag=self.registry.get(message["tag"]);sup=self.supervisors[tag.controller_id]
   if not tag.forceable:raise RuntimeError("tag is not forceable")
+  if sup.client is None: raise RuntimeError("controller client is unavailable")
   mt=MessageType.FORCE_TAG if operation=="force_tag" else MessageType.CLEAR_FORCE
   return await sup.client.request(mt,{"runtime_id":tag.runtime_id,"program_hash":tag.program_hash,"value":message.get("value")})
  def acknowledge(self,m):

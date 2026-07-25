@@ -2,14 +2,14 @@
 
 > **Safety and security:** RSmicro is experimental and is not safety-certified. It must not replace emergency stops, overload protection, guards, or safety-rated controls. Forces can create hazardous operation. RSM Link is unauthenticated and unencrypted; keep services on loopback or an isolated trusted network.
 
-RSmicro has four cooperating pieces: **Studio** (planned; not present in this revision), the deterministic **Compiler** (canonical project to `.rsm`), portable C99 **Core** (the sole canonical instruction engine, native simulator, and node), and **SCADA** (tag broker, quality, historian, alarms, and produced/consumed routing).
+RSmicro has a deterministic **Compiler** (canonical project to `.rsm`), portable C99 **Core** (the canonical instruction engine, native simulator, and node), and preserved engineering/SCADA application code. The release evidence deliberately distinguishes implemented source from processes actually exercised.
 
 ```text
-Studio -> Compiler -> .rsm -> rsmcore / rsm-node
-SCADA operator -> tagd -> RSM Link -> native nodes
+Compiler -> .rsm -> rsmcore / rsm-node
+Studio / SCADA application code -> rsmicro-tagd -> RSM Link -> native nodes
 ```
 
-Run the integrated two-controller example with `PYTHONPATH=src QT_QPA_PLATFORM=offscreen python tools/run_integrated_demo.py --headless`. The native stack is suitable for experimentation. CircuitPython, MicroPython, and Propeller 2/TAQOZ targets remain preserved but physically **UNVERIFIED**. RSM-LOGIX-CORE-1 is an RSmicro-defined documented subset, not a complete compatibility or certification claim. RSmicro is not affiliated with Rockwell Automation.
+Run the deterministic compiler smoke with `PYTHONPATH=src QT_QPA_PLATFORM=offscreen python tools/run_integrated_demo.py --headless`. It compiles each controller twice to separate files, compares bytes, and inspects images; it does **not** start nodes, `rsmicro-tagd`, Studio, or SCADA. Those live paths are **NOT_IMPLEMENTED/out of scope for this evidence**. CircuitPython, MicroPython, and Propeller 2/TAQOZ targets remain physically **UNVERIFIED**. RSM-LOGIX-CORE-1 profile 2.0.0 / instruction ABI 2 / image 2.0 / runtime ABI 1.2 is an RSmicro-defined documented subset, not a compatibility or certification claim.
 
 ---
 
@@ -17,16 +17,15 @@ Run the integrated two-controller example with `PYTHONPATH=src QT_QPA_PLATFORM=o
 
 ## RSmicro desktop applications
 
-Task 7 adds the PySide6 `rsmicro-studio` engineering application and standalone
-`rsmicro-scada` operator runtime. Studio uses the canonical compiler, native C
-runtime binding for simulation, and RSM Link for controller engineering. The
-operator runtime obtains process data only through loopback `rsmicro-tagd`.
+The source tree includes a PySide6 `rsmicro-studio` engineering application and
+standalone `rsmicro-scada` operator runtime. The operator runtime is designed to
+obtain process data only through loopback `rsmicro-tagd`; this release smoke does
+not launch or validate either application.
 The original Tkinter `plc-ascii` application and all hardware runtimes remain.
 
-The canonical model, compiler, portable runtime, protocol/node and SCADA services
-are complete through Task 7. Physical hardware remains unverified; Task 8 owns
-final integrated validation. These applications are not safety certified and
-RSM Link 1.0 is not a secure remote-access protocol.
+The canonical model, compiler, portable runtime, and protocol/node source are
+locally gated. Physical hardware remains unverified. These applications are not
+safety certified and RSM Link 1.0 is not a secure remote-access protocol.
 
 `PLC ASCII` is a Python-first ladder logic workbench inspired by LDmicro's text
 presentation and the general workflow of PLC software such as RSLogix 5000.
@@ -200,22 +199,6 @@ The runtime responds with acknowledgements and snapshots:
 
 ## Canonical RSmicro foundation
 
-RSmicro is being refactored toward an integrated PLC/SCADA engineering environment comprising **RSmicro Studio**, **RSmicro Compiler**, the portable-C **RSmicro Core**, and **RSmicro SCADA**. This task introduces the versioned, UUID-based `rsmicro-project` model shared by those future components.
+The canonical model separates target-neutral controller logic from deployments that contain platforms, devices, endpoints, and bindings. Use `rsmicro migrate-v1`, `rsmicro validate`, and `rsmicro show-project` for legacy conversion and inspection. Compile a canonical project with `rsmicro compile`, inspect it with `rsmicro inspect-image`, and query the profile with `rsmicro profile instructions RSM-LOGIX-CORE-1`.
 
-The canonical model separates target-neutral controller logic from deployments that contain platforms, devices, endpoints, and bindings. Use `rsmicro migrate-v1`, `rsmicro validate`, and `rsmicro show-project` for legacy conversion and inspection. The existing Tkinter IDE, Python execution engine, protocol, native runtime, and CircuitPython, MicroPython, and Propeller 2/TAQOZ implementations remain intact and supported; this foundation does **not** replace the GUI or runtime yet.
-
-## RSM-LOGIX-CORE-1 compiler
-
-The repository includes a deterministic compiler for the defined RSM-LOGIX-CORE-1 subset. Compile with `rsmicro compile examples/compiler_demo/project.rsmproj --controller controller-a --output controller-a.rsm`, inspect using `rsmicro inspect-image controller-a.rsm`, and explore specifications using `rsmicro profile instructions RSM-LOGIX-CORE-1`. This does not implement the Task 3 C runtime or claim full vendor-product compatibility.
-
-## Portable C runtime core
-
-The `runtime/core` C99 library is the canonical instruction engine for compiled `.rsm` images. It is platform independent, caller-arena based, and has a deterministic native test HAL. Existing Python, CircuitPython, MicroPython, and Propeller 2 paths are preserved as legacy/experimental integrations; Task 4 will connect Python simulation to the shared C ABI. No networking, GUI replacement, or physical-board port is included yet.
-
-## Refactor status
-
-The canonical project model, deterministic compiler, program image and portable C runtime now feed a Python native simulator (`rsmicro native info`, `rsmicro run-native`). Python schedules and supplies virtual HAL I/O; C executes ladder logic. Legacy Python, CircuitPython, MicroPython, Propeller 2/TAQOZ and Tkinter entry points remain preserved. Networking/RSM Link, SCADA, the new GUI, and validated hardware migration are not implemented; native simulation is not a safety or hard-real-time controller.
-
-## Refactor status
-
-The canonical model, compiler, portable C runtime, native binding/simulation, RSM Link and native node are complete. Task 6 adds the headless `rsmicro-tagd` service, SQLite historian, alarms, and broker-mediated multi-node routing. The PySide6 Studio and graphical operator runtime are Task 7 work. Legacy runtimes remain available. Direct controller routing, secure remote authentication, safety certification, and physical hardware validation are not claimed.
+The C99 core is caller-arena based and uses a deterministic native test HAL; the Python native simulator schedules it and supplies virtual I/O. These are host-software facilities, not safety or hard-real-time claims. See [current status](docs/current-status.md) and [release readiness](docs/release-readiness.md) for the exact evidence boundary and platform matrix.

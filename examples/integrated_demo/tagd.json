@@ -1,264 +1,33 @@
 {
-  "listen": {
-    "host": "127.0.0.1",
-    "port": 0
-  },
-  "historian": {
-    "database": "integrated-demo.sqlite3",
-    "queue_limit": 4096,
-    "definitions": [
-      {
-        "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093",
-        "mode": "ON_CHANGE",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561",
-        "mode": "PERIODIC",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "2e6f3f27-d6f3-5320-95cb-c76799c32a64",
-        "mode": "ON_CHANGE_WITH_HEARTBEAT",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a",
-        "mode": "ON_CHANGE",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0.1,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f",
-        "mode": "PERIODIC",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0.1,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "347fc585-9f83-5574-9b51-dd902c5005b7",
-        "mode": "ON_CHANGE_WITH_HEARTBEAT",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0.1,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "22000a6d-81ac-5265-bbea-0c173f55a6d0",
-        "mode": "ON_CHANGE",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0.1,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed",
-        "mode": "PERIODIC",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "c86db121-1e39-54a8-9632-1d679f73f8f7",
-        "mode": "ON_CHANGE_WITH_HEARTBEAT",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "16fafe85-83dc-5417-ac67-7646a3549fae",
-        "mode": "ON_CHANGE",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "d0d96d13-bc61-5eb8-a3c1-885cb2858879",
-        "mode": "PERIODIC",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      },
-      {
-        "tag_uuid": "4868156c-7d78-58e1-af1f-4676a0b0ba39",
-        "mode": "ON_CHANGE_WITH_HEARTBEAT",
-        "period_ms": 1000,
-        "heartbeat_ms": 5000,
-        "deadband": 0,
-        "minimum_interval_ms": 100,
-        "store_quality_transitions": true,
-        "store_force_transitions": true
-      }
-    ]
-  },
-  "alarms": [
+  "format": "rsmicro-tagd-config",
+  "format_version": 1,
+  "broker_id": "28bf6eb6-01ba-56bc-aaf9-f221a92bb7e8",
+  "project": "project.rsmproj",
+  "controllers": [
     {
-      "alarm_id": "6bb05979-eead-57b6-8f6d-73656d4da642",
-      "name": "controller-a-high-temperature",
-      "kind": "HIGH",
-      "priority": 2,
-      "delay_on_s": 1.0,
-      "delay_off_s": 1.0,
-      "hysteresis": 2.0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
+      "controller_id": "controller-a",
+      "host": "127.0.0.1",
+      "port": 7581,
+      "connect_timeout_ms": 2000,
+      "request_timeout_ms": 2000,
+      "heartbeat_period_ms": 1000,
+      "stale_timeout_ms": 3000,
+      "required": true
     },
     {
-      "alarm_id": "827a8303-d7e4-5406-9d38-c6f2bb306185",
-      "name": "controller-a-high-high-temperature",
-      "kind": "HIGH_HIGH",
-      "priority": 1,
-      "delay_on_s": 0.25,
-      "delay_off_s": 2.0,
-      "hysteresis": 3.0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "cd2af11c-09cc-5848-938e-d2e9c46034bc",
-      "name": "controller-a-stale",
-      "kind": "CONNECTION",
-      "priority": 1,
-      "delay_on_s": 0,
-      "delay_off_s": 0,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "8e12f7c7-f851-5d0d-8b9e-ef61edafa40a",
-      "name": "controller-b-stale",
-      "kind": "CONNECTION",
-      "priority": 1,
-      "delay_on_s": 0,
-      "delay_off_s": 0,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "f27b6f94-6f47-5dbe-93e8-134fa3f2f53e",
-      "name": "remote-route-stale",
-      "kind": "QUALITY",
-      "priority": 1,
-      "delay_on_s": 0.5,
-      "delay_off_s": 0.5,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "4cfb584b-d474-54da-be08-f94e1631cdd9",
-      "name": "remote-route-bad",
-      "kind": "QUALITY",
-      "priority": 1,
-      "delay_on_s": 0,
-      "delay_off_s": 0,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "bb1cb170-4495-5479-8e47-52eecfb87c34",
-      "name": "remote-lamp-expected-off",
-      "kind": "DISCREPANCY",
-      "priority": 2,
-      "delay_on_s": 1,
-      "delay_off_s": 1,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "57eff28d-39b7-577f-a580-f675e3a8fe3d",
-      "name": "active-force-warning",
-      "kind": "ENGINEERING",
-      "priority": 2,
-      "delay_on_s": 0,
-      "delay_off_s": 0,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "7d9ba628-a994-5280-81fb-565c2e7ba6a7",
-      "name": "controller-runtime-fault",
-      "kind": "FAULT",
-      "priority": 1,
-      "delay_on_s": 0,
-      "delay_off_s": 0,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
-    },
-    {
-      "alarm_id": "dbdc7d29-fba8-53e2-9727-b502bda2a05f",
-      "name": "historian-degraded",
-      "kind": "SERVICE",
-      "priority": 2,
-      "delay_on_s": 1,
-      "delay_off_s": 1,
-      "hysteresis": 0,
-      "acknowledgement_required": true,
-      "returned_unacknowledged": true
+      "controller_id": "controller-b",
+      "host": "127.0.0.1",
+      "port": 7582,
+      "connect_timeout_ms": 2000,
+      "request_timeout_ms": 2000,
+      "heartbeat_period_ms": 1000,
+      "stale_timeout_ms": 3000,
+      "required": true
     }
   ],
-  "routes": [
-    {
-      "route_id": "ac3adf43-dfaf-5ffc-9fed-797f26015767",
-      "source": {
-        "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
-        "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
-      },
-      "destination": {
-        "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
-        "tag_uuid": "c86db121-1e39-54a8-9632-1d679f73f8f7"
-      },
-      "timeout_ms": 750,
-      "fallback": false,
-      "quality_companions": {
-        "good": "16fafe85-83dc-5417-ac67-7646a3549fae",
-        "stale": "d0d96d13-bc61-5eb8-a3c1-885cb2858879",
-        "bad": "62118396-6bcd-5821-a4a1-bb65bfd88783"
-      }
-    }
-  ]
+  "api": {"listen": "127.0.0.1", "port": 7590},
+  "historian": {"database": "integrated-demo.sqlite3", "queue_limit": 4096},
+  "alarms": {},
+  "routing": {},
+  "limits": {"maximum_clients": 16}
 }

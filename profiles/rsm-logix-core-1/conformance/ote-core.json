@@ -172,8 +172,41 @@
       ]
     },
     {
-      "operation": "program",
+      "operation": "force",
       "time_ms": 7,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": true
+        }
+      ],
+      "force": {
+        "tag": 1,
+        "type": "BOOL",
+        "value": true
+      },
+      "state": {
+        "forces": [{"tag": 1, "enabled": true, "type": "BOOL", "logical": false, "effective": true}]
+      }
+    },
+    {
+      "operation": "clear_all_forces",
+      "time_ms": 8,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "BOOL",
+          "value": false
+        }
+      ],
+      "state": {
+        "forces": [{"tag": 1, "enabled": false, "type": "BOOL", "logical": false, "effective": false}]
+      }
+    },
+    {
+      "operation": "program",
+      "time_ms": 9,
       "assert": [
         {
           "tag": 1,

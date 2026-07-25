@@ -8,7 +8,7 @@ from .messages import encode_message,decode_message
 from .stream import StreamDecoder
 class ConnectionState(Enum): DISCONNECTED="disconnected"; CONNECTING="connecting"; NEGOTIATING="negotiating"; CONNECTED="connected"; DEGRADED="degraded"; STALE="stale"; CLOSED="closed"
 class RsmLinkClient:
- def __init__(self,host="127.0.0.1",port=7580,timeout=5.0): self.host=host; self.port=port; self.timeout=timeout; self.state=ConnectionState.DISCONNECTED; self._next=1; self._pending={}; self._decoder=StreamDecoder(); self._reader=None; self._writer=None; self._task=None; self.capabilities=None
+ def __init__(self,host="127.0.0.1",port=7580,timeout=5.0): self.host=host; self.port=port; self.timeout=timeout; self.state=ConnectionState.DISCONNECTED; self._next=1; self._pending={}; self._decoder=StreamDecoder(); self._reader: asyncio.StreamReader | None=None; self._writer: asyncio.StreamWriter | None=None; self._task=None; self.capabilities=None
  async def connect(self):
   self.state=ConnectionState.CONNECTING
   try: self._reader,self._writer=await asyncio.wait_for(asyncio.open_connection(self.host,self.port),self.timeout)
@@ -16,6 +16,7 @@ class RsmLinkClient:
   self.state=ConnectionState.NEGOTIATING; self._task=asyncio.create_task(self._receive()); await self.request(MessageType.HELLO,{"client_name":"rsmicro","protocol_major":1,"protocol_minor":0}); self.state=ConnectionState.CONNECTED; return self
  async def _receive(self):
   try:
+   if self._reader is None: raise RsmLinkConnectionError("connection reader is unavailable")
    while data:=await self._reader.read(65536):
     for frame in self._decoder.feed(data):
      future=self._pending.pop(frame.request_id,None)
@@ -26,6 +27,7 @@ class RsmLinkClient:
   finally: self._pending.clear()
  async def request(self,message_type,payload=None):
   rid=self._next; self._next=(rid+1)&0xffffffff or 1; future=asyncio.get_running_loop().create_future(); self._pending[rid]=future
+  if self._writer is None: self._pending.pop(rid,None); raise RsmLinkConnectionError("connection writer is unavailable")
   self._writer.write(Frame(int(message_type),encode_message(payload or {}),rid).encode()); await self._writer.drain()
   try: mt,result=await asyncio.wait_for(future,self.timeout)
   except asyncio.TimeoutError as e: self._pending.pop(rid,None); raise RsmLinkTimeoutError(f"request {rid} timed out") from e

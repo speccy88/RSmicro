@@ -1,6 +1,6 @@
 # Python native binding
 
-`rsmicro.native` is a typed `ctypes` binding. Discovery order is explicit path, `RSMICRO_CORE_LIBRARY`, development build, package-local library, and OS lookup. It requires `RSM-LOGIX-CORE-1`, runtime ABI **1.2**, instruction ABI **2**, and image format **2.0**. The binding queries these values from the loaded library and raises `NativeAbiMismatchError` rather than attempting to load an older ABI-1 / format-1 runtime or reinterpret its images.
+`rsmicro.native` is a typed `ctypes` binding. Discovery order is explicit path, `RSMICRO_CORE_LIBRARY`, development build, package-local library, and OS lookup. It requires the `RSM-LOGIX-CORE-1` profile **2.0.0**, runtime ABI **1.2**, instruction ABI **2**, and image format **2.0**. The binding queries these values from the loaded library and raises `NativeAbiMismatchError` rather than attempting to load an older ABI-1 / format-1 runtime or reinterpret its images.
 
 `NativeRuntime` retains the C object buffer, arena, image, and HAL callbacks. It supports context management, mode changes, scans, typed tag reads/writes, force overlays, immutable scalar/composite snapshots, diagnostics, faults, and bounded backing-write traces. REAL writes are explicitly rounded to binary32. UUID and unique-name access require matching compiler metadata with its SHA-256.
 

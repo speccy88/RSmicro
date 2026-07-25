@@ -1,7 +1,8 @@
 from __future__ import annotations
 import asyncio,json,uuid
+from typing import Any
 class ScadaClient:
- def __init__(self,host="127.0.0.1",port=7590,timeout=5,role="VIEWER"):self.uri=f"ws://{host}:{port}";self.timeout=timeout;self.role=role.upper();self.ws=None
+ def __init__(self,host="127.0.0.1",port=7590,timeout=5,role="VIEWER"):self.uri=f"ws://{host}:{port}";self.timeout=timeout;self.role=role.upper();self.ws: Any=None
  async def connect(self):
   from websockets.asyncio.client import connect
   self.ws=await connect(self.uri);await self.request("hello");return self

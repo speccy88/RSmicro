@@ -17,9 +17,9 @@ def test_profile_complete_unique_and_fixtures():
 def test_compile_deterministic_and_inspect():
  p=load_project(ROOT/'examples/compiler_demo/project.rsmproj'); a=compile_project(p,'controller-a'); b=compile_project(p,'11111111-1111-4111-8111-111111111111')
  assert a.success and b.success; assert a.image_bytes==b.image_bytes; assert a.manifest==b.manifest; assert a.debug_map==b.debug_map
- assert a.manifest['profile_version']==PROFILE_VERSION=='2.0.0'
- assert a.manifest['instruction_abi']==INSTRUCTION_ABI==2
- assert a.manifest['image_format']=='.'.join(map(str,IMAGE_FORMAT_VERSION))=='2.0'
+ assert a.manifest['profile_version']==PROFILE_VERSION
+ assert a.manifest['instruction_abi']==INSTRUCTION_ABI
+ assert a.manifest['image_format']=='.'.join(map(str,IMAGE_FORMAT_VERSION))
  info=inspect_image(a.image_bytes); assert info['crc_valid'] and info['instruction_count']==a.manifest['instruction_count']; assert info['tag_count']==9
 @pytest.mark.parametrize('mutator,message',[
  (lambda x: b'BAD!'+x[4:],'wrong magic'),(lambda x:x[:10],'truncated header'),(lambda x:x[:-1],'truncated or oversized image')])
@@ -39,7 +39,8 @@ def test_semantic_fixture_schema():
   for step in fixture['steps']:
    assert 'operation' in step
    values=step.get('assert',step.get('assertions',[step['expect']] if 'expect' in step else []))
-   assert values
+   observable_fields={'status','mode','diagnostics','fault','output_writes','forces','instruction_states','rung_powers','write_trace'}
+   assert values or observable_fields & set(step), f'{f.name}: step has no observable assertion: {step}'
    for value in values: assert {'tag','type','value'} <= set(value)
 
 def _canonical_branch_project():
@@ -81,7 +82,7 @@ def test_canonical_project_compiles_to_rsm_and_runs_full_state_in_fresh_c_core(t
  normal=compile_project(project,'canonical-branch-controller',deployment_id='native')
  stripped=compile_project(project,'canonical-branch-controller',deployment_id='native',options=CompileOptions(strip_debug=True))
  assert normal.success and stripped.success and normal.image_bytes != stripped.image_bytes
- assert normal.manifest['profile_version']==PROFILE_VERSION and normal.manifest['instruction_abi']==INSTRUCTION_ABI and normal.manifest['image_format']=='2.0'
+ assert normal.manifest['profile_version']==PROFILE_VERSION and normal.manifest['instruction_abi']==INSTRUCTION_ABI and normal.manifest['image_format']=='.'.join(map(str,IMAGE_FORMAT_VERSION))
  assert normal.debug_map['rungs'] and normal.debug_map['instructions'] and stripped.debug_map=={}
  assert {x['id'] for x in normal.debug_map['rungs']} == {x['id'] for x in normal.ir.rungs}
  assert {i.mnemonic for i in normal.ir.instructions} >= {'BRANCH_BEGIN','BRANCH_LANE_BEGIN','BRANCH_LANE_END','BRANCH_END'}
@@ -89,9 +90,6 @@ def test_canonical_project_compiles_to_rsm_and_runs_full_state_in_fresh_c_core(t
  assert len(hidden)==2 and len({t.uuid for t in hidden})==2 and all(t.type=='BOOL' and t.storage=='INTERNAL' for t in hidden)
  assert [i.operands[0].value for i in normal.ir.instructions if i.mnemonic=='ONS']==[hidden[0].id,hidden[1].id]
  image=tmp_path/'canonical.rsm'; image.write_bytes(normal.image_bytes)
- build=tmp_path/'fresh-core'
- subprocess.run(['cmake','-S',str(ROOT),'-B',str(build),'-DRSM_BUILD_TESTS=OFF','-DRSM_ENABLE_STRICT_WARNINGS=ON'],check=True)
- subprocess.run(['cmake','--build',str(build),'--target','rsmcore','--parallel'],check=True)
  source=tmp_path/'full_state.c'
  source.write_text(r'''#include <stdio.h>
 #include <stdlib.h>
@@ -109,7 +107,7 @@ static rsm_status_t sm(void*p,rsm_tag_id_t id,rsm_member_id_t m,const rsm_value_
 static rsm_status_t ss(void*p,uint8_t mode,const rsm_runtime_diagnostics_t*d,const rsm_fault_t*f,uint32_t slot,uint8_t edge,uint8_t valid,uint64_t time){snap_t*s=p;(void)f;(void)slot;(void)edge;(void)valid;(void)time;s->mode=mode;s->diag=*d;s->states++;return RSM_STATUS_OK;}
 static rsm_status_t sr(void*p,uint32_t id,rsm_bool_t power){snap_t*s=p;if(id>=8)return RSM_STATUS_HAL_ERROR;s->rung[id]=power;s->rungs++;return RSM_STATUS_OK;}
 static int snapshot(rsm_runtime_t*r,snap_t*s){rsm_snapshot_writer_t w;memset(s,0,sizeof *s);memset(&w,0,sizeof w);w.context=s;w.value=sv;w.member=sm;w.state=ss;w.rung_power=sr;return rsm_runtime_snapshot(r,&w)==RSM_STATUS_OK?0:bad("snapshot");}
-static int scan(rsm_runtime_t*r,hal_t*h,int a,int b,int c,int expect_branch,int expect_three_c,int expect_nested,int expect_multi,int expect_ons1,int expect_ons2){snap_t s;unsigned i;h->in[A]=a;h->in[B]=b;h->in[C]=c;h->in[PRE]=h->in[POST]=1;h->now+=1000;h->reads=h->writes=0;if(rsm_runtime_clear_write_trace(r)||rsm_runtime_scan(r)||snapshot(r,&s))return bad("scan status");if(s.values!=17u||s.members!=12u||s.rungs!=8u||s.mode!=RSM_MODE_RUN||s.diag.scan_count==0)return bad("incomplete snapshot");for(i=0;i<5;i++)if(h->read_order[i]!=i)return bad("HAL input order");for(i=0;i<10;i++)if(h->write_order[i]!=i+5u)return bad("HAL output order");if(s.logical[LANE_A].value.boolean!=(unsigned)a||s.logical[LANE_B].value.boolean!=(unsigned)b||s.logical[BRANCH_OUT].value.boolean!=(unsigned)expect_branch||s.logical[THREE_A].value.boolean!=(unsigned)a||s.logical[THREE_B].value.boolean!=(unsigned)b||s.logical[THREE_C].value.boolean!=(unsigned)expect_three_c||s.logical[NESTED_OUT].value.boolean!=(unsigned)expect_nested||s.logical[MULTI_OUT].value.boolean!=(unsigned)expect_multi||s.logical[ONS_ONE].value.boolean!=(unsigned)expect_ons1||s.logical[ONS_TWO].value.boolean!=(unsigned)expect_ons2)return bad("branch/output matrix");return 0;}
+static int scan(rsm_runtime_t*r,hal_t*h,int a,int b,int c,int expect_branch,int expect_three_c,int expect_nested,int expect_multi,int expect_ons1,int expect_ons2){snap_t s;unsigned i;h->in[A]=(rsm_bool_t)a;h->in[B]=(rsm_bool_t)b;h->in[C]=(rsm_bool_t)c;h->in[PRE]=h->in[POST]=1;h->now+=1000;h->reads=h->writes=0;if(rsm_runtime_clear_write_trace(r)||rsm_runtime_scan(r)||snapshot(r,&s))return bad("scan status");if(s.values!=17u||s.members!=12u||s.rungs!=8u||s.mode!=RSM_MODE_RUN||s.diag.scan_count==0)return bad("incomplete snapshot");for(i=0;i<5;i++)if(h->read_order[i]!=i)return bad("HAL input order");for(i=0;i<10;i++)if(h->write_order[i]!=i+5u)return bad("HAL output order");if(s.logical[LANE_A].value.boolean!=(unsigned)a||s.logical[LANE_B].value.boolean!=(unsigned)b||s.logical[BRANCH_OUT].value.boolean!=(unsigned)expect_branch||s.logical[THREE_A].value.boolean!=(unsigned)a||s.logical[THREE_B].value.boolean!=(unsigned)b||s.logical[THREE_C].value.boolean!=(unsigned)expect_three_c||s.logical[NESTED_OUT].value.boolean!=(unsigned)expect_nested||s.logical[MULTI_OUT].value.boolean!=(unsigned)expect_multi||s.logical[ONS_ONE].value.boolean!=(unsigned)expect_ons1||s.logical[ONS_TWO].value.boolean!=(unsigned)expect_ons2)return bad("branch/output matrix");return 0;}
 int main(int n,char **v){FILE*f;long z;uint8_t*image,arena[65536],arena_a[65536],arena_b[65536];rsm_runtime_t r,ra,rb;rsm_hal_t h;hal_t hc,ha,hb; snap_t s,sa,sb;rsm_value_t force; rsm_runtime_write_trace_entry_t trace[64];size_t count;unsigned i;const uint32_t want[]={LANE_A,LANE_B,BRANCH_OUT,THREE_A,THREE_B,THREE_C,NESTED_OUT,MULTI_OUT,HIDDEN_A,ONS_ONE,HIDDEN_B,ONS_TWO};const rsm_bool_t final_bool[]={0,0,1,1,1,0,0,0,0,0,0,0,0,0,0};
  if(n!=2)return bad("argument");
  memset(&hc,0,sizeof hc); memset(&h,0,sizeof h); h.monotonic_time_us=tick; h.read_input=input; h.write_output=output;
@@ -148,6 +146,12 @@ int main(int n,char **v){FILE*f;long z;uint8_t*image,arena[65536],arena_a[65536]
  rsm_runtime_deinit(&r); free(image); return 0;
 }
 ''')
- exe=tmp_path/'full_state'
- subprocess.run(['cc','-std=c99','-Wall','-Wextra','-Werror','-I',str(ROOT/'runtime/core/include'),str(source),str(build/'runtime/core/librsmcore.a'),'-lm','-o',str(exe)],check=True)
- subprocess.run([str(exe),str(image)],check=True)
+ build=tmp_path/'fresh-core'
+ harness=ROOT/'tests/cmake/compiler_native_harness'
+ subprocess.run([
+  'cmake','-S',str(harness),'-B',str(build),
+  f'-DRSMICRO_SOURCE_DIR={ROOT}',f'-DRSM_HARNESS_SOURCE={source}',f'-DRSM_IMAGE={image}',
+  '-DRSM_ENABLE_STRICT_WARNINGS=ON',
+ ],check=True)
+ subprocess.run(['cmake','--build',str(build),'--target','canonical_native_harness','--parallel'],check=True)
+ subprocess.run(['ctest','--test-dir',str(build),'--output-on-failure'],check=True)

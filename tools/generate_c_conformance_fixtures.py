@@ -18,7 +18,8 @@ FIXTURES = ROOT / "profiles/rsm-logix-core-1/conformance"
 OUT = ROOT / "runtime/generated"
 OPERATION = {"prescan": 1, "postscan": 2, "scan": 3, "write": 4,
              "run": 5, "program": 6, "test": 7, "force": 8,
-             "clear_force": 9, "clear_all_forces": 10, "unload": 11}
+             "clear_force": 9, "clear_all_forces": 10, "unload": 11, "load": 12,
+             "read": 13}
 STATUS = {"OK": 0, "INVALID_ARGUMENT": 1, "INVALID_STATE": 2,
           "BUFFER_TOO_SMALL": 3, "OUT_OF_MEMORY": 4, "BAD_IMAGE": 5,
           "BAD_CRC": 6, "UNSUPPORTED_IMAGE_VERSION": 7,
@@ -81,8 +82,6 @@ def assertions(step):
     values = list(step.get("assert", step.get("assertions", [])))
     if "expect" in step:
         values.append(step["expect"])
-    if not values:
-        raise ValueError("each step needs assert/assertions or legacy expect")
     return values
 
 
@@ -125,7 +124,11 @@ extern const size_t rsm_conformance_fixture_count;
             rendered = []
             for a in aa:
                 rendered.append("{%d,%d,%s}" % (int(a["tag"]), MEMBER.get(a.get("member"), 0), cvalue(a["value"], a["type"])))
-            parts.append("static const rsm_conformance_assertion_t assertions_%d_%d[]={%s};\n" % (n, x, ",".join(rendered)))
+            assertion_ptr, assertion_count = "NULL", "0"
+            if rendered:
+                parts.append("static const rsm_conformance_assertion_t assertions_%d_%d[]={%s};\n" % (n, x, ",".join(rendered)))
+                assertion_ptr = "assertions_%d_%d" % (n, x)
+                assertion_count = "sizeof assertions_%d_%d/sizeof assertions_%d_%d[0]" % (n, x, n, x)
             state = s.get("state", {})
             forces = state.get("forces", [])
             instruction_states = state.get("instruction_states", [])
@@ -142,12 +145,12 @@ extern const size_t rsm_conformance_fixture_count;
             write = s.get("write", s.get("force", s))
             fault = s.get("fault", {})
             diagnostics = s.get("diagnostics", {})
-            steps.append("{%d,UINT64_C(%d),%d,%s,%d,%d,UINT64_C(%d),%d,%d,%d,assertions_%d_%d,sizeof assertions_%d_%d/sizeof assertions_%d_%d[0],%s,%s,%s,%s,%s,%s,%d,%s,%s}" % (
+            steps.append("{%d,UINT64_C(%d),%d,%s,%d,%d,UINT64_C(%d),%d,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%d,%s,%s}" % (
                 OPERATION[s["operation"]], int(s.get("time_us", int(s.get("time_ms", 0))*1000)), int(write.get("tag", 0)),
                 cvalue(write.get("value", False), write.get("type", "BOOL")), STATUS[s.get("status", "OK")],
                 MODE.get(s.get("mode", ""), -1), int(diagnostics.get("scan_count", 18446744073709551615)),
                 FAULT.get(fault.get("category", ""), -1), int(fault.get("code", 0)),
-                int(s.get("output_writes", -1)), n, x, n, x, n, x,
+                int(s.get("output_writes", -1)), assertion_ptr, assertion_count,
                 force_ptr, force_count, state_ptr, state_count, rung_ptr, rung_count,
                 int("write_trace" in s), write_ptr, write_count))
         parts.append("static const rsm_conformance_step_t steps_%d[]={%s};\n" % (n, ",".join(steps)))

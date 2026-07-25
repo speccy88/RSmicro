@@ -1,0 +1,5205 @@
+{
+  "id": "high-state-core-001",
+  "profile": "RSM-LOGIX-CORE-1",
+  "instruction": "CTU-HIGH-STATE",
+  "schema": "rsmicro-semantic-fixture-v2",
+  "tags": [
+    {
+      "name": "gate",
+      "type": "BOOL",
+      "initial": false
+    },
+    {
+      "name": "counter_0",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_1",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_2",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_3",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_4",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_5",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_6",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_7",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_8",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_9",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_10",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_11",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_12",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_13",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_14",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_15",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_16",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_17",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_18",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_19",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_20",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_21",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_22",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_23",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_24",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_25",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_26",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_27",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_28",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_29",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_30",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_31",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_32",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_33",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_34",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_35",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_36",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_37",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_38",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_39",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_40",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_41",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_42",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_43",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_44",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_45",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_46",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_47",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_48",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_49",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_50",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_51",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_52",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_53",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_54",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_55",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_56",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_57",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_58",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_59",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_60",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_61",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_62",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_63",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_64",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_65",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_66",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_67",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_68",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_69",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_70",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_71",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_72",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_73",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_74",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_75",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_76",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_77",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_78",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_79",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_80",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_81",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_82",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_83",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_84",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_85",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_86",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_87",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_88",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_89",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_90",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_91",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_92",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_93",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_94",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_95",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_96",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_97",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_98",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_99",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_100",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_101",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_102",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_103",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_104",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_105",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_106",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_107",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_108",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_109",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_110",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_111",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_112",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_113",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_114",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_115",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_116",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_117",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_118",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_119",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_120",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_121",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_122",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_123",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_124",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_125",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_126",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_127",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_128",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_129",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_130",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_131",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_132",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_133",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_134",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_135",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_136",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_137",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_138",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_139",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_140",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_141",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_142",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_143",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_144",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_145",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_146",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_147",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_148",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_149",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_150",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_151",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_152",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_153",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_154",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_155",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_156",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_157",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_158",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_159",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_160",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_161",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_162",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_163",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_164",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_165",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_166",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_167",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_168",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_169",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_170",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_171",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_172",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_173",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_174",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_175",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_176",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_177",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_178",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_179",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_180",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_181",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_182",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_183",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_184",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_185",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_186",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_187",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_188",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_189",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_190",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_191",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_192",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_193",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_194",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_195",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_196",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_197",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_198",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_199",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_200",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_201",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_202",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_203",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_204",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_205",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_206",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_207",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_208",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_209",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_210",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_211",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_212",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_213",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_214",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_215",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_216",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_217",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_218",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_219",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_220",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_221",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_222",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_223",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_224",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_225",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_226",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_227",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_228",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_229",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_230",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_231",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_232",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_233",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_234",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_235",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_236",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_237",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_238",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_239",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_240",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_241",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_242",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_243",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_244",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_245",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_246",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_247",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_248",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_249",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_250",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_251",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_252",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_253",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_254",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_255",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_256",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_257",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_258",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_259",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_260",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_261",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_262",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_263",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_264",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_265",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_266",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_267",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_268",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_269",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_270",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_271",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_272",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_273",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_274",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_275",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_276",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_277",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_278",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_279",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_280",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_281",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_282",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_283",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_284",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_285",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_286",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_287",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_288",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_289",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_290",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_291",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_292",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_293",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_294",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_295",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_296",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_297",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_298",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    },
+    {
+      "name": "counter_299",
+      "type": "COUNTER",
+      "initial": {
+        "PRE": 1,
+        "ACC": 0
+      }
+    }
+  ],
+  "program": [
+    {
+      "mnemonic": "XIC",
+      "operands": [
+        {
+          "tag": 0,
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 1,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 2,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 3,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 4,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 5,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 6,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 7,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 8,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 9,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 10,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 11,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 12,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 13,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 14,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 15,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 16,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 17,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 18,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 19,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 20,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 21,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 22,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 23,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 24,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 25,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 26,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 27,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 28,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 29,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 30,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 31,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 32,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 33,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 34,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 35,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 36,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 37,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 38,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 39,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 40,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 41,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 42,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 43,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 44,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 45,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 46,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 47,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 48,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 49,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 50,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 51,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 52,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 53,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 54,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 55,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 56,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 57,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 58,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 59,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 60,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 61,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 62,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 63,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 64,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 65,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 66,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 67,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 68,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 69,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 70,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 71,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 72,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 73,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 74,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 75,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 76,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 77,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 78,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 79,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 80,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 81,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 82,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 83,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 84,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 85,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 86,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 87,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 88,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 89,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 90,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 91,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 92,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 93,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 94,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 95,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 96,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 97,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 98,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 99,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 100,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 101,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 102,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 103,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 104,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 105,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 106,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 107,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 108,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 109,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 110,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 111,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 112,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 113,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 114,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 115,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 116,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 117,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 118,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 119,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 120,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 121,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 122,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 123,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 124,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 125,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 126,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 127,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 128,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 129,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 130,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 131,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 132,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 133,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 134,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 135,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 136,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 137,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 138,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 139,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 140,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 141,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 142,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 143,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 144,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 145,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 146,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 147,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 148,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 149,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 150,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 151,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 152,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 153,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 154,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 155,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 156,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 157,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 158,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 159,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 160,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 161,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 162,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 163,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 164,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 165,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 166,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 167,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 168,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 169,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 170,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 171,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 172,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 173,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 174,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 175,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 176,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 177,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 178,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 179,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 180,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 181,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 182,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 183,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 184,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 185,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 186,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 187,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 188,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 189,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 190,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 191,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 192,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 193,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 194,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 195,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 196,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 197,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 198,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 199,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 200,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 201,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 202,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 203,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 204,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 205,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 206,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 207,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 208,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 209,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 210,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 211,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 212,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 213,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 214,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 215,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 216,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 217,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 218,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 219,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 220,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 221,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 222,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 223,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 224,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 225,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 226,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 227,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 228,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 229,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 230,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 231,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 232,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 233,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 234,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 235,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 236,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 237,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 238,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 239,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 240,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 241,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 242,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 243,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 244,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 245,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 246,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 247,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 248,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 249,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 250,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 251,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 252,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 253,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 254,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 255,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 256,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 257,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 258,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 259,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 260,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 261,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 262,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 263,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 264,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 265,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 266,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 267,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 268,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 269,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 270,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 271,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 272,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 273,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 274,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 275,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 276,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 277,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 278,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 279,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 280,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 281,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 282,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 283,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 284,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 285,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 286,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 287,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 288,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 289,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 290,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 291,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 292,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 293,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 294,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 295,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 296,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 297,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 298,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 299,
+          "type": "COUNTER"
+        }
+      ]
+    },
+    {
+      "mnemonic": "CTU",
+      "operands": [
+        {
+          "tag": 300,
+          "type": "COUNTER"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "operation": "run",
+      "time_us": 0,
+      "mode": "RUN"
+    },
+    {
+      "operation": "scan",
+      "time_us": 1000,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        },
+        {
+          "tag": 300,
+          "type": "DINT",
+          "value": 0,
+          "member": "ACC"
+        }
+      ],
+      "diagnostics": {
+        "scan_count": 1
+      }
+    },
+    {
+      "operation": "write",
+      "time_us": 1500,
+      "write": {
+        "tag": 0,
+        "type": "BOOL",
+        "value": true
+      },
+      "assert": [
+        {
+          "tag": 0,
+          "type": "BOOL",
+          "value": true
+        }
+      ]
+    },
+    {
+      "operation": "scan",
+      "time_us": 2000,
+      "assert": [
+        {
+          "tag": 1,
+          "type": "DINT",
+          "value": 1,
+          "member": "ACC"
+        },
+        {
+          "tag": 300,
+          "type": "DINT",
+          "value": 1,
+          "member": "ACC"
+        }
+      ],
+      "diagnostics": {
+        "scan_count": 2
+      },
+      "state": {
+        "instruction_states": [
+          {
+            "slot": 0,
+            "edge": true,
+            "valid": false,
+            "time_us": 0
+          },
+          {
+            "slot": 299,
+            "edge": true,
+            "valid": false,
+            "time_us": 0
+          }
+        ]
+      }
+    }
+  ]
+}
