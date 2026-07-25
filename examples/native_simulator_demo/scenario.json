@@ -1,0 +1,1 @@
+{"steps":[{"operation":"write","tag":"start_pb","value":true},{"operation":"mode","value":"run"},{"operation":"scan"},{"operation":"advance_time_us","value":500000},{"operation":"scan"},{"operation":"read","tag":"motor_cmd"},{"operation":"force","tag":"Count","value":42},{"operation":"read","tag":"Count"},{"operation":"unforce","tag":"Count"}]}

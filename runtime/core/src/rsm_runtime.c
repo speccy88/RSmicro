@@ -11,6 +11,16 @@ typedef struct {uint8_t type,storage,retentive,pad; union {rsm_bool_t b;rsm_dint
 typedef struct {uint8_t enabled; rsm_value_t value;} force_t;
 typedef struct {uint8_t edge,valid; uint64_t time;} state_t;
 typedef struct {const uint8_t *image,*code;size_t image_size,code_size;uint32_t tags,states,instructions,rungs;tag_t *tag;force_t *force;state_t *state;const uint8_t *rung_data;rsm_runtime_diagnostics_t diag;rsm_fault_t fault;} impl_t;
+uint32_t rsm_runtime_abi_major(void){return 1u;}
+uint32_t rsm_runtime_abi_minor(void){return 1u;}
+uint32_t rsm_instruction_abi(void){return 1u;}
+uint32_t rsm_image_format_major(void){return 1u;}
+uint32_t rsm_image_format_minor(void){return 0u;}
+uint32_t rsm_profile_id(void){return 1u;}
+size_t rsm_runtime_object_size(void){return sizeof(rsm_runtime_t);}
+const char *rsm_mode_name(rsm_mode_t m){static const char *const n[]={"PROGRAM","RUN","TEST","FAULTED"};return (unsigned)m<4u?n[m]:"UNKNOWN";}
+const char *rsm_type_name(rsm_data_type_t t){static const char *const n[]={"UNKNOWN","BOOL","DINT","REAL","TIMER","COUNTER"};return (unsigned)t<6u?n[t]:"UNKNOWN";}
+const char *rsm_fault_category_name(rsm_fault_category_t c){static const char *const n[]={"NONE","IMAGE","CONFIGURATION","MEMORY","EXECUTION","NUMERIC","TIMER","COUNTER","HAL","WATCHDOG","INTERNAL"};return (unsigned)c<11u?n[c]:"UNKNOWN";}
 static uint16_t u16(const uint8_t*p){return (uint16_t)((uint16_t)p[0]|((uint16_t)p[1]<<8));}
 static uint32_t u32(const uint8_t*p){return (uint32_t)p[0]|((uint32_t)p[1]<<8)|((uint32_t)p[2]<<16)|((uint32_t)p[3]<<24);}
 static int32_t i32(const uint8_t*p){uint32_t x=u32(p);int32_t v;memcpy(&v,&x,4);return v;}

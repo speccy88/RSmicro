@@ -8,6 +8,16 @@
 #include "rsm_snapshot.h"
 typedef enum {RSM_MODE_PROGRAM,RSM_MODE_RUN,RSM_MODE_TEST,RSM_MODE_FAULTED} rsm_mode_t;
 typedef struct rsm_runtime { void *impl; void *arena; size_t arena_size; rsm_hal_t hal; void *hal_context; rsm_mode_t mode; } rsm_runtime_t;
+uint32_t rsm_runtime_abi_major(void);
+uint32_t rsm_runtime_abi_minor(void);
+uint32_t rsm_instruction_abi(void);
+uint32_t rsm_image_format_major(void);
+uint32_t rsm_image_format_minor(void);
+uint32_t rsm_profile_id(void);
+size_t rsm_runtime_object_size(void);
+const char *rsm_mode_name(rsm_mode_t mode);
+const char *rsm_type_name(rsm_data_type_t type);
+const char *rsm_fault_category_name(rsm_fault_category_t category);
 rsm_status_t rsm_runtime_required_memory(const uint8_t *,size_t,size_t *);
 rsm_status_t rsm_runtime_init(rsm_runtime_t *,void *,size_t,const rsm_hal_t *,void *);
 void rsm_runtime_deinit(rsm_runtime_t *);
