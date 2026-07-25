@@ -179,3 +179,7 @@ The canonical model separates target-neutral controller logic from deployments t
 ## RSM-LOGIX-CORE-1 compiler
 
 The repository includes a deterministic compiler for the defined RSM-LOGIX-CORE-1 subset. Compile with `rsmicro compile examples/compiler_demo/project.rsmproj --controller controller-a --output controller-a.rsm`, inspect using `rsmicro inspect-image controller-a.rsm`, and explore specifications using `rsmicro profile instructions RSM-LOGIX-CORE-1`. This does not implement the Task 3 C runtime or claim full vendor-product compatibility.
+
+## Portable C runtime core
+
+The `runtime/core` C99 library is the canonical instruction engine for compiled `.rsm` images. It is platform independent, caller-arena based, and has a deterministic native test HAL. Existing Python, CircuitPython, MicroPython, and Propeller 2 paths are preserved as legacy/experimental integrations; Task 4 will connect Python simulation to the shared C ABI. No networking, GUI replacement, or physical-board port is included yet.

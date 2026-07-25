@@ -28,3 +28,7 @@ This is a defined RSmicro subset; full Studio 5000, Allen-Bradley, Rockwell, or 
 |DIV|Yes|53|Profile-defined|Yes|Yes|C runtime pending|
 |NEG|Yes|54|Profile-defined|Yes|Yes|C runtime pending|
 |ABS|Yes|55|Profile-defined|Yes|Yes|C runtime pending|
+
+## C99 core status
+
+All 24 CORE-1 mnemonics are dispatched by the C runtime with fixed-width numeric checks, per-instruction state, monotonic TON timing, and force overlays. Unit and fixture-catalogue checks cover the complete opcode registry. Parallel source branches remain represented by Task 2's deterministic flattened stream; richer branch merge bytecode is a known future image evolution. Full Studio 5000 compatibility, physical target validation, and safety certification are not claimed.

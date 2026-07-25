@@ -1,0 +1,28 @@
+#include "rsm_conformance_fixtures.h"
+const rsm_conformance_fixture_t rsm_conformance_fixtures[]={
+ {"ABS","abs-core.json"},
+ {"ADD","add-core.json"},
+ {"CLR","clr-core.json"},
+ {"CTD","ctd-core.json"},
+ {"CTU","ctu-core.json"},
+ {"DIV","div-core.json"},
+ {"EQ","eq-core.json"},
+ {"GE","ge-core.json"},
+ {"GT","gt-core.json"},
+ {"LE","le-core.json"},
+ {"LT","lt-core.json"},
+ {"MOV","mov-core.json"},
+ {"MUL","mul-core.json"},
+ {"NE","ne-core.json"},
+ {"NEG","neg-core.json"},
+ {"ONS","ons-core.json"},
+ {"OTE","ote-core.json"},
+ {"OTL","otl-core.json"},
+ {"OTU","otu-core.json"},
+ {"RES","res-core.json"},
+ {"SUB","sub-core.json"},
+ {"TON","ton-core.json"},
+ {"XIC","xic-core.json"},
+ {"XIO","xio-core.json"},
+};
+const size_t rsm_conformance_fixture_count=sizeof rsm_conformance_fixtures/sizeof rsm_conformance_fixtures[0];

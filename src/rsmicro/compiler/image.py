@@ -1,7 +1,29 @@
 import json,struct,zlib,hashlib,uuid
 from .bytecode import encode_instruction_stream
 MAGIC=b'RSM1'; VERSION=(1,0); HEADER_FMT='<4sBBHIIHH16s32sI'; DESC_FMT='<HHIIII'; HEADER_SIZE=struct.calcsize(HEADER_FMT); DESC_SIZE=struct.calcsize(DESC_FMT)
-SECTIONS={'TAG_TABLE':1,'INITIAL_VALUES':2,'TIMER_LAYOUT':3,'COUNTER_LAYOUT':4,'TASK_TABLE':5,'ROUTINE_TABLE':6,'RUNG_TABLE':7,'INSTRUCTION_STREAM':8,'STATE_LAYOUT':9,'PRODUCED_TAGS':10,'CONSUMED_TAGS':11,'DEBUG_MAP':12,'STRING_TABLE':13,'MEMORY_ESTIMATES':14}
+SECTIONS={'TAG_TABLE':1,'INITIAL_VALUES':2,'TIMER_LAYOUT':3,'COUNTER_LAYOUT':4,'TASK_TABLE':5,'ROUTINE_TABLE':6,'RUNG_TABLE':7,'INSTRUCTION_STREAM':8,'STATE_LAYOUT':9,'PRODUCED_TAGS':10,'CONSUMED_TAGS':11,'DEBUG_MAP':12,'STRING_TABLE':13,'MEMORY_ESTIMATES':14,'RUNTIME_TAGS':15,'RUNTIME_RUNGS':16}
+
+def runtime_tags(ir):
+ """Binary, alignment-independent tag metadata for small C targets.
+
+ The original 1.0 image made its canonical tag table JSON.  Keeping that
+ section preserves inspection compatibility; this companion section prevents
+ the canonical runtime from needing a JSON parser.
+ """
+ out=bytearray(struct.pack('<I',len(ir.tags)))
+ types={'BOOL':1,'DINT':2,'REAL':3,'TIMER':4,'COUNTER':5}; stores={'INTERNAL':0,'INPUT':1,'OUTPUT':2}
+ for t in ir.tags:
+  v=t.initial
+  if t.type=='BOOL': raw=struct.pack('<I',1 if v else 0)+bytes(12)
+  elif t.type=='DINT': raw=struct.pack('<i',int(v or 0))+bytes(12)
+  elif t.type=='REAL': raw=struct.pack('<f',float(v or 0))+bytes(12)
+  else:
+   v=v or 0
+   if isinstance(v,dict): pre,acc=int(v.get('PRE',0)),int(v.get('ACC',0))
+   else: pre,acc=int(v),0
+   raw=struct.pack('<ii',pre,acc)+bytes(8)
+  out += struct.pack('<BBBB',types[t.type],stores.get(t.storage,0),1 if t.retentive else 0,0)+raw
+ return bytes(out)
 def canonical(x): return json.dumps(x,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()
 def memory(ir):
  counts={t:sum(x.type==t for x in ir.tags) for t in ['BOOL','DINT','REAL','TIMER','COUNTER']}; scalar=counts['BOOL']+4*(counts['DINT']+counts['REAL']); total=64+scalar+16*counts['TIMER']+20*counts['COUNTER']+len(ir.tags)*2+len([x for x in ir.instructions if x.state_slot is not None])*16+ir.branches*8
@@ -9,7 +31,7 @@ def memory(ir):
 def debug(ir): return {'tags':[{'runtime_id':t.id,'uuid':t.uuid,'name':t.name,'type':t.type} for t in ir.tags],'routines':list(ir.routines),'rungs':list(ir.rungs),'instructions':[{'runtime_id':i.id,'uuid':i.uuid,'mnemonic':i.mnemonic,'opcode':i.opcode,'source_path':i.path,'state_slot':i.state_slot} for i in ir.instructions]}
 def build(ir,strip_debug=False):
  dbg={} if strip_debug else debug(ir); mem=memory(ir)
- data={'TAG_TABLE':canonical([t.__dict__ if hasattr(t,'__dict__') else {'id':t.id,'uuid':t.uuid,'name':t.name,'type':t.type,'storage':t.storage,'retentive':t.retentive} for t in ir.tags]),'INITIAL_VALUES':canonical([t.initial for t in ir.tags]),'TIMER_LAYOUT':canonical([t.id for t in ir.tags if t.type=='TIMER']),'COUNTER_LAYOUT':canonical([t.id for t in ir.tags if t.type=='COUNTER']),'TASK_TABLE':canonical([{'id':0}]),'ROUTINE_TABLE':canonical(ir.routines),'RUNG_TABLE':canonical(ir.rungs),'INSTRUCTION_STREAM':encode_instruction_stream(ir),'STATE_LAYOUT':canonical([{'slot':i.state_slot,'instruction_id':i.id} for i in ir.instructions if i.state_slot is not None]),'PRODUCED_TAGS':b'[]','CONSUMED_TAGS':b'[]','DEBUG_MAP':canonical(dbg),'STRING_TABLE':canonical(sorted({t.name for t in ir.tags})),'MEMORY_ESTIMATES':canonical(mem)}
+ data={'TAG_TABLE':canonical([t.__dict__ if hasattr(t,'__dict__') else {'id':t.id,'uuid':t.uuid,'name':t.name,'type':t.type,'storage':t.storage,'retentive':t.retentive} for t in ir.tags]),'INITIAL_VALUES':canonical([t.initial for t in ir.tags]),'TIMER_LAYOUT':canonical([t.id for t in ir.tags if t.type=='TIMER']),'COUNTER_LAYOUT':canonical([t.id for t in ir.tags if t.type=='COUNTER']),'TASK_TABLE':canonical([{'id':0}]),'ROUTINE_TABLE':canonical(ir.routines),'RUNG_TABLE':canonical(ir.rungs),'INSTRUCTION_STREAM':encode_instruction_stream(ir),'STATE_LAYOUT':canonical([{'slot':i.state_slot,'instruction_id':i.id} for i in ir.instructions if i.state_slot is not None]),'PRODUCED_TAGS':b'[]','CONSUMED_TAGS':b'[]','DEBUG_MAP':canonical(dbg),'STRING_TABLE':canonical(sorted({t.name for t in ir.tags})),'MEMORY_ESTIMATES':canonical(mem),'RUNTIME_TAGS':runtime_tags(ir),'RUNTIME_RUNGS':struct.pack('<I',len(ir.rungs))+b''.join(struct.pack('<III',r['routine_id'],r['start'],r['count']) for r in ir.rungs)}
  names=list(SECTIONS); count=len(names); offset=HEADER_SIZE+count*DESC_SIZE; desc=[]; payload=bytearray()
  for n in names:
   b=data[n]; desc.append(struct.pack(DESC_FMT,SECTIONS[n],0,offset,len(b),0,0)); payload+=b; offset+=len(b)
