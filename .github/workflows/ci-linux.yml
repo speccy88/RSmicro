@@ -10,6 +10,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12', cache: pip}
+      - name: Install Qt runtime libraries
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1
       - run: python -m pip install -e '.[dev]'
       - run: python --version && cmake --version && make --version
       - run: python tools/generate_instruction_registry.py --check && python tools/generate_c_conformance_fixtures.py --check && python tools/generate_rsm_link_registry.py --check

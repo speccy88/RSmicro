@@ -3,7 +3,8 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: windows-latest
+    # The workflow explicitly uses the Visual Studio 17 2022 generator.
+    runs-on: windows-2022
     env:
       QT_QPA_PLATFORM: offscreen
       # Visual Studio generators put the shared target below Release; discovery

@@ -82,14 +82,23 @@ static size_t make_scale_image(uint8_t *image,uint32_t count,int tag_heavy) {
     put32(rungs,tag_heavy?1u:count);for(i=0;i<(tag_heavy?1u:count);i++){uint8_t*q=rungs+4u+(size_t)i*12u;put32(q,0u);put32(q+4u,i);put32(q+8u,1u);}seal(image,total);return total;
 }
 static int hostile_scale_contract(void) {
-    const uint32_t counts[]={65535u,65536u,65537u};unsigned kind,index;int failures=0;
-    for(kind=0u;kind<2u;kind++)for(index=0u;index<sizeof counts/sizeof counts[0];index++){
-        size_t capacity=(size_t)HEADER+16u*DESC+(size_t)counts[index]*32u+64u,n,need;uint8_t *image=malloc(capacity);rsm_image_info_t info;
-        if(!image)return 1;
-        n=make_scale_image(image,counts[index],kind==0u);
-        if(check(rsm_runtime_validate_image(image,n,&info),RSM_STATUS_OK,"scale validate")||check(rsm_runtime_required_memory(image,n,&need),RSM_STATUS_OK,"scale required memory")||need==0u||info.tag_count!=(kind==0u?counts[index]:1u)||info.rung_count!=(kind==0u?1u:counts[index]))failures++;
-        if(rsm_runtime_validate_image(image,n-1u,&info)==RSM_STATUS_OK){fputs("scale truncation accepted\n",stderr);failures++;}free(image);
-    }puts("hostile tag/rung boundaries: 65535/65536/65537 passed");return failures;
+    const uint32_t counts[]={65535u,65536u,65537u};
+    unsigned kind,index;
+    int failures=0;
+    for(kind=0u;kind<2u;kind++){
+        for(index=0u;index<sizeof counts/sizeof counts[0];index++){
+            size_t capacity=(size_t)HEADER+16u*DESC+(size_t)counts[index]*32u+64u,n,need;
+            uint8_t *image=malloc(capacity);
+            rsm_image_info_t info;
+            if(!image)return 1;
+            n=make_scale_image(image,counts[index],kind==0u);
+            if(check(rsm_runtime_validate_image(image,n,&info),RSM_STATUS_OK,"scale validate")||check(rsm_runtime_required_memory(image,n,&need),RSM_STATUS_OK,"scale required memory")||need==0u||info.tag_count!=(kind==0u?counts[index]:1u)||info.rung_count!=(kind==0u?1u:counts[index]))failures++;
+            if(rsm_runtime_validate_image(image,n-1u,&info)==RSM_STATUS_OK){fputs("scale truncation accepted\n",stderr);failures++;}
+            free(image);
+        }
+    }
+    puts("hostile tag/rung boundaries: 65535/65536/65537 passed");
+    return failures;
 }
 
 static size_t make_state_scale_image(uint8_t *image,uint32_t count,int many_rungs) {
