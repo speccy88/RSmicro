@@ -11,6 +11,12 @@ if(RSM_BUILD_SHARED)
   OUTPUT_NAME rsmcore
   WINDOWS_EXPORT_ALL_SYMBOLS ON
  )
+ if(WIN32)
+  # A shared target's MSVC import library is an ARCHIVE artifact.  Keep it
+  # distinct from the static target's rsmcore.lib during parallel builds while
+  # preserving the public runtime filename rsmcore.dll.
+  set_target_properties(rsmcore_shared PROPERTIES ARCHIVE_OUTPUT_NAME rsmcore_import)
+ endif()
 endif()
 set(RSM_TARGETS rsmcore)
 if(RSM_BUILD_SHARED)
