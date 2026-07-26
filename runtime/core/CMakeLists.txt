@@ -7,7 +7,10 @@ if(RSM_BUILD_SHARED)
  add_library(rsmcore_shared SHARED ${RSM_SOURCES})
  target_include_directories(rsmcore_shared PUBLIC include)
  rsm_enable_strict_warnings(rsmcore_shared)
- set_target_properties(rsmcore_shared PROPERTIES OUTPUT_NAME rsmcore)
+ set_target_properties(rsmcore_shared PROPERTIES
+  OUTPUT_NAME rsmcore
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
+ )
 endif()
 set(RSM_TARGETS rsmcore)
 if(RSM_BUILD_SHARED)
@@ -35,4 +38,5 @@ if(RSM_BUILD_TESTS)
  target_link_libraries(rsmcore_runtime_regression_tests PRIVATE rsmcore)
  rsm_enable_strict_warnings(rsmcore_runtime_regression_tests)
  add_test(NAME rsmcore_runtime_regression_tests COMMAND rsmcore_runtime_regression_tests)
+ set_tests_properties(rsmcore_runtime_regression_tests PROPERTIES TIMEOUT 30)
 endif()

@@ -14,6 +14,11 @@ class CompileResult:
 def compile_project(project,controller_id,profile=PROFILE_ID,deployment_id=None,options=None):
  options=options or CompileOptions()
  if profile!=PROFILE_ID: return CompileResult(False,[D('ERROR','RSM-E100',f'unsupported profile {profile}')])
+ # Canonical admission precedes UUID-or-name controller selection.  In
+ # particular, image construction must never receive an unchecked controller
+ # UUID or deployment binding.
+ structural=validate_compile_project(project)
+ if any(x.severity=='ERROR' for x in structural) or (options.warnings_as_errors and any(x.severity=='WARNING' for x in structural)): return CompileResult(False,structural)
  matches=[c for c in project.controllers if c.controller_id==controller_id or c.name==controller_id]
  if len(matches)!=1: return CompileResult(False,[D('ERROR','RSM-E103','controller is missing or ambiguous')])
  c=matches[0]; deps=[d for d in project.deployments if deployment_id and (d.deployment_id==deployment_id or d.name==deployment_id)]

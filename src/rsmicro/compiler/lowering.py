@@ -13,7 +13,7 @@ def lower(controller,deployment=None):
  tags=[]; tid={}
  for n,t in enumerate(sorted(controller.tags,key=lambda x:x.tag_id)):
   tid[t.tag_id]=n; b=bound.get(t.tag_id); storage='INTERNAL'
-  if b: storage=str(dirs.get((b.device_id,b.endpoint_id),'internal')).upper()
+  if b: storage=str(dirs[(b.device_id,b.endpoint_id)]).upper()
   tags.append(IRTag(n,t.tag_id,t.name,str(t.data_type),storage,t.initial_value if t.initial_value is not None else t.preset,t.retentive))
  ins:list[IRInstruction]=[]; routines:list[dict[str,Any]]=[]; rungs:list[dict[str,Any]]=[]; states=0; branches=0
  def emit_control(name,path):

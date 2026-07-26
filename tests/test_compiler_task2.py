@@ -1,4 +1,4 @@
-import json,subprocess,sys
+import json,os,subprocess,sys
 from pathlib import Path
 import pytest
 from rsmicro.model import load_project
@@ -153,5 +153,11 @@ int main(int n,char **v){FILE*f;long z;uint8_t*image,arena[65536],arena_a[65536]
   f'-DRSMICRO_SOURCE_DIR={ROOT}',f'-DRSM_HARNESS_SOURCE={source}',f'-DRSM_IMAGE={image}',
   '-DRSM_ENABLE_STRICT_WARNINGS=ON',
  ],check=True)
- subprocess.run(['cmake','--build',str(build),'--target','canonical_native_harness','--parallel'],check=True)
- subprocess.run(['ctest','--test-dir',str(build),'--output-on-failure'],check=True)
+ config=os.environ.get('RSMICRO_CMAKE_CONFIG')
+ build_cmd=['cmake','--build',str(build),'--target','canonical_native_harness','--parallel']
+ ctest_cmd=['ctest','--test-dir',str(build),'--output-on-failure']
+ if config:
+  build_cmd.extend(['--config',config])
+  ctest_cmd.extend(['-C',config])
+ subprocess.run(build_cmd,check=True)
+ subprocess.run(ctest_cmd,check=True)

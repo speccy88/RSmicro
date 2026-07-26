@@ -5,7 +5,7 @@
   "project": "project.rsmproj",
   "controllers": [
     {
-      "controller_id": "controller-a",
+      "controller_id": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
       "host": "127.0.0.1",
       "port": 7581,
       "connect_timeout_ms": 2000,
@@ -15,7 +15,7 @@
       "required": true
     },
     {
-      "controller_id": "controller-b",
+      "controller_id": "1c479764-d825-5c32-a104-87d304ed619d",
       "host": "127.0.0.1",
       "port": 7582,
       "connect_timeout_ms": 2000,

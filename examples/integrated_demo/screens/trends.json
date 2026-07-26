@@ -1,45 +1,256 @@
 {
-  "format": "rsmicro-screen",
-  "version": 1,
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
   "screen_id": "3dd47fe3-0739-58f0-824c-c2c1a471cfee",
   "name": "trends",
-  "widgets": [
+  "description": "Canonical operator screen for trends",
+  "width": 1280,
+  "height": 720,
+  "background": "#0f172a",
+  "scaling_policy": "fit",
+  "objects": [
     {
-      "widget_id": "1ec58ab7-7f8a-5ec3-a76c-06df3bb82163",
-      "type": "tag_value",
-      "label": "TemperaturePV",
+      "object_id": "225437e7-b0f0-57aa-b4f6-809b539a35b9",
+      "type": "label",
+      "geometry": {
+        "x": 48,
+        "y": 28,
+        "width": 900,
+        "height": 52
+      },
+      "properties": {
+        "text": "RSmicro \u2022 Trends"
+      },
+      "style": {
+        "role": "title"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "bac030b7-5a16-5fe5-8273-69df060370c7",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 980,
+        "y": 34,
+        "width": 250,
+        "height": 42
+      },
+      "properties": {
+        "text": "OFFLINE PREVIEW",
+        "placeholder": "Broker disconnected"
+      },
+      "style": {
+        "role": "status"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 1,
+      "metadata": {}
+    },
+    {
+      "object_id": "6e2d395b-cc46-597d-b2c0-74a56ecfa375",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "TemperaturePV"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 2,
+      "metadata": {}
+    },
+    {
+      "object_id": "ae96f450-3c12-5453-83ee-86fd708f613f",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 360,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014 degC",
+        "label": "TemperaturePV"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 3,
+      "metadata": {}
     },
     {
-      "widget_id": "d87bf8ce-9374-5c1e-aa36-3adab4eecdb5",
-      "type": "tag_value",
-      "label": "TemperatureSP",
+      "object_id": "28650da3-808b-5321-bace-7eca15f16e32",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "TemperatureSP"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 4,
+      "metadata": {}
+    },
+    {
+      "object_id": "922a0f8e-1355-5840-99d5-33309dbdd08c",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 970,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014 degC",
+        "label": "TemperatureSP"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 5,
+      "metadata": {}
     },
     {
-      "widget_id": "bcc2be31-23d6-5a37-8fa3-5ae7202a3236",
-      "type": "tag_value",
-      "label": "MotorRun",
+      "object_id": "b629b7c7-7d90-5e64-ae5b-a0be7267fc86",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "MotorRun"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 6,
+      "metadata": {}
+    },
+    {
+      "object_id": "0a8b7330-9d7c-5fd4-867c-6da9c0de76a6",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "MotorRun"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 7,
+      "metadata": {}
     },
     {
-      "widget_id": "cdea02c6-a994-515e-96cc-8304f686c036",
-      "type": "tag_value",
-      "label": "RemotePermitProduced",
+      "object_id": "69333147-aa25-5a9b-94a4-a1a19860f877",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitProduced"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 8,
+      "metadata": {}
+    },
+    {
+      "object_id": "690529b6-a915-5e3a-9736-79cb31b07c34",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitProduced"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 9,
+      "metadata": {}
     }
   ],
+  "layers": [],
+  "metadata": {
+    "preview": "offline",
+    "source": "integrated_demo"
+  },
   "executable_code": false
 }

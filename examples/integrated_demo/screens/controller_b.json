@@ -1,72 +1,400 @@
 {
-  "format": "rsmicro-screen",
-  "version": 1,
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
   "screen_id": "f096d042-a9c6-5184-bab1-3ef80cc5d400",
   "name": "controller_b",
-  "widgets": [
+  "description": "Canonical operator screen for controller b",
+  "width": 1280,
+  "height": 720,
+  "background": "#0f172a",
+  "scaling_policy": "fit",
+  "objects": [
     {
-      "widget_id": "ded5d40f-162d-5ea1-b688-88a6eec69012",
-      "type": "tag_value",
-      "label": "RemotePermitConsumed",
+      "object_id": "acfe1a8a-e421-5505-ba7c-25c9e74914ad",
+      "type": "label",
+      "geometry": {
+        "x": 48,
+        "y": 28,
+        "width": 900,
+        "height": 52
+      },
+      "properties": {
+        "text": "RSmicro \u2022 Controller B"
+      },
+      "style": {
+        "role": "title"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "2b598903-f38f-51dc-990b-577f4a245940",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 980,
+        "y": 34,
+        "width": 250,
+        "height": 42
+      },
+      "properties": {
+        "text": "OFFLINE PREVIEW",
+        "placeholder": "Broker disconnected"
+      },
+      "style": {
+        "role": "status"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 1,
+      "metadata": {}
+    },
+    {
+      "object_id": "a9208131-bc42-5045-8f33-0fe4aa062056",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitConsumed"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 2,
+      "metadata": {}
+    },
+    {
+      "object_id": "33499f18-c28c-535c-b230-1f0a07010043",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitConsumed"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "c86db121-1e39-54a8-9632-1d679f73f8f7"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 3,
+      "metadata": {}
     },
     {
-      "widget_id": "c8fd7305-1111-54c1-a313-7a865e32a25d",
-      "type": "tag_value",
-      "label": "RemotePermitQualityGood",
+      "object_id": "e2358054-5364-53e7-8a89-26f05e22c4fe",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitQualityGood"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 4,
+      "metadata": {}
+    },
+    {
+      "object_id": "766559d9-43f0-59fe-a032-d2167df22f07",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitQualityGood"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "16fafe85-83dc-5417-ac67-7646a3549fae"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 5,
+      "metadata": {}
     },
     {
-      "widget_id": "c64779a7-95f5-5e8d-938b-5e3c3d18d90d",
-      "type": "tag_value",
-      "label": "RemotePermitStale",
+      "object_id": "756792ea-10d9-5494-b221-a5587c833199",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitStale"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 6,
+      "metadata": {}
+    },
+    {
+      "object_id": "def6d7b2-01e2-5982-9a01-38528990abfa",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitStale"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "d0d96d13-bc61-5eb8-a3c1-885cb2858879"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 7,
+      "metadata": {}
     },
     {
-      "widget_id": "79e6c26b-9e97-529d-bfac-6c8184976352",
-      "type": "tag_value",
-      "label": "RemotePermitBad",
+      "object_id": "1282120b-c3f0-5cc1-94c7-2eb4d336c704",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitBad"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 8,
+      "metadata": {}
+    },
+    {
+      "object_id": "882fe809-1d01-5a89-a289-3ec328f313d4",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitBad"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "62118396-6bcd-5821-a4a1-bb65bfd88783"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 9,
+      "metadata": {}
     },
     {
-      "widget_id": "e2f7c53c-509b-5446-b626-f17dfb2bc721",
-      "type": "tag_value",
-      "label": "RouteHealthy",
+      "object_id": "0561cd57-888b-5407-93f5-8ad18b76f5a5",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 279,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RouteHealthy"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 10,
+      "metadata": {}
+    },
+    {
+      "object_id": "52b087dd-9862-512e-a952-a806e373e80c",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 279,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RouteHealthy"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "e5b4a045-1f99-5644-a1b8-099a4d131db4"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 11,
+      "metadata": {}
     },
     {
-      "widget_id": "4310ff07-2ea3-5470-9f56-b4c9d9f632cf",
-      "type": "tag_value",
-      "label": "RouteFault",
+      "object_id": "8dae9728-6e3e-5955-84bd-95a0cd2df03b",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 279,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RouteFault"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 12,
+      "metadata": {}
+    },
+    {
+      "object_id": "c83f5a5e-e888-5618-8410-1375de322525",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 279,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RouteFault"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "cd43d26c-7144-5271-bee9-98b6bc9ba831"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 13,
+      "metadata": {}
     },
     {
-      "widget_id": "33693e52-f99b-52a5-97da-7cf59d503ff7",
-      "type": "tag_value",
-      "label": "RemoteLamp",
+      "object_id": "a67ce990-e151-5d05-adcb-1c4942b9d385",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 361,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemoteLamp"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 14,
+      "metadata": {}
+    },
+    {
+      "object_id": "0b4c1539-afae-5525-9229-d41814f42773",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 361,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemoteLamp"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "1c479764-d825-5c32-a104-87d304ed619d",
         "tag_uuid": "4868156c-7d78-58e1-af1f-4676a0b0ba39"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 15,
+      "metadata": {}
     }
   ],
+  "layers": [],
+  "metadata": {
+    "preview": "offline",
+    "source": "integrated_demo"
+  },
   "executable_code": false
 }

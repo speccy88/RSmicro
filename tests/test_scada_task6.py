@@ -11,10 +11,11 @@ from rsmicro.scada.alarms import *
 from rsmicro.scada.routing import *
 from rsmicro.scada.api import require
 
-def cfg(**kw): return BrokerConfig(str(uuid.uuid4()),[ControllerConfig("a")],**kw)
+CONTROLLER_ID="11111111-1111-4111-8111-111111111111"
+def cfg(**kw): return BrokerConfig(str(uuid.uuid4()),[ControllerConfig(CONTROLLER_ID)],**kw)
 def test_config_deterministic_and_loopback(): assert cfg().validate().to_json()==cfg(broker_id:=None).to_json() if False else cfg().validate().to_json().endswith('\n')
 def test_config_duplicate_controller():
- c=cfg();c.controllers.append(ControllerConfig("a",port=2))
+ c=cfg();c.controllers.append(ControllerConfig(CONTROLLER_ID,port=2))
  with pytest.raises(ConfigurationError):c.validate()
 def test_config_external_rejected():
  c=cfg(api={"listen":"0.0.0.0","port":7590})

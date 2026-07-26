@@ -4,7 +4,7 @@ RSM1 format 2.0 is little-endian and uses instruction ABI 2. Its fixed header ca
 
 The descriptor table supplies type, flags, offset, length, entry count, and reserved fields. Required sections are TAG_TABLE, INITIAL_VALUES, TIMER_LAYOUT, COUNTER_LAYOUT, TASK_TABLE, ROUTINE_TABLE, RUNG_TABLE, INSTRUCTION_STREAM, STATE_LAYOUT, PRODUCED_TAGS, CONSUMED_TAGS, DEBUG_MAP, STRING_TABLE, MEMORY_ESTIMATES, RUNTIME_TAGS, and RUNTIME_RUNGS. Inspection rejects bad magic/version/CRC, truncation, overlap, invalid offsets, duplicates, missing sections, and unknown required types.
 
-The instruction stream uses a fixed 12-byte instruction header followed by explicit 8-byte operands. Debug maps preserve runtime-ID-to-UUID/source-path mappings for tags, instructions, routines, and rungs. `--strip-debug` emits an intentionally empty DEBUG_MAP while retaining binary runtime tag/rung sections, so stripped images remain executable but name/UUID convenience lookup is unavailable.
+The instruction stream uses a fixed 12-byte instruction header followed by explicit 8-byte operands. Stateful instruction slot IDs may be sparse but are emitted in strictly increasing stream order; duplicate or descending slots are malformed. Debug maps preserve runtime-ID-to-UUID/source-path mappings for tags, instructions, routines, and rungs. `--strip-debug` emits an intentionally empty DEBUG_MAP while retaining binary runtime tag/rung sections, so stripped images remain executable but name/UUID convenience lookup is unavailable.
 
 ## Portable-runtime metadata
 
