@@ -121,7 +121,7 @@ static int hostile_state_scale_contract(void) {
     const uint32_t counts[]={65535u,65536u,65537u};unsigned index;int failures=0;clock_t started=clock();
     for(index=0u;index<sizeof counts/sizeof counts[0];index++){
         int many_rungs=index+1u==sizeof counts/sizeof counts[0];
-        size_t capacity=HEADER+16u*DESC+(size_t)counts[index]*32u+64u,n,need;uint8_t *image=malloc(capacity);rsm_image_info_t info;
+        size_t capacity=HEADER+16u*DESC+(size_t)counts[index]*32u+64u,n,need=0u;uint8_t *image=malloc(capacity);rsm_image_info_t info={0};
         if(!image)return 1;
         n=make_state_scale_image(image,counts[index],many_rungs);
         if(check(rsm_runtime_validate_image(image,n,&info),RSM_STATUS_OK,"state scale validate")||
@@ -236,10 +236,10 @@ static int lifecycle_matrix(void) {
  * test validates, sizes, loads, snapshots and independently scans it twice. */
 static int high_state_contract(void) {
     const rsm_conformance_fixture_t *f=fixture("high-state-core-001");
-    rsm_image_info_t info; rsm_runtime_t a,b,short_arena; rsm_hal_t h=counted_hal();
+    rsm_image_info_t info={0}; rsm_runtime_t a,b,short_arena; rsm_hal_t h=counted_hal();
     static uint8_t aa[65536],bb[65536],too_small[65536]; hal_counts_t ha={0},hb={0};
-    rsm_runtime_diagnostics_t da,db; rsm_snapshot_writer_t w; snapshot_t sa,sb;
-    rsm_value_t va,vb; size_t need; int failures=0; unsigned alignment;
+    rsm_runtime_diagnostics_t da={0},db={0}; rsm_snapshot_writer_t w; snapshot_t sa,sb;
+    rsm_value_t va={0},vb={0}; size_t need=0u; int failures=0; unsigned alignment;
     if(!f)return 1;
     if(check(rsm_runtime_validate_image(f->image,f->image_size,&info),RSM_STATUS_OK,"high-state validate")||
        check(rsm_runtime_required_memory(f->image,f->image_size,&need),RSM_STATUS_OK,"high-state required memory"))return 1;
@@ -309,7 +309,7 @@ static int sparse_res_contract(void) {
 static int unload_reload_contract(void) {
     const rsm_conformance_fixture_t *f=fixture("unload-reload-core-001");
     rsm_runtime_t a,b; rsm_hal_t h=counted_hal(); uint8_t aa[65536],bb[65536];
-    rsm_value_t value,peer_before,peer_after; rsm_runtime_diagnostics_t diagnostics;
+    rsm_value_t value={0},peer_before={0},peer_after={0}; rsm_runtime_diagnostics_t diagnostics={0};
     int failures=0;
     if(!f)return 1;
     if(check(rsm_runtime_init(&a,aa,sizeof aa,&h,NULL),RSM_STATUS_OK,"unload init a")||

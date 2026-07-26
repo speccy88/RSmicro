@@ -1,3 +1,6 @@
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include "rsmicro/rsm_runtime.h"
 #include "rsm_test_hal.h"
 #include <stdio.h>
