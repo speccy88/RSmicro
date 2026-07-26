@@ -150,7 +150,7 @@ int main(int n,char **v){FILE*f;long z;uint8_t*image,arena[65536],arena_a[65536]
  harness=ROOT/'tests/cmake/compiler_native_harness'
  subprocess.run([
   'cmake','-S',str(harness),'-B',str(build),
-  f'-DRSMICRO_SOURCE_DIR={ROOT}',f'-DRSM_HARNESS_SOURCE={source}',f'-DRSM_IMAGE={image}',
+  f'-DRSMICRO_SOURCE_DIR={ROOT.as_posix()}',f'-DRSM_HARNESS_SOURCE={source.as_posix()}',f'-DRSM_IMAGE={image.as_posix()}',
   '-DRSM_ENABLE_STRICT_WARNINGS=ON',
  ],check=True)
  config=os.environ.get('RSMICRO_CMAKE_CONFIG')
