@@ -25,7 +25,8 @@ def test_migration_all_examples_is_deterministic_and_valid(tmp_path):
   a=tmp_path/(src.stem+"a"); b=tmp_path/(src.stem+"b"); original=src.read_bytes(); pa,ra=migrate_legacy(src,a); pb,rb=migrate_legacy(src,b)
   assert a.read_bytes()==b.read_bytes(); assert pa.project_id==pb.project_id; assert src.read_bytes()==original
   assert not [d for d in validate_project(pa) if d.severity.value=="ERROR"]
-  assert a.read_bytes()==(ROOT/"examples/migrated"/(src.stem+".rsmproj")).read_bytes()
+  expected=(ROOT/"examples/migrated"/(src.stem+".rsmproj")).read_bytes()
+  assert a.read_bytes().replace(b"\r\n",b"\n")==expected.replace(b"\r\n",b"\n")
 def test_cli(tmp_path,capsys):
  src=ROOT/"examples/circuitpython_button_led.json"; out=tmp_path/"x.rsmproj"
  assert main(["migrate-v1",str(src),"--output",str(out)])==0

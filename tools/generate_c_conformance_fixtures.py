@@ -70,7 +70,11 @@ def image(fixture):
 
 def cvalue(value, typ):
     if typ == "BOOL": return "{RSM_TYPE_BOOL,{.boolean=%du}}" % (1 if value else 0)
-    if typ == "DINT": return "{RSM_TYPE_DINT,{.dint=%d}}" % int(value)
+    if typ == "DINT":
+        dint = int(value)
+        # MSVC parses -2147483648 as unary minus applied to an unsigned literal.
+        literal = "INT32_MIN" if dint == -(2**31) else str(dint)
+        return "{RSM_TYPE_DINT,{.dint=%s}}" % literal
     # C requires a decimal point or exponent before a floating suffix (``99f`` is invalid).
     return "{RSM_TYPE_REAL,{.real=%.9gf}}" % float(value) if ("." in (text := format(float(value), ".9g")) or "e" in text or "E" in text) else "{RSM_TYPE_REAL,{.real=%s.0f}}" % text
 

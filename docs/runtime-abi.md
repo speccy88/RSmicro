@@ -6,7 +6,7 @@ The ABI requires instruction ABI **2** and portable image format **2.0** for `RS
 
 ## Image admission and control flow
 
-Image validation is a bounded, binary operation: the portable runtime does not parse JSON. It verifies the CRC and all required sections, binary tag/operand metadata, instruction records, state slots, and `RUNTIME_RUNGS`. Rung records are contiguous instruction ranges. Their routine IDs begin at 0, never use `UINT32_MAX`, are nondecreasing with only the same ID or the next ID permitted, and cannot return to an earlier routine; therefore every routine's rungs are contiguous. Rejected images leave any active program unchanged.
+Image validation is a bounded, binary operation: the portable runtime does not parse JSON. It verifies the CRC and all required sections, binary tag/operand metadata, instruction records, state slots, and `RUNTIME_RUNGS`. Stateful instruction slots may be sparse but must be strictly increasing in instruction-stream order; this makes duplicate admission and runtime lookup bounded without dynamic allocation. Rung records are contiguous instruction ranges. Their routine IDs begin at 0, never use `UINT32_MAX`, are nondecreasing with only the same ID or the next ID permitted, and cannot return to an earlier routine; therefore every routine's rungs are contiguous. Rejected images leave any active program unchanged.
 
 Instruction ABI 2 reserves `BRANCH_BEGIN`, `BRANCH_LANE_BEGIN`, `BRANCH_LANE_END`, and `BRANCH_END` as zero-operand control records. Branches are structurally validated, cannot escape a rung, and have a maximum nesting depth of 32.
 

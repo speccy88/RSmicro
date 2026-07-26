@@ -1,204 +1,154 @@
-# RSmicro / PLC ASCII
+# RSmicro
 
-> **Safety and security:** RSmicro is experimental and is not safety-certified. It must not replace emergency stops, overload protection, guards, or safety-rated controls. Forces can create hazardous operation. RSM Link is unauthenticated and unencrypted; keep services on loopback or an isolated trusted network.
+A deterministic ladder-logic compiler, portable C99 execution core, native simulator, and experimental engineering/SCADA desktop tools.
 
-RSmicro has a deterministic **Compiler** (canonical project to `.rsm`), portable C99 **Core** (the canonical instruction engine, native simulator, and node), and preserved engineering/SCADA application code. The release evidence deliberately distinguishes implemented source from processes actually exercised.
+> **Safety:** RSmicro is experimental, unaudited control software. It is not safety-certified and must never replace emergency stops, guards, overload protection, or safety-rated control. RSM Link is currently unauthenticated and unencrypted; keep it on loopback or an isolated trusted network.
 
-```text
-Compiler -> .rsm -> rsmcore / rsm-node
-Studio / SCADA application code -> rsmicro-tagd -> RSM Link -> native nodes
-```
+## What you can use today
 
-Run the deterministic compiler smoke with `PYTHONPATH=src QT_QPA_PLATFORM=offscreen python tools/run_integrated_demo.py --headless`. It compiles each controller twice to separate files, compares bytes, and inspects images; it does **not** start nodes, `rsmicro-tagd`, Studio, or SCADA. Those live paths are **NOT_IMPLEMENTED/out of scope for this evidence**. CircuitPython, MicroPython, and Propeller 2/TAQOZ targets remain physically **UNVERIFIED**. RSM-LOGIX-CORE-1 profile 2.0.0 / instruction ABI 2 / image 2.0 / runtime ABI 1.2 is an RSmicro-defined documented subset, not a compatibility or certification claim.
+- Validate canonical `.rsmproj` projects with structured diagnostics.
+- Compile controllers deterministically to portable `.rsm` program images.
+- Inspect image metadata, sections, routes, and compatibility versions.
+- Execute projects in the C99 core through the Python native simulator.
+- Open canonical projects and inspect rendered ladder routines in Studio.
+- Load and preview canonical SCADA screens through the same parser used by repository validation.
+- Use the preserved `plc-ascii` Tk workbench for legacy local simulation and board-oriented workflows.
 
----
+The supported software contract is **RSM-LOGIX-CORE-1 profile 2.0.0**, instruction ABI **2**, image format **2.0**, and runtime ABI **1.2**.
 
-## Legacy PLC ASCII workbench
+## Screenshots
 
-## RSmicro desktop applications
+### Studio — offline project and ladder inspection
 
-The source tree includes a PySide6 `rsmicro-studio` engineering application and
-standalone `rsmicro-scada` operator runtime. The operator runtime is designed to
-obtain process data only through loopback `rsmicro-tagd`; this release smoke does
-not launch or validate either application.
-The original Tkinter `plc-ascii` application and all hardware runtimes remain.
+![RSmicro Studio showing two canonical controllers and rendered ladder rungs](docs/images/rsmicro-studio.png)
 
-The canonical model, compiler, portable runtime, and protocol/node source are
-locally gated. Physical hardware remains unverified. These applications are not
-safety certified and RSM Link 1.0 is not a secure remote-access protocol.
+### SCADA — canonical offline screen preview
 
-`PLC ASCII` is a Python-first ladder logic workbench inspired by LDmicro's text
-presentation and the general workflow of PLC software such as RSLogix 5000.
-This first version focuses on a practical MVP:
+![RSmicro SCADA overview rendering canonical tag cards with honest disconnected and stale status](docs/images/rsmicro-scada-overview.png)
 
-- Build ladder programs with basic instructions in an ASCII workbench
-- Simulate scan cycles locally
-- Force tags like a PLC during simulation
-- Download the same program to a remote Python runtime
-- Use one transport protocol for serial today, with room for Wi-Fi or BLE later
-- Keep Raspberry Pi compatibility aligned with CircuitPython style I/O via Blinka
+The SCADA screenshot is intentionally marked **Broker disconnected / STALE**. Live node-to-broker-to-SCADA data flow is not implemented yet.
 
-## Current scope
+## Five-minute start
 
-This repository intentionally implements a vertical slice instead of a complete
-PLC IDE. The current engine and IDE currently support:
+### Requirements
 
-- `XIC` and `XIO` contacts
-- `OTE`, `OTL`, and `OTU` outputs
-- `TON` timers
-- A Tkinter desktop IDE with rung editing and monitor panels
-- ASCII ladder rendering with live rung state indicators
-- Local simulation
-- A JSON-line runtime protocol
-- A device runtime with memory and GPIO backend scaffolding
-
-The default launcher now opens a Tkinter GUI. The original shell workbench is
-still available as a secondary CLI entry point for debugging and scripting.
-
-## Install
+- Python **3.11+**
+- CMake **3.20+**
+- A C99 compiler: GCC/Clang on Linux/macOS or Visual Studio Build Tools on Windows
 
 ```bash
+git clone https://github.com/speccy88/RSmicro.git
+cd RSmicro
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
 pip install -e .
 ```
 
-If you want serial connectivity:
+Build the shared native core in the default discoverable `build/` directory:
 
 ```bash
-pip install -e .[serial]
+rsmicro native build --clean --release
+rsmicro native info
 ```
 
-## Run the workbench
+Validate, compile, and inspect the integrated example:
 
 ```bash
-plc-ascii
+rsmicro validate examples/integrated_demo/project.rsmproj
+mkdir -p build/demo
+rsmicro compile examples/integrated_demo/project.rsmproj \
+  --controller controller-a \
+  --output build/demo/controller-a.rsm \
+  --manifest build/demo/controller-a.manifest.json \
+  --debug-map build/demo/controller-a.debug.json
+rsmicro inspect-image build/demo/controller-a.rsm
 ```
 
-Or load the example directly:
+Run it in the real C core through the native simulator:
+
+```bash
+rsmicro run-native examples/integrated_demo/project.rsmproj \
+  --controller controller-a \
+  --mode run --duration 0.25 \
+  --show-tags --show-diagnostics --format json
+```
+
+Open the desktop views:
+
+```bash
+rsmicro-studio examples/integrated_demo/project.rsmproj
+rsmicro-scada --project examples/integrated_demo/project.rsmproj \
+  --screen overview --role viewer
+```
+
+See the [complete beginner tutorial](docs/tutorial.md) for expected output, headless verification, custom library paths, troubleshooting, and the legacy workbench.
+
+## Current project status
+
+| Area | Status |
+| --- | --- |
+| Canonical model and compiler | **Usable for experimentation** — complete compiler-owned admission and deterministic images |
+| Portable C99 core | **Usable for host experimentation** — strict and sanitizer tested; caller-owned arena |
+| Python native simulator | **Usable locally** — lifecycle, snapshots, traces, unload/reload, and concurrent access covered |
+| Studio | **Offline preview** — project tree and ladder rendering work; most engineering actions are not wired |
+| SCADA screens | **Offline preview** — canonical schema and rendering work; live broker updates/writes are not connected |
+| `rsmicro-tagd` | **Foundation only** — configuration/API scaffolding; no proven live controller data flow |
+| `rsm-node` | **Foundation only** — socket/configuration shell; not a protocol-serving cyclic controller |
+| Legacy `plc-ascii` | **Preserved** — Tk editor/local simulator and board tooling; hardware remains unverified here |
+| Production/safety control | **No-go** |
+
+Linux is exercised locally. Linux, macOS, and Windows have checked-in CI workflows, but a platform is not claimed as passing until its hosted workflow is visibly green. Physical CircuitPython, MicroPython, Raspberry Pi, and Propeller 2 behavior is **UNVERIFIED** by the current release evidence.
+
+Read [current status](docs/current-status.md), [release readiness](docs/release-readiness.md), and [native node status](docs/native-node.md) before planning integration work.
+
+## Architecture
+
+```text
+canonical .rsmproj
+       │
+       ├── validate / compile ──> deterministic .rsm image ──> rsmcore
+       │                                                     └── Python native simulator
+       ├── Studio ──> offline project/routine inspection
+       └── SCADA references ──> canonical screen loader ──> offline operator preview
+
+future live path: rsm-node <─RSM Link─> rsmicro-tagd <─WebSocket─> SCADA
+```
+
+## Verification for contributors
+
+```bash
+python tools/generate_instruction_registry.py --check
+python tools/generate_c_conformance_fixtures.py --check
+python tools/generate_rsm_link_registry.py --check
+cmake -S . -B build -DRSM_BUILD_TESTS=ON -DRSM_BUILD_SHARED=ON -DRSM_ENABLE_STRICT_WARNINGS=ON
+cmake --build build --config Release --parallel
+ctest --test-dir build -C Release --output-on-failure
+pytest -q
+ruff check .
+mypy src/rsmicro
+PYTHONPATH=src python tools/validate_repository.py --format text
+python -m build
+```
+
+The deterministic integrated smoke is deliberately bounded:
+
+```bash
+PYTHONPATH=src python tools/run_integrated_demo.py --headless --format json
+```
+
+It compares separately written program images and inspects both. It does **not** claim that nodes, broker routing, Studio online mode, live SCADA, or physical hardware work.
+
+## Legacy PLC ASCII workbench
 
 ```bash
 plc-ascii examples/demo_program.json
-```
-
-That opens the Tkinter IDE with:
-
-- rung list and rung ordering controls
-- instruction editors for conditions and actions
-- a live ladder preview pane
-- a tag monitor with set/force/unforce controls
-- a bindings editor
-- local simulation step/run/stop controls
-- board runtime download/upload/live monitoring controls
-- CircuitPython runtime install for supported serial targets
-- Propeller 2 TAQOZ runtime loading for supported serial targets
-
-If you want the original shell version:
-
-```bash
 plc-ascii-cli examples/demo_program.json
-```
-
-## Example workflow
-
-1. Build a ladder program in the GUI by adding rungs, conditions, actions, and bindings.
-2. Simulate and debug locally with the monitor panel and the Step/Run/Stop controls.
-3. Force tags from the monitor panel like a PLC.
-4. Choose the correct board under `Runtime` -> `Target Board`.
-5. For CircuitPython, `Download` can install the runtime first if the board needs it.
-6. Use `Download`, `Upload`, and `Go Online` to work with the connected board from the same IDE.
-7. Use `Disconnect` to close the serial connection and return to offline editing.
-
-## CircuitPython board workflow
-
-For the ESP32 DevKitC V4 setup tested in this repo:
-
-- Pushbutton input: `IO0` with pull-up and active-low logic
-- LED output: `IO2`
-- Example program: `examples/circuitpython_button_led.json`
-
-Recommended flow:
-
-1. Open `examples/circuitpython_button_led.json` in the IDE.
-2. Confirm `Runtime` -> `Target Board` is set to `CircuitPython`.
-3. Click `Download`. If the runtime is not present yet, the IDE can install it first and then send the ladder.
-4. Click `Go Online`. If the IDE is not connected yet, it will prompt you to connect.
-5. Click `Upload` to read the stored program back from the board.
-6. Click `Disconnect` to close the serial connection and return to offline mode.
-
-If CircuitPython reports a read-only filesystem over serial, the installer now
-falls back to copying the runtime bundle to the mounted `CIRCUITPY` volume
-when one is available.
-
-## Propeller 2 TAQOZ workflow
-
-For the Propeller 2 setup tested in this repo:
-
-- TAQOZ console over `/dev/tty.usbserial-P2EEQZ7`
-- TAQOZ console defaults to `921600` baud in the IDE/CLI, with fallback probing for `115200`
-- onboard LEDs on `P56` to `P63`
-- those LEDs are active-low
-- example program: `examples/propeller2_led56.json`
-
-Recommended flow:
-
-1. Open `examples/propeller2_led56.json` in the IDE.
-2. Confirm `Runtime` -> `Target Board` is set to `Propeller2 TAQOZ`.
-3. Choose `Runtime` -> `Load Runtime to Propeller 2 (RAM)...` if you want to preload the TAQOZ runtime.
-4. Click `Go Online`, or use `Download` to push the current ladder and immediately reload the TAQOZ runtime in RAM.
-5. Use `Upload` to read the stored ladder JSON back from the board while the same TAQOZ session remains active.
-6. Click `Disconnect` when you want to return to offline editing.
-
-Current limitation:
-
-- the Propeller 2 runtime is RAM-only for now
-- TAQOZ is used as the bootstrap loader, then the board switches into a dedicated line-framed host loop for online commands
-- reconnecting after a reset or fresh serial attach loses the RAM runtime, so a fresh `Download` is still the normal recovery path
-- scalar online set/force support is available inside one live session; timer and counter live-edit behavior still needs more hardware validation
-
-## Device runtime
-
-The device runtime is packaged separately in the same repo:
-
-```bash
 plc-runtime --demo
 ```
 
-That starts a simulated device loop on your development machine.
+The legacy Tk application supports basic ladder editing, local simulation, forcing, JSON-line runtime transport, and preserved CircuitPython/Propeller tooling. These paths are separate from the canonical compiler/C-core architecture.
 
-For Raspberry Pi with Blinka later, the intended pattern is:
+## License and contributions
 
-- Host app stays unchanged
-- Transport stays message-compatible
-- The runtime swaps from memory I/O to a Blinka GPIO backend
-
-## Protocol notes
-
-The host and runtime speak newline-delimited JSON messages. Example messages:
-
-```json
-{"type": "download_program", "program": {"name": "demo", "rungs": []}}
-{"type": "force", "tag": "start_pb", "enabled": true, "value": true}
-{"type": "snapshot_request"}
-```
-
-The runtime responds with acknowledgements and snapshots:
-
-```json
-{"type": "ack", "request": "download_program"}
-{"type": "snapshot", "mode": "run", "tags": {"start_pb": true}, "rung_power": {"seal_in": true}}
-```
-
-## Next steps
-
-- Add parallel branches and more instructions
-- Add direct GPIO implementations for Blinka and CircuitPython boards
-- Add Wi-Fi and BLE transports
-- Add a true CircuitPython serial transport target script
-- Add richer live debug tables and rung highlighting overlays
-
-## Canonical RSmicro foundation
-
-The canonical model separates target-neutral controller logic from deployments that contain platforms, devices, endpoints, and bindings. Use `rsmicro migrate-v1`, `rsmicro validate`, and `rsmicro show-project` for legacy conversion and inspection. Compile a canonical project with `rsmicro compile`, inspect it with `rsmicro inspect-image`, and query the profile with `rsmicro profile instructions RSM-LOGIX-CORE-1`.
-
-The C99 core is caller-arena based and uses a deterministic native test HAL; the Python native simulator schedules it and supplies virtual I/O. These are host-software facilities, not safety or hard-real-time claims. See [current status](docs/current-status.md) and [release readiness](docs/release-readiness.md) for the exact evidence boundary and platform matrix.
+This project is still pre-production. Contributions should include executable tests, keep generated artifacts deterministic, and avoid claims that exceed measured evidence.

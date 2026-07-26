@@ -7,7 +7,9 @@
 /* A snapshot is deliberately observational: callbacks receive copies and never
  * invoke HAL or mutate scan/instruction state.  One writer covers scalar and
  * composite values plus the runtime envelope, so consumers cannot accidentally
- * omit composite or lifecycle state. */
+ * omit composite or lifecycle state.  If an image has no state records, its
+ * state callback is still invoked once with slot UINT32_MAX and inert
+ * edge/valid/time fields; this is an envelope, not an instruction state. */
 typedef rsm_status_t (*rsm_snapshot_value_fn)(void *,rsm_tag_id_t,const rsm_value_t *,const rsm_value_t *,rsm_bool_t);
 typedef rsm_status_t (*rsm_snapshot_member_fn)(void *,rsm_tag_id_t,rsm_member_id_t,const rsm_value_t *);
 typedef rsm_status_t (*rsm_snapshot_state_fn)(void *,uint8_t,const rsm_runtime_diagnostics_t *,const rsm_fault_t *,uint32_t,uint8_t,uint8_t,uint64_t);

@@ -51,15 +51,26 @@ class Screen:
    value.get("description",""),value.get("background","#f0f0f0"),value.get("scaling_policy","fit"),objects,
    list(value.get("layers",[])),dict(value.get("metadata",{})),value.get("format_version",1))
 
-def validate_screen(screen: Screen, tag_ids: set[str] | None = None) -> list[str]:
- errors=[]; seen=set(); tag_ids=tag_ids or set()
+def validate_screen(
+ screen: Screen,
+ tag_ids: set[str] | None = None,
+ controller_tags: dict[str, set[str]] | None = None,
+) -> list[str]:
+ errors=[]; seen=set(); tag_ids=tag_ids or set(); controller_tags=controller_tags or {}
  if screen.width <= 0 or screen.height <= 0: errors.append("screen dimensions must be positive")
  for obj in screen.objects:
   if obj.object_id in seen: errors.append(f"duplicate object UUID: {obj.object_id}")
   seen.add(obj.object_id)
   if obj.type not in WIDGET_TYPES: errors.append(f"unsupported widget type: {obj.type}")
   if any(float(obj.geometry.get(k,0)) < 0 for k in ("width","height")): errors.append(f"invalid geometry: {obj.object_id}")
-  tag_id=obj.binding.get("tag_uuid")
-  if tag_id and tag_ids and tag_id not in tag_ids: errors.append(f"unknown tag UUID: {tag_id}")
+  tag_id=obj.binding.get("tag_uuid"); controller_id=obj.binding.get("controller_uuid")
+  tag_known=not tag_id or not tag_ids or tag_id in tag_ids
+  if not tag_known: errors.append(f"unknown tag UUID: {tag_id}")
+  if controller_id and controller_tags and controller_id not in controller_tags:
+   errors.append(f"unknown controller UUID: {controller_id}")
+  elif tag_known and tag_id and controller_id and controller_tags and tag_id not in controller_tags[controller_id]:
+   errors.append(f"tag UUID {tag_id} is not owned by controller {controller_id}")
+  elif tag_id and controller_tags and not controller_id:
+   errors.append(f"tag binding requires controller_uuid: {tag_id}")
   if obj.action and obj.action.get("type") not in ACTIONS: errors.append(f"unsupported action: {obj.action.get('type')}")
  return errors

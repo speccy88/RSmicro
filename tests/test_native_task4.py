@@ -1,4 +1,7 @@
 import ctypes as C
+import json
+import os
+import sys
 import threading
 from pathlib import Path
 
@@ -9,7 +12,7 @@ from rsmicro.model import load_project
 from rsmicro.native import (DintValue, NativeBinding, NativeRuntime, NativeSimulator,
                             RealValue, RuntimeMode)
 from rsmicro.native.abi import ImageInfo, Value, WriteTraceEntry
-from rsmicro.native.errors import NativeImageError, RSmicroNativeError
+from rsmicro.native.errors import NativeImageError, NativeTagError, RSmicroNativeError
 from rsmicro.native.simulation import SimulatorEvent
 
 ROOT = Path(__file__).parents[1]
@@ -33,6 +36,11 @@ def test_binding_versions_and_abi_declarations():
     assert binding.lib.rsm_runtime_get_write_trace.argtypes == [
         C.c_void_p, C.POINTER(WriteTraceEntry), C.c_size_t, C.POINTER(C.c_size_t)]
     assert C.sizeof(WriteTraceEntry) == C.sizeof(C.c_uint32) + C.sizeof(Value)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows shared-library override proof")
+def test_windows_binding_uses_ci_core_library_override():
+    assert NativeBinding().path == str(Path(os.environ["RSMICRO_CORE_LIBRARY"]).resolve())
 
 
 def test_image_info_ctypes_layout_matches_native_c_abi():
@@ -94,6 +102,66 @@ def test_unload_requires_program_mode_invalidates_and_reloads(compiled):
     assert exc.value.status_name == "INVALID_STATE"
     runtime.load_image(compiled.image_bytes, compiled.manifest, compiled.debug_map)
     assert runtime.read_tag("Count") == DintValue(1)
+    runtime.close()
+
+
+def _larger_reload_project():
+    project = json.loads((ROOT / "examples/native_core_demo/project.rsmproj").read_text())
+    controller = project["controllers"][0]
+    # Omit a small-image tag so reload must not retain its debug map.
+    controller["tags"] = [tag for tag in controller["tags"] if tag["name"] != "Gain"]
+    trigger = next(tag["tag_id"] for tag in controller["tags"] if tag["data_type"] == "BOOL")
+    rungs = controller["programs"][0]["routines"][0]["rungs"]
+    controller["tags"].append({
+        "tag_id": "eeeeeeee-0000-4000-8000-000000000001", "name": "ReloadLargeValue",
+        "data_type": "DINT", "initial_value": 42,
+    })
+    for index in range(128):
+        timer_id = f"aaaaaaaa-0000-4000-8000-{index + 1:012d}"
+        controller["tags"].append({
+            "tag_id": timer_id, "name": f"ReloadTimer{index}",
+            "data_type": "TIMER", "initial_value": None, "preset": 1,
+        })
+        rungs.append({"rung_id": f"bbbbbbbb-0000-4000-8000-{index + 1:012d}", "nodes": [
+            {"node_type": "instruction", "instruction_id": f"cccccccc-0000-4000-8000-{index + 1:012d}",
+             "mnemonic": "XIC", "operands": [{"kind": "tag", "tag_id": trigger}], "metadata": {}},
+            {"node_type": "instruction", "instruction_id": f"dddddddd-0000-4000-8000-{index + 1:012d}",
+             "mnemonic": "TON", "operands": [{"kind": "tag", "tag_id": timer_id}], "metadata": {}},
+        ]})
+    return project
+
+
+def test_unload_then_larger_image_reinitializes_arena_and_clears_debug_metadata(compiled, tmp_path):
+    large_path = tmp_path / "larger-reload.rsmproj"
+    large_path.write_text(json.dumps(_larger_reload_project()))
+    large = compile_project(load_project(large_path), "controller-a")
+    assert large.success
+
+    runtime = NativeRuntime().load_image(compiled.image_bytes, compiled.manifest, compiled.debug_map)
+
+    def required_memory(image):
+        native_image = (C.c_uint8 * len(image)).from_buffer_copy(image)
+        need = C.c_size_t()
+        runtime.binding.check(runtime.binding.lib.rsm_runtime_required_memory(
+            native_image, len(image), C.byref(need)), "required memory")
+        return need.value
+
+    small_need, large_need = required_memory(compiled.image_bytes), required_memory(large.image_bytes)
+    assert large_need > small_need
+    with pytest.raises(RSmicroNativeError, match="unload it first"):
+        runtime.load_image(large.image_bytes, large.manifest, large.debug_map)
+    assert runtime.read_tag("Count") == DintValue(1)
+    runtime.unload()
+    runtime.load_image(large.image_bytes, large.manifest, large.debug_map)
+    assert runtime._arena_capacity >= large_need
+    assert runtime.read_tag("ReloadLargeValue") == DintValue(42)
+    with pytest.raises(NativeTagError, match="not found"):
+        runtime.read_tag("Gain")
+    assert runtime.diagnostics().scan_count == 0
+    runtime.set_mode(RuntimeMode.RUN)
+    runtime.scan()
+    assert runtime.read_tag("Count") == DintValue(2)
+    assert runtime.diagnostics().scan_count == 1
     runtime.close()
 
 

@@ -1,7 +1,24 @@
-# Native controller node
+# Native controller node status
 
-`rsm-node` is a C-runtime process linking `rsmcore` and transport-independent `rsmlink`, without embedding Python. It defaults to PROGRAM mode, a 10 ms monotonic scheduling interval, and `127.0.0.1:7580`; `--help` documents bounded configuration, logging, startup image/deployment, rollback, readiness, and test-duration options.
+`rsm-node` is currently a **node foundation**, not an implemented controller service. It links the portable `rsmcore` and transport-independent `rsmlink` libraries and provides bounded command-line configuration around a loopback listener.
 
-The node layer owns sockets, deployment JSON, virtual I/O, scheduling, bounded FIFO commands, transfers, sessions, and safe shutdown; these do not belong in `rsmcore`. It is deterministic host software, not certified hard real-time or safety behavior. Previous validated images are process-lifetime rollback state only; persistent dual-slot embedded storage is future work.
+Implemented today:
 
-The Task 9A.1 deterministic smoke does not launch a node or broker: live node/broker lifecycle and physical-node behavior are **NOT_IMPLEMENTED/out of scope for that evidence**. No physical target has been validated; all hardware status is **UNVERIFIED**.
+- C99 process linking `rsmcore` and `rsmlink` without embedding Python.
+- Loopback-default listener/configuration shell.
+- PROGRAM-mode and scheduling/configuration defaults.
+- Strict-warning native build and bounded process tests.
+
+Not implemented today:
+
+- Accepting and serving RSM Link sessions.
+- Decoding request frames and returning protocol responses.
+- Receiving, validating, activating, or rolling back downloaded `.rsm` images.
+- Running a cyclic controller scan from the node process.
+- Tag manifest/read/write/force/subscription operations.
+- Publishing unsolicited tag updates or fault events.
+- Persistent dual-slot image storage or hardware I/O.
+
+Those responsibilities belong in the node layer rather than `rsmcore`, but describing ownership is not evidence of implementation. The deterministic repository smoke does not launch a node/broker lifecycle.
+
+`rsm-node --version` and documentation must agree with runtime ABI **1.2**. RSM Link remains unauthenticated and unencrypted; keep all experiments on loopback or an isolated trusted network. No physical target is validated, and all hardware status is **UNVERIFIED**.

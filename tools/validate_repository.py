@@ -31,58 +31,15 @@ CURRENT_COMPATIBILITY_DOCS = (
 
 
 def validate_screen_references(project_path: Path, project: Any) -> list[str]:
-    """Load every project-declared screen, not merely files found in a directory."""
-    from rsmicro.scada_screen import Screen, validate_screen
+    """Use the production loader for every project-declared screen."""
+    from rsmicro.scada_screen_loader import ScreenLoadError, load_screen_reference
 
-    project_root = project_path.parent.resolve()
-    tag_ids = {tag.tag_id for controller in project.controllers for tag in controller.tags}
     errors: list[str] = []
     for index, reference in enumerate(project.scada.screens):
-        if not isinstance(reference, dict) or not isinstance(reference.get("path"), str):
-            errors.append(f"screen[{index}] has no string path")
-            continue
-        declared = reference["path"]
-        candidate = (project_root / declared).resolve()
         try:
-            candidate.relative_to(project_root)
-        except ValueError:
-            errors.append(f"screen[{index}] path escapes project: {declared}")
-            continue
-        if not candidate.is_file():
-            errors.append(f"screen[{index}] missing: {declared}")
-            continue
-        try:
-            raw = json.loads(candidate.read_text(encoding="utf-8"))
-            if not isinstance(raw, dict):
-                raise ValueError("screen JSON must be an object")
-            if raw.get("executable_code") is not False:
-                errors.append(f"screen[{index}] permits executable code: {declared}")
-            if raw.get("screen_id") != reference.get("screen_id"):
-                errors.append(f"screen[{index}] id does not match declaration: {declared}")
-            if "objects" in raw:
-                screen = Screen.from_dict(raw)
-                diagnostics = validate_screen(screen, tag_ids)
-                errors.extend(f"screen[{index}] {diagnostic}: {declared}" for diagnostic in diagnostics)
-            elif not isinstance(raw.get("widgets"), list):
-                errors.append(f"screen[{index}] has neither objects nor widgets: {declared}")
-
-            def check_bindings(value: Any) -> None:
-                if isinstance(value, dict):
-                    tag_id = value.get("tag_uuid")
-                    if tag_id is not None:
-                        if not isinstance(tag_id, str):
-                            errors.append(f"screen[{index}] tag UUID is not a string: {declared}")
-                        elif tag_id not in tag_ids:
-                            errors.append(f"screen[{index}] unknown tag UUID: {tag_id}: {declared}")
-                    for nested in value.values():
-                        check_bindings(nested)
-                elif isinstance(value, list):
-                    for nested in value:
-                        check_bindings(nested)
-
-            check_bindings(raw)
-        except (OSError, ValueError, TypeError, json.JSONDecodeError, KeyError) as exc:
-            errors.append(f"screen[{index}] invalid {declared}: {exc}")
+            load_screen_reference(project, project_path, reference)
+        except (ScreenLoadError, OSError, TypeError, ValueError) as exc:
+            errors.append(f"screen[{index}] invalid: {exc}")
     return errors
 
 

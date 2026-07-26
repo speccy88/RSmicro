@@ -1,21 +1,108 @@
 {
-  "format": "rsmicro-screen",
-  "version": 1,
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
   "screen_id": "b91d57b5-533c-5ed2-ab68-989031ef10d0",
   "name": "alarms",
-  "widgets": [
+  "description": "Canonical operator screen for alarms",
+  "width": 1280,
+  "height": 720,
+  "background": "#0f172a",
+  "scaling_policy": "fit",
+  "objects": [
     {
-      "widget_id": "42d089e2-a7eb-59ca-bae7-d99162926b4a",
-      "type": "alarm_list",
-      "columns": [
-        "priority",
-        "state",
-        "message",
-        "source",
-        "acknowledgement",
-        "comment"
-      ]
+      "object_id": "03df9264-2c5c-5257-ac67-4a78a30fc354",
+      "type": "label",
+      "geometry": {
+        "x": 48,
+        "y": 28,
+        "width": 900,
+        "height": 52
+      },
+      "properties": {
+        "text": "RSmicro \u2022 Alarms"
+      },
+      "style": {
+        "role": "title"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "11780876-2aac-5cd9-bdf4-6377818e0f9b",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 980,
+        "y": 34,
+        "width": 250,
+        "height": 42
+      },
+      "properties": {
+        "text": "OFFLINE PREVIEW",
+        "placeholder": "Broker disconnected"
+      },
+      "style": {
+        "role": "status"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 1,
+      "metadata": {}
+    },
+    {
+      "object_id": "02c36db1-1458-50d0-bc7f-857ec2ca582f",
+      "type": "alarm_banner",
+      "geometry": {
+        "x": 60,
+        "y": 125,
+        "width": 1160,
+        "height": 100
+      },
+      "properties": {
+        "placeholder": "No live alarm source \u2022 start the broker and controller nodes to populate alarms"
+      },
+      "style": {
+        "role": "alarm"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 2,
+      "metadata": {}
+    },
+    {
+      "object_id": "efbca129-dca0-56de-b72d-b89e408e2c02",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 260,
+        "width": 1160,
+        "height": 80
+      },
+      "properties": {
+        "text": "This canonical screen is renderable now. Live alarm delivery remains outside the current static preview."
+      },
+      "style": {
+        "role": "note"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 3,
+      "metadata": {}
     }
   ],
+  "layers": [],
+  "metadata": {
+    "preview": "offline",
+    "source": "integrated_demo"
+  },
   "executable_code": false
 }

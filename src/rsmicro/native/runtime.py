@@ -129,6 +129,7 @@ class NativeRuntime:
         self.hal = hal or NativeSimulationHAL()
         self._object = C.create_string_buffer(self.binding.lib.rsm_runtime_object_size())
         self._arena = self._image = self._map = self._manifest = None
+        self._arena_capacity = 0
         self._program_hash = None
         self._initialized = self._program_loaded = self._closed = False
         self._lock = threading.RLock()
@@ -171,11 +172,25 @@ class NativeRuntime:
             if manifest and manifest.get("image_sha256") != digest:
                 raise NativeImageError("manifest image hash does not match image")
             native_image = (C.c_uint8 * len(data)).from_buffer_copy(data)
-            if not self._initialized:
-                need = C.c_size_t()
-                self.binding.check(self.binding.lib.rsm_runtime_required_memory(native_image, len(data), C.byref(need)), "required memory")
+            need = C.c_size_t()
+            self.binding.check(self.binding.lib.rsm_runtime_required_memory(native_image, len(data), C.byref(need)), "required memory")
+            if not self._initialized or need.value > self._arena_capacity:
+                if self._program_loaded:
+                    raise RSmicroNativeError(
+                        "cannot resize a native runtime with an active program; unload it first",
+                        operation="resize runtime", status=2, status_name="INVALID_STATE",
+                        library_path=self.binding.path)
+                if self._initialized:
+                    self.binding.lib.rsm_runtime_deinit(self._object)
+                    self._initialized = False
+                    self._arena = None
+                    self._arena_capacity = 0
+                    self._clear_program_metadata()
+                # Keep the small alignment allowance until the native exact-arena
+                # contract is repaired; capacity records the actual supplied arena.
                 self._arena = C.create_string_buffer(need.value + 8)
-                self.binding.check(self.binding.lib.rsm_runtime_init(self._object, self._arena, len(self._arena), C.byref(self.hal.struct), None), "initialize runtime")
+                self._arena_capacity = len(self._arena)
+                self.binding.check(self.binding.lib.rsm_runtime_init(self._object, self._arena, self._arena_capacity, C.byref(self.hal.struct), None), "initialize runtime")
                 self._initialized = True
             self.binding.check(self.binding.lib.rsm_runtime_load_image(self._object, native_image, len(data)), "load image")
             self._image, self._manifest, self._map, self._program_hash = native_image, manifest, debug_map, digest
@@ -191,6 +206,7 @@ class NativeRuntime:
                 if self._initialized: self.binding.lib.rsm_runtime_deinit(self._object)
                 self._initialized = False
                 self._arena = None
+                self._arena_capacity = 0
                 self._clear_program_metadata()
                 self._closed = True
 

@@ -1,108 +1,592 @@
 {
-  "format": "rsmicro-screen",
-  "version": 1,
+  "format": "rsmicro-scada-screen",
+  "format_version": 1,
   "screen_id": "7a98e9be-90f0-5d4b-86f7-f97033ef571f",
   "name": "controller_a",
-  "widgets": [
+  "description": "Canonical operator screen for controller a",
+  "width": 1280,
+  "height": 720,
+  "background": "#0f172a",
+  "scaling_policy": "fit",
+  "objects": [
     {
-      "widget_id": "fc0d9b7d-4ddf-573a-9f78-2f2aad084311",
-      "type": "tag_value",
-      "label": "StartPB",
+      "object_id": "0ae8cc6a-0f08-54f6-9e3c-916890438cb3",
+      "type": "label",
+      "geometry": {
+        "x": 48,
+        "y": 28,
+        "width": 900,
+        "height": 52
+      },
+      "properties": {
+        "text": "RSmicro \u2022 Controller A"
+      },
+      "style": {
+        "role": "title"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 0,
+      "metadata": {}
+    },
+    {
+      "object_id": "8d1e815e-e562-5420-9f20-6679fd3fabe4",
+      "type": "connection_indicator",
+      "geometry": {
+        "x": 980,
+        "y": 34,
+        "width": 250,
+        "height": 42
+      },
+      "properties": {
+        "text": "OFFLINE PREVIEW",
+        "placeholder": "Broker disconnected"
+      },
+      "style": {
+        "role": "status"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 1,
+      "metadata": {}
+    },
+    {
+      "object_id": "1f58fac0-6137-5b20-b6c3-b8b04f525e64",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "StartPB"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 2,
+      "metadata": {}
+    },
+    {
+      "object_id": "7ea937d4-9652-5f13-8c63-44c58cbabafa",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "StartPB"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "00ee0c42-e2c2-5088-8ab8-d8e6b55e1140"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 3,
+      "metadata": {}
     },
     {
-      "widget_id": "15c3a4a7-2065-5ee2-b51c-0fd3a2eb7f8d",
-      "type": "tag_value",
-      "label": "StopPB",
+      "object_id": "12702d6f-cc6e-594c-8406-c21677c69cfa",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 115,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "StopPB"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 4,
+      "metadata": {}
+    },
+    {
+      "object_id": "7993665d-8083-536f-96b5-438ebc7f8a62",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 115,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "StopPB"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "08791959-91f2-547f-8802-8146ebd3ead9"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 5,
+      "metadata": {}
     },
     {
-      "widget_id": "c967342a-ca26-542a-ae91-65d768c04f2b",
-      "type": "tag_value",
-      "label": "ResetPB",
+      "object_id": "1bf78f9f-8197-5126-84b6-d9b824ee0df5",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "ResetPB"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 6,
+      "metadata": {}
+    },
+    {
+      "object_id": "f52d4af7-1a4c-531b-b3ec-379eaea41069",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "ResetPB"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "3c3596af-3edd-5aac-9d1f-845768da7fdc"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 7,
+      "metadata": {}
     },
     {
-      "widget_id": "40a796e1-64a9-5f14-9cbe-d0447ad061a5",
-      "type": "tag_value",
-      "label": "MotorRun",
+      "object_id": "048951d8-98ff-51c7-9a39-e21909254d9f",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 197,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "MotorRun"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 8,
+      "metadata": {}
+    },
+    {
+      "object_id": "2b9d3d35-4b64-5224-aa38-e9235319c08c",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 197,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "MotorRun"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "54d88922-5626-5c2e-ba41-2e7133876093"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 9,
+      "metadata": {}
     },
     {
-      "widget_id": "e00e7536-9145-5bcb-af1d-10b67718b45c",
-      "type": "tag_value",
-      "label": "StartDelay",
+      "object_id": "d7a159d4-f186-5d01-86e4-481d39f7829f",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 279,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "StartDelay"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 10,
+      "metadata": {}
+    },
+    {
+      "object_id": "d93a3e0b-2ae4-5ec8-9f27-f187db2bd415",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 360,
+        "y": 279,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014  STALE",
+        "label": "StartDelay"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "9d812cab-2a01-50fd-80ca-ecfd3a1e8561"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 11,
+      "metadata": {}
     },
     {
-      "widget_id": "39bde0c8-977b-59fd-b36f-f6796586ea0e",
-      "type": "tag_value",
-      "label": "StartCounter",
+      "object_id": "e0204f0b-ca2c-54ba-bdcf-00918001a7c1",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 279,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "StartCounter"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 12,
+      "metadata": {}
+    },
+    {
+      "object_id": "4a409d41-e166-575c-99f9-490fbbb71632",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 970,
+        "y": 279,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014  STALE",
+        "label": "StartCounter"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "2e6f3f27-d6f3-5320-95cb-c76799c32a64"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 13,
+      "metadata": {}
     },
     {
-      "widget_id": "9d269797-a588-5648-9376-1253a56c6650",
-      "type": "tag_value",
-      "label": "TemperaturePV",
+      "object_id": "f7016ce9-a250-5075-ac67-9b59bcfafd16",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 361,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "TemperaturePV"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 14,
+      "metadata": {}
+    },
+    {
+      "object_id": "9245b2c9-382b-566f-81e7-5ec038749eb9",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 360,
+        "y": 361,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014 degC",
+        "label": "TemperaturePV"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "381264e0-45bf-51f2-94ab-184679b4d50a"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 15,
+      "metadata": {}
     },
     {
-      "widget_id": "0d12a479-d33c-560d-b18c-a32522f5f670",
-      "type": "tag_value",
-      "label": "TemperatureSP",
+      "object_id": "55b94748-90f6-5ae7-a629-171bd3a394c2",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 361,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "TemperatureSP"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 16,
+      "metadata": {}
+    },
+    {
+      "object_id": "d986cbc3-1707-5c63-aa10-461d0ac149e3",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 970,
+        "y": 361,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014 degC",
+        "label": "TemperatureSP"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "56d8f4ab-7d96-53d7-bed4-096eab40be5f"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 17,
+      "metadata": {}
     },
     {
-      "widget_id": "9c6ca93e-1e7c-560d-abcb-6167ef382792",
-      "type": "tag_value",
-      "label": "TemperatureError",
+      "object_id": "119eac7d-19a3-599b-8484-a59bd6b0e38b",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 443,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "TemperatureError"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 18,
+      "metadata": {}
+    },
+    {
+      "object_id": "edf52e50-3101-5585-8e7d-74aca94e8666",
+      "type": "numeric_display",
+      "geometry": {
+        "x": 360,
+        "y": 443,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "\u2014  STALE",
+        "label": "TemperatureError"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "2830da4d-a69b-5953-99b2-5d21ce51c019"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 19,
+      "metadata": {}
     },
     {
-      "widget_id": "84588601-43c1-5bf8-9997-c26eb7066cce",
-      "type": "tag_value",
-      "label": "MaintenanceMode",
+      "object_id": "85133ed0-7bec-5dfb-95bd-b4ad0b439e83",
+      "type": "label",
+      "geometry": {
+        "x": 670,
+        "y": 443,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "MaintenanceMode"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 20,
+      "metadata": {}
+    },
+    {
+      "object_id": "b21b8cf9-0029-5576-98ee-cd15a139758f",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 970,
+        "y": 443,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "MaintenanceMode"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "d96d6808-15e5-54cc-a5ec-a83e87315e0a"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 21,
+      "metadata": {}
     },
     {
-      "widget_id": "b65c36d1-ec2d-5ef2-9fd1-89516ffe7b9a",
-      "type": "tag_value",
-      "label": "RemotePermitProduced",
+      "object_id": "43e9cc6b-edfd-5818-a80f-2aeda91dfc25",
+      "type": "label",
+      "geometry": {
+        "x": 60,
+        "y": 525,
+        "width": 285,
+        "height": 54
+      },
+      "properties": {
+        "text": "RemotePermitProduced"
+      },
+      "style": {
+        "role": "tag-label"
+      },
+      "binding": {},
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 22,
+      "metadata": {}
+    },
+    {
+      "object_id": "d8ba3041-045a-582d-bceb-6055c6fc82a3",
+      "type": "boolean_indicator",
+      "geometry": {
+        "x": 360,
+        "y": 525,
+        "width": 245,
+        "height": 54
+      },
+      "properties": {
+        "placeholder": "OFF \u2022 STALE",
+        "label": "RemotePermitProduced"
+      },
+      "style": {
+        "role": "tag-value"
+      },
       "binding": {
         "controller_uuid": "09d4dc32-8813-5abc-9a4e-1a78e1780591",
         "tag_uuid": "2bceaa61-5827-50aa-b0e8-c8ab452366ed"
-      }
+      },
+      "action": {},
+      "visible": true,
+      "locked": true,
+      "z_order": 23,
+      "metadata": {}
     }
   ],
+  "layers": [],
+  "metadata": {
+    "preview": "offline",
+    "source": "integrated_demo"
+  },
   "executable_code": false
 }
